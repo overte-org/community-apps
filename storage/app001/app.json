@@ -1,0 +1,10 @@
+{
+ "application": {
+  "name": "My Application 001",
+  "description": "This is my super Application no 001.\nI can have many line of description, up to 1000 char",
+  "jsfile": "test.js",
+  "icon": "myicon.js",
+  "caption": "APP001",
+  "category": "UTILITIES"
+ }
+}
