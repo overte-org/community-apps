@@ -1,0 +1,12 @@
+{
+	"applications": [
+		{
+			"name": "My Name",
+			"description": "My Description",
+			"jsfile": "test/eee.js",
+			"icon": "test/icon.png",
+			"caption": "APPS",
+			"category": "FUNCTIONALITIES"
+		}			
+	]
+}
