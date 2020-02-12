@@ -1,0 +1,55 @@
+<script>
+
+//Parameters
+var offset = findGetParameter("offset");
+if(offset === null){offset = 0;}
+
+var perpage = findGetParameter("perpage");
+if(perpage === null){perpage = 15;}
+
+
+
+
+function findGetParameter(parameterName) {
+    var result = null,
+        tmp = [];
+    var items = location.search.substr(1).split("&");
+    for (var index = 0; index < items.length; index++) {
+        tmp = items[index].split("=");
+        if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+    }
+    return result;
+}
+
+
+function httpGet(theUrl){
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+	xmlHttp.send( null );
+	return xmlHttp.responseText;
+}
+
+var dataPage = { "applications": [] };
+
+function ProcessDirectory(item, index){
+	if ((index >= offset) && (index < (offset + perpage))){
+		var appUrl = "https://kebhelion.github.io/apps_repository/storage/" + item.directory + "/app.json";
+		var appData = JSON.parse(httpGet(appUrl)); 
+		dataPage.applications.push(appData);
+	}
+} 
+
+
+
+
+
+var directoriesData = JSON.parse(httpGet("https://kebhelion.github.io/apps_repository/storage/applications.json"));
+
+
+directoriesData.directories.forEach(ProcessDirectory);
+
+
+document.write(JSON.stringify(dataPage));
+
+
+</script>

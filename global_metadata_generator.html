@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Application metadata generator (app.json)</title>
+</head>
+<style>
+h1 {
+	font-size: 24px;
+	color: #CFB538;
+	font-weight: 800;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+
+font.error {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	color: #FF0000;
+	font-weight: 700;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+
+input {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #000000;
+	font-weight: 500;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+
+textarea {
+	width: 100%;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #000000;
+	font-weight: 500;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+
+textarea.output {
+	background: #ffff66;
+	width: 100%;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #000000;
+	font-weight: 700;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+
+
+body {
+	background: #3E415E;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #FFFFFF;
+	font-weight: 600;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+</style>
+<body>
+<h1>Application Metadata Generator (app.json)</h1>
+<form name = 'gen'>
+Application Name: <input type = 'text' size = '60' maxlength="50" name='name'><br><br>
+
+
+Application Description: <br><textarea name ='description' rows = '6' maxlength="1000"></textarea><br><br>
+
+
+Main javascript file name: <input type = 'text' size = '60' maxlength="60" name='jsfilename'><br><br>
+
+Icon file name: <input type = 'text' size = '60' maxlength="60" name='icon'><br>
+Caption: <input type = 'text' size = '30' maxlength="12" name='caption'><br><br>
+
+
+Category: <select name = 'category'>
+<option value = "FUNCTIONALITIES">Functionalities</option>
+<option value = "ENTERTAINMENT">Entertainment</option>
+<option value = "UTILITIES">Tools & Utilities</option>
+<option value = "DEV">Development & Debugging</option>
+</select><br><br>
+
+<input name = 'generate' type = 'button' onclick = 'genCode();' value ='Generate'><br>
+<div id = 'errormessage'><font class = 'error'>&nbsp;</font></div>
+<hr>
+Code to insert in a file named "app.json" that you must put in the folder of your application in the repository:<br>
+<textarea class = 'output' name ='code' rows = '12' readonly></textarea>
+
+<script>
+
+function httpGet(theUrl){
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+	xmlHttp.send( null );
+	return xmlHttp.responseText;
+}
+
+
+//Load the current apps.json
+var content = httpGet("https://kebhelion.github.io/apps_repository/apps.json");
+var appsDirectory = JSON.parse(content);
+
+
+
+String.prototype.escapeJSON = function() {
+	var result = "";
+	for (var i = 0; i < this.length; i++)
+	{
+		var ch = this[i];
+		switch (ch)
+		{
+			case "\\": ch = "\\\\"; break;
+			case "\'": ch = "\\'"; break;
+			case "\"": ch = '\\"'; break;
+			case "\&": ch = "\\&"; break;
+			case "\t": ch = "\\t"; break;
+			case "\n": ch = "\\n"; break;
+			case "\r": ch = "\\r"; break;
+			case "\b": ch = "\\b"; break;
+			case "\f": ch = "\\f"; break;
+			case "\v": ch = "\\v"; break;
+			default: break;
+		}
+
+		result += ch;
+	}
+
+	return result;
+};
+
+
+
+function genCode(){
+	var newAppsDirectory = appsDirectory;
+	
+	var errormessage = "&nbsp;";
+	var name = document.gen.name.value;
+	var description = document.gen.description.value;
+	var jsfilename = document.gen.jsfilename.value;
+	var icon = document.gen.icon.value;
+	var caption = document.gen.caption.value;
+	var category = document.gen.category.value;	
+	var thecode = {};
+	
+	caption = caption.toUpperCase();
+	
+	if (name == "" || description == "" || jsfilename == "" || icon == "" || caption == ""){
+		errormessage = "Something is missing. All the fields are mandatory.";
+	}else{
+		thecode = {
+			"name": name.escapeJSON(),
+			"description": description.escapeJSON(),
+			"jsfile": jsfilename,
+			"icon": icon,
+			"caption": caption.escapeJSON(),
+			"category": category
+		};
+		
+		//Add new record to data:
+		newAppsDirectory.applications.push(thecode);
+	
+		document.gen.code.value = JSON.stringify(newAppsDirectory);
+	}
+	
+
+	
+	document.getElementById("errormessage").innerHTML = "<font class = 'error'>" + errormessage + "</font>";
+	
+
+	
+}
+</script>
+
+</form>
+</body>
+</html>
