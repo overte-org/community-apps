@@ -1,2 +1,2 @@
 # apps_repository
-Test for an application repository based on github.
+Applications repository for "Project Athena" based on github.

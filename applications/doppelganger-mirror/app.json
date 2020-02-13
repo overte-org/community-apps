@@ -1,0 +1,7 @@
+{
+  "name": "Doppelganger-Mirror",
+  "description": "Generate an double of your avatar that only you can see. \nThis allows you to examine your avatar and see how you move.\nThe doppelganger can be grabbed and positioned like you want.",
+  "jsfile": "doppelganger-mirror/app-doppleganger.js",
+  "icon": "doppelganger-mirror/doppleganger-i.svg",
+  "caption": "MIRROR"
+}
