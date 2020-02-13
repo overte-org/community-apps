@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript" src="../applications/directories.js"></script>
+		<script>
+			function findGetParameter(parameterName) {
+				var result = null,
+					tmp = [];
+				var items = location.search.substr(1).split("&");
+				for (var index = 0; index < items.length; index++) {
+					tmp = items[index].split("=");
+					if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+				}
+				return result;
+			}
+
+			//Parameters
+			var offset = findGetParameter("offset");
+			if(offset === null){offset = 0;}
+
+			var perpage = findGetParameter("perpage");
+			if(perpage === null){perpage = 15;}
+
+			var search = findGetParameter("search");
+			if(search === null){search = "";}			
+
+			
+
+			function doSearch (keyword){
+				location.href = "more.html?offset=" + offset + "&perpage=" + perpage + "&search=" + encodeURI(keyword) + "&sort=" + sort;
+			}
+
+
+
+			var sort = findGetParameter("sort");
+			if( sort === null){ sort = "asc";}	
+			directories.sort();	
+			if (sort == "desc"){
+				directories.reverse();
+			}
+
+			var currentPath = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
+			var rootPath = currentPath.replace("more/more.html", "applications/");
+			
+			
+			var currentlyRunningScripts;
+			
+			EventBridge.scriptEventReceived.connect(function(message){
+				currentlyRunningScripts = message; 
+            });
+			
+			function httpGet(theUrl){
+				var xmlHttp = new XMLHttpRequest();
+				xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+				xmlHttp.send( null );
+				return xmlHttp.responseText;
+			}
+			
+			function CheckRunning(scriptName){
+			
+				return false;
+			}
+			
+			
+			
+			//Fetch the data
+			var counterDir = 0;
+			
+			var dataPage = { "applications": [] };
+
+			function ProcessDirectory(item, index){
+				var lowItem = item.toLowerCase();
+				if (lowItem.indexOf(search.toLowerCase()) != -1){
+					counterDir = counterDir + 1;
+					if ((counterDir >= offset) && (counterDir < (offset + perpage))){
+						var appUrl = rootPath + item + "/app.json";
+						var appData = JSON.parse(httpGet(appUrl)); 
+						dataPage.applications.push(appData);
+					}
+				}
+			} 
+						
+			directories.forEach(ProcessDirectory);
+			
+			
+		</script>
+		<style>
+		
+			body {
+				background: #73758c;
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 12px;
+				color: #FFFFFF;
+				font-weight: 600;
+				text-decoration: none;
+				font-style: normal;
+				font-variant: normal;
+				text-transform: none;
+			}
+		
+			h1 {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 28px;
+				color: #ffffff;
+				font-weight: 800;
+				text-decoration: none;
+				font-style: normal;
+				font-variant: normal;
+				text-transform: none;
+				text-shadow: 3px 3px 3px rgba(63,64,76,1);
+			}
+
+			font.appname {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 18px;
+				color: #CFB538;
+				font-weight: 800;
+				text-decoration: none;
+				font-style: normal;
+				font-variant: normal;
+				text-transform: none;
+			}
+
+			font.appdesc {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 14px;
+				color: #ffffff;
+				font-weight: 500;
+				text-decoration: none;
+				font-style: normal;
+				font-variant: normal;
+				text-transform: none;
+			}
+
+			font.caption {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 12px;
+				color: #ffffff;
+				font-weight: 600;
+				text-decoration: none;
+				font-style: normal;
+				font-variant: normal;
+				text-transform: none;
+			}
+			
+			div.iconContainer{
+				border-radius: 15px;
+				background: #000000;
+				padding: 5px;
+				width: 70px;
+				height: 70px;
+				text-align: center;
+			}
+			
+			table.item {
+				background: #3E415E;
+			}
+			
+			td {
+				vertical-align: top;
+				padding: 5px;
+			}
+
+			button.install {
+				background-color: #008CBA;
+				font-size: 16px;
+				color: #ffffff;
+				font-weight: 600;
+				border-radius: 6px;
+				border: 2px solid #008CBA;
+				transition-duration: 0.3s;
+			}
+			
+			button.install:hover {
+			  background-color: #10afe3; 
+			  border: 2px solid #10afe3;
+			}
+
+			button.uninstall {
+				background-color: #b34700;
+				font-size: 16px;
+				color: #ffffff;
+				font-weight: 600;
+				border-radius: 6px;
+				border: 2px solid #b34700;
+				transition-duration: 0.3s;
+			}
+			
+			button.uninstall:hover {
+			  background-color: #e34c22; 
+			  border: 2px solid #e34c22;
+			}
+
+			
+		</style>
+	</head>
+	<body><form name = "searchbar">
+		<h1>Add more functionalities...</h1>
+		
+		<table style = "width:100%;">
+			<tr>
+				<td align= 'left'>
+					<input class = "searchtextbox" name = "searchtextbox" size = "20" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
+				</td>
+				<td align= 'center'>
+					&nbsp;&nbsp;&nbsp;sort
+				</td>
+				<td align= 'right'>
+					<script>
+						document.write(parseInt(offset + 1) + " - " + parseInt(offset + counterDir)); //offset = 0 will do for < btn | offset + counterDir = perpage then >
+					</script>
+				</td>				
+			</tr>
+		</table>
+		</form><br>
+		
+		
+		<script>
+
+			document.searchbar.searchtextbox.value = search;
+			
+
+			function DisplayApp(item, index) {
+				document.write("<a name = '" + window.btoa(item.name) + "'><table class='item'><tr>");
+				document.write("<td><div class='iconContainer'><img src='" + rootPath + item.icon + "' style='width:50px;'><br><font class = 'caption'>" + item.caption + "</font></div></td>");
+				var btn = "";
+				var absoluteJsFile = rootPath + item.jsfile;
+				if(CheckRunning(absoluteJsFile) != false){
+					//Means already running
+					btn = "<button class='uninstall'>Uninstall</button>";
+				}else{
+					//Means not already installed
+					btn = "<button class='install'>Install</button>";
+				}
+				
+				
+				document.write("<td><font class='appname'>" + item.name + "<br></font><font class = 'appdesc'>" + item.description + "<br></font><div align='right'>" + btn + "</div></td>");
+				document.write("</tr></table><br><br>");				
+			}
+		
+		
+			
+			dataPage.applications.forEach(DisplayApp);
+		</script>
+
+	</body>
+</html>
