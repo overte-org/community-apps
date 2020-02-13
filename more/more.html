@@ -24,6 +24,14 @@
 			var search = findGetParameter("search");
 			if(search === null){search = "";}			
 
+			
+
+			function doSearch (keyword){
+				location.href = "move.html?offset=" + offset + "&perpage=" + perpage + "&search=" + encodeURI(keyword) + "&sort=" + sort;
+			}
+
+
+
 			var sort = findGetParameter("sort");
 			if( sort === null){ sort = "asc";}	
 			directories.sort();	
@@ -188,7 +196,16 @@
 	</head>
 	<body>
 		<h1>Add more functionalities...</h1>
+		
+		<form name = "searchbar">
+			<input class = "searchtextbox" name = "searchtextbox" size = "20" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
+		</form>
+		
+		
 		<script>
+
+			document.searchbar.searchtextbox.value = search;
+			
 
 			function DisplayApp(item, index) {
 				document.write("<a name = '" + window.btoa(item.name) + "'><table class='item'><tr>");
@@ -209,7 +226,7 @@
 			}
 		
 		
-		
+			
 			dataPage.applications.forEach(DisplayApp);
 		</script>
 
