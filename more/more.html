@@ -3,6 +3,7 @@
 	<head>
 		<script type="text/javascript" src="../applications/metadata.js"></script>
 		<script>
+			//Parameters
 			function findGetParameter(parameterName) {
 				var result = null,
 					tmp = [];
@@ -14,7 +15,7 @@
 				return result;
 			}
 
-			//Parameters
+			
 			var offset = findGetParameter("offset");
 			if(offset === null){offset = 0;}
 
@@ -24,25 +25,54 @@
 			var search = findGetParameter("search");
 			if(search === null){search = "";}			
 
-			
+			var sort = findGetParameter("sort");
+			if( sort === null){ sort = "asc";}			
 
+			
+			//Search
 			function doSearch (keyword){
 				location.href = "more.html?offset=" + offset + "&perpage=" + perpage + "&search=" + encodeURI(keyword) + "&sort=" + sort;
 			}
 
 
+			
+			//Sorting
+			
+			/**
+			 * Function to sort alphabetically an array of objects by some specific key.
+			 * 
+			 * @param {String} property Key of the object to sort.
+			 */
+			function dynamicSort(property) {
+				var sortOrder = 1;
 
-			var sort = findGetParameter("sort");
-			if( sort === null){ sort = "asc";}	
-			directories.sort();	
+				if(property[0] === "-") {
+					sortOrder = -1;
+					property = property.substr(1);
+				}
+
+				return function (a,b) {
+					if(sortOrder == -1){
+						return b[property].localeCompare(a[property]);
+					}else{
+						return a[property].localeCompare(b[property]);
+					}        
+				}
+			}
+			
+			
+			metadata.application.sort(dynamicSort("name"));	
+			
 			if (sort == "desc"){
-				directories.reverse();
+				metadata.application.reverse();
 			}
 
+			
+			//Paths
 			var currentPath = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
 			var rootPath = currentPath.replace("more/more.html", "applications/");
 			
-			
+			//Running scripts 
 			var currentlyRunningScripts;
 			
 			EventBridge.scriptEventReceived.connect(function(message){
