@@ -180,6 +180,11 @@ function genCode(){
 
 	
 	caption = caption.toUpperCase();
+	caption = caption.trim()
+	icon = icon.trim();
+	name = name.trim();
+	jsfilename = jsfilename.trim();
+	description = description.replace(/\s+/g, ' ').trim();
 	
 	if (directory == "" || name == "" || description == "" || jsfilename == "" || icon == "" || caption == ""){
 		errormessage = "Error: Something is missing. All the fields are mandatory.";
