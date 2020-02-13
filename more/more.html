@@ -24,49 +24,17 @@
 
 			var search = findGetParameter("search");
 			if(search === null){search = "";}			
-
-			var sort = findGetParameter("sort");
-			if( sort === null){ sort = "asc";}			
+	
 
 			
 			//Search
 			function doSearch (keyword){
-				location.href = "more.html?offset=" + offset + "&perpage=" + perpage + "&search=" + encodeURI(keyword) + "&sort=" + sort;
+				location.href = "more.html?offset=" + offset + "&perpage=" + perpage + "&search=" + encodeURI(keyword);
 			}
 
 
 			
-			//Sorting
 			
-			/**
-			 * Function to sort alphabetically an array of objects by some specific key.
-			 * 
-			 * @param {String} property Key of the object to sort.
-			 */
-			function dynamicSort(property) {
-				var sortOrder = 1;
-
-				if(property[0] === "-") {
-					sortOrder = -1;
-					property = property.substr(1);
-				}
-
-				return function (a,b) {
-					if(sortOrder == -1){
-						return b[property].localeCompare(a[property]);
-					}else{
-						return a[property].localeCompare(b[property]);
-					}        
-				}
-			}
-			
-			
-			metadata.application.sort(dynamicSort("name"));	
-			
-			if (sort == "desc"){
-				metadata.application.reverse();
-			}
-
 			
 			//Paths
 			var currentPath = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
@@ -202,10 +170,7 @@
 		<table style = "width:100%;">
 			<tr>
 				<td align= 'left'>
-					<input class = "searchtextbox" name = "searchtextbox" size = "20" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
-				</td>
-				<td align= 'center'>
-					&nbsp;&nbsp;&nbsp;sort
+					<input class = "searchtextbox" name = "searchtextbox" size = "25" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
 				</td>
 				<td align= 'right'>
 					<div id = 'pager'></div>
