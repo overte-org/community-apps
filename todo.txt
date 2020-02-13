@@ -1,7 +1,7 @@
 - Style: 
 	Search (box and button)
 	pager: text and arrows
-- Clean up (app.json in apps + directories.js + old json generator + old more.html)
+- Prevent bad char in 2 files names in metadata gen
 - Scipt handling management.
 - documentation and insertion guide line
 
