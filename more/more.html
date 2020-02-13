@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script type="text/javascript" src="../applications/directories.js"></script>
+		<script type="text/javascript" src="../applications/metadata.js"></script>
 		<script>
 			function findGetParameter(parameterName) {
 				var result = null,
@@ -48,41 +48,13 @@
 			EventBridge.scriptEventReceived.connect(function(message){
 				currentlyRunningScripts = message; 
             });
-			
-			function httpGet(theUrl){
-				var xmlHttp = new XMLHttpRequest();
-				xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
-				xmlHttp.send( null );
-				return xmlHttp.responseText;
-			}
-			
+
 			function CheckRunning(scriptName){
 			
 				return false;
 			}
 			
-			
-			
-			//Fetch the data
-			var counterDir = 0;
-			
-			var dataPage = { "applications": [] };
 
-			function ProcessDirectory(item, index){
-				var lowItem = item.toLowerCase();
-				if (lowItem.indexOf(search.toLowerCase()) != -1){
-					counterDir = counterDir + 1;
-					if ((counterDir >= offset) && (counterDir < (offset + perpage))){
-						var appUrl = rootPath + item + "/app.json";
-						var appData = JSON.parse(httpGet(appUrl)); 
-						dataPage.applications.push(appData);
-					}
-				}
-			} 
-						
-			directories.forEach(ProcessDirectory);
-			
-			
 		</script>
 		<style>
 		
@@ -220,7 +192,7 @@
 			document.searchbar.searchtextbox.value = search;
 			
 
-			function DisplayApp(item, index) {
+			function DisplayApp(item) {
 				document.write("<a name = '" + window.btoa(item.name) + "'><table class='item'><tr>");
 				document.write("<td><div class='iconContainer'><img src='" + rootPath + item.icon + "' style='width:50px;'><br><font class = 'caption'>" + item.caption + "</font></div></td>");
 				var btn = "";
@@ -238,9 +210,25 @@
 				document.write("</tr></table><br><br>");				
 			}
 		
-		
+
+			var counterDir = 0;
+			var index = 0;
+			var lowItem = "";
 			
-			dataPage.applications.forEach(DisplayApp);
+			for (index = 0; index < metadata.applications.length; index++){
+				lowItem = metadata.applications[index].name.toLowerCase();
+				if (lowItem.indexOf(search.toLowerCase()) != -1){ 
+					counterDir = counterDir + 1;
+					if ((counterDir >= offset) && (counterDir < (offset + perpage))){
+						DisplayApp(metadata.applications[index]);
+					}
+					if counterDir >= (offset + perpage)){
+						break;
+					}
+				}
+			}
+			
+
 		</script>
 
 	</body>
