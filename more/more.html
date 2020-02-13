@@ -194,12 +194,25 @@
 			
 		</style>
 	</head>
-	<body>
+	<body><form name = "searchbar">
 		<h1>Add more functionalities...</h1>
 		
-		<form name = "searchbar">
-			<input class = "searchtextbox" name = "searchtextbox" size = "20" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
-		</form>
+		<table>
+			<tr>
+				<td>
+					<input class = "searchtextbox" name = "searchtextbox" size = "20" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
+				</td>
+				<td>
+					sort
+				</td>
+				<td>
+					<script>
+						document.write((offset + 1) + " - " + (offset + perpage + 1));
+					</script>
+				</td>				
+			</tr>
+		</table>
+		</form><br>
 		
 		
 		<script>
