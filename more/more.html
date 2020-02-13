@@ -199,15 +199,15 @@
 		
 		<table>
 			<tr>
-				<td>
+				<td align= 'left'>
 					<input class = "searchtextbox" name = "searchtextbox" size = "20" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
 				</td>
-				<td>
+				<td align= 'center'>
 					sort
 				</td>
-				<td>
+				<td align= 'right'>
 					<script>
-						document.write((offset + 1) + " - " + (offset + counterDir));
+						document.write((offset + 1) + " - " + (offset + counterDir)); //offset = 0 will do for < btn | offset + counterDir = perpage then >
 					</script>
 				</td>				
 			</tr>
