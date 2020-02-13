@@ -208,9 +208,7 @@
 					&nbsp;&nbsp;&nbsp;sort
 				</td>
 				<td align= 'right'>
-					<script>
-						document.write(parseInt(offset + 1) + " - " + parseInt(offset + counterDir)); //offset = 0 will do for < btn | offset + counterDir = perpage then >
-					</script>
+					<div id = 'pager'></div>
 				</td>				
 			</tr>
 		</table>
@@ -258,6 +256,9 @@
 				}
 			}
 			
+			//pager
+			document.getElementById( "pager" ).innerHTML = parseInt(offset + 1) + " - " + parseInt(offset + counterDir); //offset = 0 will do for < btn | offset + counterDir = perpage then >
+
 
 		</script>
 
