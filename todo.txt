@@ -1,0 +1,11 @@
+- Style: 
+	Search (box and button)
+	pager: text and arrows
+- Test de charge:
+	with 1000 apps in metadata
+- Clean up (app.json in apps + directories.js + old json generator + old more.html)
+- Scipt handling management.
+- documentation and insertion guide line
+
+
+
