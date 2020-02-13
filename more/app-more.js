@@ -4,15 +4,12 @@
 //  Created by Keb Helion, February 2020.
 //  Copyright "Project Athena" 2020. 
 //
-//  This script adds a "More Apps" selector to Project Athena to allow the user to add optional functionalities to the tablet.
-//  There is already a certain quantity of scripts provided with "interface" but they can't be all be part of the default script. 
-//  The current way to figure them in "Edit > Running Script" is not enough descriptive.
-//  In the first Phase, this will expose a choice of optional built-in tools. (Version 1.X)
-//  In a second phase, It could be extended to an external repository. (Version 2.X)
+//  This script adds a "More Apps" selector to "Project Athena" to allow the user to add optional functionalities to the tablet.
+//  This application has been designed to work directly from the Github repository.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
-//
+//	
 (function() {
 	var ROOT = Script.resolvePath('').split("app-more.js")[0];
 	var APP_NAME = "MORE...";
