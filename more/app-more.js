@@ -63,7 +63,7 @@
 
 	function sendRunningScriptList(){
 		var currentlyRunningScripts = ScriptDiscoveryService.getRunning();
-		tablet.emitScriptEvent(currentlyRunningScripts);
+		tablet.emitScriptEvent(JSON.stringify(currentlyRunningScripts));
 	}
 
 	
