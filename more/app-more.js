@@ -37,7 +37,7 @@
 			//print("turn on");
 
 			
-			tablet.gotoWebScreen(APP_URL + "?version=" + Math.floor(Math.random()*50000));
+			tablet.gotoWebScreen(APP_URL); //+ "?version=" + Math.floor(Math.random()*50000));
 			
 			tablet.webEventReceived.connect(onMoreAppWebEventReceived);
 			tablet.screenChanged.connect(onMoreAppScreenChanged);
