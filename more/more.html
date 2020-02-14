@@ -62,6 +62,7 @@
 				alert(message);
 				//update the buttons
 				buttonList.forEach(function(item){
+					alert(item.url);
 					var btn = "";
 					if(message.indexOf(item.url) != -1){
 						//Means already running
