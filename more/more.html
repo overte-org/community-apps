@@ -42,7 +42,7 @@
 			
 			
 			//Paths
-			var currentPath = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname;
+			var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
 			var rootPath = currentPath.replace("more/more.html", "applications/");
 			
 			//Running scripts 
@@ -59,10 +59,10 @@
 			
 			
 			EventBridge.scriptEventReceived.connect(function(message){
-				alert(message);
+
 				//update the buttons
 				buttonList.forEach(function(item){
-					alert(item.url);
+					
 					var btn = "";
 					if(message.indexOf(item.url) != -1){
 						//Means already running
@@ -290,8 +290,8 @@
 				pageContent = pageContent + "<td><div class='iconContainer'><img src='" + rootPath + item.icon + "' style='width:50px;'><br><font class = 'caption'>" + item.caption + "</font></div></td>";
 				var btn = "";
 				var absoluteJsFile = rootPath + item.jsfile;
-				
-				var btn = ""; //"<button class='install' onclick = 'uninstall(absoluteJsFile, window.btoa(item.name));'>Install</button>";
+			
+				var btn = "<button class='install' onclick = 'uninstall(absoluteJsFile, window.btoa(item.name));'>Install</button>";
 				var btndata = {
 					"url": absoluteJsFile,
 					"id": window.btoa(item.name)

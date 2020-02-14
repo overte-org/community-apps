@@ -29,26 +29,16 @@
 	
 	function clicked(){
 		if (Appstatus == true){
-			//print("turn off");			
+		
 			tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
 			tablet.gotoHomeScreen();
-			//tablet.screenChanged.disconnect(onMoreAppScreenChanged);
+
 		}else{
-			//print("turn on");
 
 			
-			tablet.gotoWebScreen(APP_URL); //+ "?version=" + Math.floor(Math.random()*50000));
+			tablet.gotoWebScreen(APP_URL);
 			
-			tablet.webEventReceived.connect(onMoreAppWebEventReceived);
-			//tablet.screenChanged.connect(onMoreAppScreenChanged);
-			/*	
-			Script.setTimeout(function() {
-				sendRunningScriptList();
-			}, 2000);
-			*/
-			
-			
-			
+			tablet.webEventReceived.connect(onMoreAppWebEventReceived);		
 			
 		}
 			
@@ -93,20 +83,7 @@
 		
 	}
 
-/*
-	function onMoreAppScreenChanged(type, url) {
-        if ((type === "Web")) {
-			Appstatus = true;
-        }else{ 
-			Appstatus = false;
-			button.editProperties({
-				isActive: Appstatus
-			});
-			tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
-			tablet.screenChanged.disconnect(onMoreAppScreenChanged);
-        }
-    }
-*/
+
 	
 	tablet.webEventReceived.connect(onMoreAppWebEventReceived);
 	
