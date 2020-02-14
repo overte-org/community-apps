@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="UTF-8">
 		<script type="text/javascript" src="../applications/metadata.js"></script>
 		<script>
 			//Parameters
@@ -30,11 +31,13 @@
 
 			
 			//Search
-			function doSearch (keyword){
+			function doSearch(keyword){
 				location.href = "more.html?offset=0&search=" + encodeURI(keyword);
 			}
 
-
+			function clearSearch(){
+				location.href = "more.html?offset=0";
+			}
 			
 			
 			
@@ -163,6 +166,21 @@
 			  border: 2px solid #e34c22;
 			}
 
+			div.searchbox {
+				border-radius: 6px;
+				background: #ffffff;
+				padding: 4px;
+				border: 0px;
+			}
+			
+			input.searchtextbox{
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 12px;
+				color: #000000;
+				font-weight: 500;
+				text-decoration: none;
+				border: 0px;
+			}
 			
 		</style>
 	</head>
@@ -172,7 +190,18 @@
 		<table style = "width:100%;">
 			<tr>
 				<td align= 'left'>
-					<input class = "searchtextbox" name = "searchtextbox" size = "25" maxlength="32"> <input class = "searchbtn" type="button" name = "searchbtn" value = "Search" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>
+					<table>
+						<tr style="vertical-align:middle;">
+							<td>
+								<div class = "searchbox">
+									<input class = "searchtextbox" name = "searchtextbox" size = "25" maxlength="32"> <a href="#" onclick='clearSearch();'>X</a>
+								</div>
+							</td>
+							<td>
+								<a href = "#" onclick = 'doSearch(document.searchbar.searchtextbox.value);'>S</a>
+							</td>
+						</tr>
+					</table>
 				</td>
 				<td align= 'right'>
 					<div id = 'pager'></div>
