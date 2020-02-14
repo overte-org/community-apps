@@ -1,6 +1,7 @@
 1- Prevent bad char in 2 files names in metadata gen 
-2- Scipt handling management. BUG = make a double call.. why?
-3- documentation and insertion guide line
+2- BUG ALLIGNEMENT des pager et message when empty list.
+3- Scipt handling management. BUG = make a double call.. why?
+4- documentation and insertion guide line
 
 
 
