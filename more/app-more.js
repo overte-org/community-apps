@@ -67,12 +67,19 @@
 			
 			if(eventzget.action === "installScript"){
 				ScriptDiscoveryService.loadOneScript(eventzget.script);
-				sendRunningScriptList();
+				
+				Script.setTimeout(function() {
+					sendRunningScriptList(); 
+				}, 2000);
 			}
 
 			if(eventzget.action === "uninstallScript"){
 				ScriptDiscoveryService.stopScript(eventzget.script, false);
-				sendRunningScriptList();
+				
+				Script.setTimeout(function() {
+					sendRunningScriptList(); 
+				}, 2000);
+				
 			}			
 
 			if(eventzget.action === "requestRunningScriptData"){
