@@ -32,7 +32,7 @@
 			//print("turn off");			
 			tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
 			tablet.gotoHomeScreen();
-			tablet.screenChanged.disconnect(onMoreAppScreenChanged);
+			//tablet.screenChanged.disconnect(onMoreAppScreenChanged);
 		}else{
 			//print("turn on");
 
@@ -40,7 +40,7 @@
 			tablet.gotoWebScreen(APP_URL); //+ "?version=" + Math.floor(Math.random()*50000));
 			
 			tablet.webEventReceived.connect(onMoreAppWebEventReceived);
-			tablet.screenChanged.connect(onMoreAppScreenChanged);
+			//tablet.screenChanged.connect(onMoreAppScreenChanged);
 			/*	
 			Script.setTimeout(function() {
 				sendRunningScriptList();
@@ -93,7 +93,7 @@
 		
 	}
 
-
+/*
 	function onMoreAppScreenChanged(type, url) {
         if ((type === "Web")) {
 			Appstatus = true;
@@ -106,7 +106,7 @@
 			tablet.screenChanged.disconnect(onMoreAppScreenChanged);
         }
     }
-
+*/
 	
 	tablet.webEventReceived.connect(onMoreAppWebEventReceived);
 	
