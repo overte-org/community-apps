@@ -66,10 +66,10 @@
 					var btn = "";
 					if(message.indexOf(item.url) != -1){
 						//Means already running
-						btn = "<button class='uninstall' onclick='uninstall(" + item.url + ", " + item.id + ");'>Uninstall</button>";
+						btn = "<button class='uninstall' onclick='uninstall(" + '"' + item.url + '"' + ", " + '"' + item.id + '"' + ");'>Uninstall</button>";
 					}else{
 						//Means not already installed
-						btn = "<button class='install' onclick='install(" + item.url + ", " + item.id + ");'>Install</button>";
+						btn = "<button class='install' onclick='install(" + '"' + item.url + '"' + ", " + '"' + item.id + '"' + ");'>Install</button>";
 					}
 					
 					document.getElementById(item.id).innerHTML = btn;
@@ -291,7 +291,7 @@
 				var btn = "";
 				var absoluteJsFile = rootPath + item.jsfile;
 			
-				var btn = "<button class='install' onclick = 'uninstall(absoluteJsFile, window.btoa(item.name));'>Install</button>";
+				var btn = "<button class='install' onclick = 'install(" + '"' + absoluteJsFile + " ," + window.btoa(item.name) + '"' + ");'>Install</button>";
 				var btndata = {
 					"url": absoluteJsFile,
 					"id": window.btoa(item.name)
