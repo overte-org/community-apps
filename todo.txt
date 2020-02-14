@@ -1,4 +1,3 @@
-0- Json beautiful.
 1- BUG ALLIGNEMENT des pager et message when empty list.
 2- footer
 3- Scipt handling management. BUG = make a double call.. why?
