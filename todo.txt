@@ -1,9 +1,6 @@
-- Style: 
-	Search (box and button)
-	pager: text and arrows
-- Prevent bad char in 2 files names in metadata gen
-- Scipt handling management.
-- documentation and insertion guide line
+1- Prevent bad char in 2 files names in metadata gen 
+2- Scipt handling management. BUG = make a double call.. why?
+3- documentation and insertion guide line
 
 
 
