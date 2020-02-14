@@ -56,15 +56,14 @@
 				EventBridge.emitWebEvent(JSON.stringify(readyEvent));
 			}
 			
-			var currentlyRunningScripts = {};
+			
 			
 			EventBridge.scriptEventReceived.connect(function(message){
-				currentlyRunningScripts = JSON.parse(message); 
-				
+
 				//update the buttons
 				buttonList.forEach(function(item){
 					var btn = "";
-					if(CheckRunning(item.url) != false){
+					if(message.indexOf(item.url) != -1){
 						//Means already running
 						btn = "<button class='uninstall' onclick='uninstall(" + item.url + ", " + item.id + ");'>Uninstall</button>";
 					}else{
@@ -107,15 +106,7 @@
 			
 			}
 
-			function CheckRunning(scriptUrl){
-					alert("checkrunning!");
-				    if(currentlyRunningScripts.some(currentlyRunningScripts => currentlyRunningScripts.path === scriptUrl)){		
-						return true;
-					} else{
-						return false;
-					}
-			}
-			
+	
 
 		</script>
 		<style>
