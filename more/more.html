@@ -60,7 +60,7 @@
 			
 			EventBridge.scriptEventReceived.connect(function(message){
 				currentlyRunningScripts = JSON.parse(message); 
-				alert(JSON.stringify(currentlyRunningScripts));
+				
 				//update the buttons
 				buttonList.forEach(function(item){
 					var btn = "";
