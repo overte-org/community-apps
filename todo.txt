@@ -1,5 +1,6 @@
-1- Prevent bad char in 2 files names in metadata gen 
-2- BUG ALLIGNEMENT des pager et message when empty list.
+0- Json beautiful.
+1- BUG ALLIGNEMENT des pager et message when empty list.
+2- footer
 3- Scipt handling management. BUG = make a double call.. why?
 4- documentation and insertion guide line
 
