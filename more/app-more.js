@@ -41,11 +41,11 @@
 			
 			tablet.webEventReceived.connect(onMoreAppWebEventReceived);
 			tablet.screenChanged.connect(onMoreAppScreenChanged);
-				
+			/*	
 			Script.setTimeout(function() {
 				sendRunningScriptList();
 			}, 2000);
-			
+			*/
 			
 			
 			
@@ -71,8 +71,10 @@
 		
 		if(typeof eventz === "string"){
 			eventzget = JSON.parse(eventz);
-		
-	
+			
+			print("EVENT ACTION: " + eventzget.action);
+			print("EVENT SCRIPT: " + eventzget.script);
+			
 			if(eventzget.action === "installScript"){
 				ScriptDiscoveryService.loadOneScript(eventzget.script);
 				sendRunningScriptList();
