@@ -1,0 +1,35 @@
+Welcome to the "Project Athena" Applications Repository.
+
+This repository stores the optional tablet's applications/functionalities provided by the contributions of the community members. 
+
+If you have created an Application and want to offer it to the community, this is where you can do it.
+
+Before going further:
+1- If your applications is a core feature that you think that must be delivered out-of-the-box with Athena, you must instead consider to make your contribution directly in the "Project Athena" release. See instead this repository [link] and contact their maintainers.
+
+2- If your application has any dependancy with an external server or services. (If it has to deal in any ways with another servers than a Project Athena Domain or Metaverse API) This repository is not where you should publish your application. It will have to be publish from a different source like the marketplace or another web site.
+
+
+Conditions for acceptance:
+1- You must include in your script a license reference making your script fully open source:
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+
+2- Avoid space and special character in your folder an file names. (Stay with: "a-z", "A-Z", "0-9", "-", "_", ".")
+
+3- Add your appliction in a folder under the "applications"(link) directory. (Your main js file and your icon must be directly in that folder)
+
+4- You must add your application to the metadata.js file (in the applications(link) directory) by generating a new one using this tool: [link]
+
+
+Submit a Pull Request to add your application folder and the new metadata.js.
+(If you are not comfortable with those procedure, contact Keb Helion on discord.)
+
+
+
+Guidelines for the code reviewer:
+1- Test the applications
+2- Make sure that the JSON contain in metadata.js is valid before accept the commit. (This will be directly in production once commited)
+3- Test the "More..." application in the Project Athena.
+
+
