@@ -108,6 +108,7 @@
 			}
 
 			function CheckRunning(scriptUrl){
+					alert("checkrunning!");
 				    if(currentlyRunningScripts.some(currentlyRunningScripts => currentlyRunningScripts.path === scriptUrl)){		
 						return true;
 					} else{
@@ -365,6 +366,7 @@
 			document.getElementById("pager_top").innerHTML = pagerHtml;
 			document.getElementById("data").innerHTML = pageContent;
 			document.getElementById("pager_footer").innerHTML = pagerHtml;
+			
 			requestRunningScriptData();
 		</script>
 
