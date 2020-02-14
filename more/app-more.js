@@ -17,7 +17,7 @@
 	var APP_ICON_INACTIVE = ROOT + "appicon_i.png";
 	var APP_ICON_ACTIVE = ROOT + "appicon_a.png";
 	var Appstatus = false;
-	var currentlyRunningScripts;
+
 	
 	var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 	var button = tablet.addButton({
@@ -35,8 +35,7 @@
 			tablet.screenChanged.disconnect(onMoreAppScreenChanged);
 		}else{
 			//print("turn on");
-			currentlyRunningScripts = ScriptDiscoveryService.getRunning();
-			//print(JSON.stringify(currentlyRunningScripts));
+
 			
 			tablet.gotoWebScreen(APP_URL + "?version=" + Math.floor(Math.random()*50000));
 			
@@ -44,7 +43,7 @@
 			tablet.screenChanged.connect(onMoreAppScreenChanged);
 				
 			Script.setTimeout(function() {
-				tablet.emitScriptEvent(currentlyRunningScripts); 
+				sendRunningScriptList();
 			}, 2000);
 			
 			
@@ -61,26 +60,32 @@
 	}
 	
 	button.clicked.connect(clicked);
+
+	function sendRunningScriptList(){
+		var currentlyRunningScripts = ScriptDiscoveryService.getRunning();
+		tablet.emitScriptEvent(currentlyRunningScripts);
+	}
+
 	
 	function onMoreAppWebEventReceived(eventz){
-
+		
 		if(typeof eventz === "string"){
 			eventzget = JSON.parse(eventz);
 		
 	
-			if(eventzget.type === "MORE_INSTALL"){
-				/*
-				var myVec = {
-					x: parseFloat(eventzget.x),
-					y: parseFloat(eventzget.y),
-					z: parseFloat(eventzget.z)
-				};
-				*/
+			if(eventzget.action === "installScript"){
+				ScriptDiscoveryService.loadOneScript(eventzget.script);
+				sendRunningScriptList();
 			}
 
-			if(eventzget.type === "MORE_UNINSTALL"){
- 
+			if(eventzget.action === "uninstallScript"){
+				ScriptDiscoveryService.stopScript(eventzget.script, false);
+				sendRunningScriptList();
 			}			
+
+			if(eventzget.action === "requestRunningScriptData"){
+				sendRunningScriptList();
+			}	
 
 		}
 		

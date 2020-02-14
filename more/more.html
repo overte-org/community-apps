@@ -46,15 +46,72 @@
 			var rootPath = currentPath.replace("more/more.html", "applications/");
 			
 			//Running scripts 
-			var currentlyRunningScripts;
+			
+			var buttonList = [];
+			
+			function requestRunningScriptData() {
+				var readyEvent = {
+					"action": "requestRunningScriptData"
+				};
+				EventBridge.emitWebEvent(JSON.stringify(readyEvent));
+			}
+			
+			var currentlyRunningScripts = {};
 			
 			EventBridge.scriptEventReceived.connect(function(message){
 				currentlyRunningScripts = message; 
+				//update the buttons
+				buttonList.forEach(function(item){
+					var btn = "";
+					if(CheckRunning(item.url) != false){
+						//Means already running
+						btn = "<button class='uninstall' onclick='uninstall(" + item.url + ", " + item.id + ");'>Uninstall</button>";
+					}else{
+						//Means not already installed
+						btn = "<button class='install' onclick='install(" + item.url + ", " + item.id + ");'>Install</button>";
+					}
+					
+					document.getElementById(item.id).innerHTML = btn;
+
+				});
+				
             });
 
-			function CheckRunning(scriptName){
+			function install(script, btnId){
+				//Action
+				var readyEvent = {
+					"action": "installScript",
+					"script": script
+				};
 				
-				return false;
+				EventBridge.emitWebEvent(JSON.stringify(readyEvent));
+				
+				//then change btn appearence
+				//var btn = "<button class='uninstall' onclick='uninstall(" + script + ", " + btnId + ");'>Uninstall</button>";
+				//document.getElementById(btnId).innerHTML = btn;
+
+			}
+
+			function uninstall(script, btnId){
+				//Action
+				var readyEvent = {
+					"action": "uninstallScript",
+					"script": script
+				};
+				
+				EventBridge.emitWebEvent(JSON.stringify(readyEvent));					
+				//then change btn appearence			
+				//var btn = "<button class='install' onclick='install(" + script + ", " + btnId + ");'>Install</button>";
+				//document.getElementById(btnId).innerHTML = btn;	
+			
+			}
+
+			function CheckRunning(scriptUrl){
+				    if(currentlyRunningScripts.some(currentlyRunningScripts => currentlyRunningScripts.path === scriptUrl)){		
+						return true;
+					} else{
+						return false;
+					}
 			}
 			
 
@@ -231,19 +288,18 @@
 			document.searchbar.searchtextbox.value = search;
 			
 
+
+			
+
 			function DisplayApp(item) {
 				pageContent = pageContent + "<a name = '" + window.btoa(item.name) + "'><table class='item'><tr>";
 				pageContent = pageContent + "<td><div class='iconContainer'><img src='" + rootPath + item.icon + "' style='width:50px;'><br><font class = 'caption'>" + item.caption + "</font></div></td>";
 				var btn = "";
 				var absoluteJsFile = rootPath + item.jsfile;
-				if(CheckRunning(absoluteJsFile) != false){
-					//Means already running
-					btn = "<button class='uninstall'>Uninstall</button>";
-				}else{
-					//Means not already installed
-					btn = "<button class='install'>Install</button>";
-				}
 				
+				var btn = "<button class='install' onclick = 'uninstall(absoluteJsFile, window.btoa(item.name));'>Install</button>";
+				var btndata = {"url": absoluteJsFile,"id":  window.btoa(item.name)};
+				buttonList.push(btndata);
 				
 				pageContent = pageContent + "<td><font class='appname'>" + item.name + "<br></font><font class = 'appdesc'>" + item.description + "<br></font><div id = '"+ window.btoa(item.name) +"' align='right'>" + btn + "</div></td>";
 				pageContent = pageContent + "</tr></table><br><br>";				
@@ -305,7 +361,7 @@
 			document.getElementById("pager_top").innerHTML = pagerHtml;
 			document.getElementById("data").innerHTML = pageContent;
 			document.getElementById("pager_footer").innerHTML = pagerHtml;
-
+			requestRunningScriptData();
 		</script>
 
 		
