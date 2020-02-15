@@ -35,17 +35,15 @@
 		
 			tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
 			tablet.gotoHomeScreen();
-
+			Appstatus = false;
 		}else{
 
-			
-			tablet.gotoWebScreen(APP_URL);
-			
+			tablet.gotoWebScreen(APP_URL);			
 			tablet.webEventReceived.connect(onMoreAppWebEventReceived);		
-			
+			Appstatus = true;
 		}
 			
-		Appstatus = !Appstatus;
+
 		button.editProperties({
 			isActive: Appstatus
 		});
@@ -95,7 +93,19 @@
 
 
 	function onScreenChanged(type, url) {
-		print("onScreenChanged:" + type + " | " + url);
+		if (type == "Web" && url.indexOf(APP_URL) != -1){
+			//Active
+			print("MORE... ACTIVE");
+			Appstatus = true;
+		}else{
+			//Inactive
+			print("MORE... INACTIVE");
+			Appstatus = false;
+		}
+		
+		button.editProperties({
+			isActive: Appstatus
+		});
 	}
 	
 	
