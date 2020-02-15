@@ -95,10 +95,7 @@
 
 
 	function onScreenChanged(type, url) {
-		Appstatus = !Appstatus;
-		button.editProperties({
-			isActive: Appstatus
-		});
+		print("onScreenChanged:" + type + " | " + url);
 	}
 	
 	
