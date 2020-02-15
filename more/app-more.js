@@ -19,7 +19,10 @@
 	var APP_ICON_INACTIVE = ROOT + "appicon_i.png";
 	var APP_ICON_ACTIVE = ROOT + "appicon_a.png";
 	var Appstatus = false;
-
+	var lastProcessing = {
+			"action": "",
+			"script": ""
+		};
 	
 	var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 	tablet.screenChanged.connect(onScreenChanged);
@@ -67,20 +70,35 @@
 			//print("EVENT SCRIPT: " + eventzget.script);
 			
 			if(eventzget.action === "installScript"){
-				ScriptDiscoveryService.loadOneScript(eventzget.script);
 				
-				Script.setTimeout(function() {
-					sendRunningScriptList(); 
-				}, 2000);
+				if(lastProcessing.action == eventzget.action && lastProcessing.script == eventzget.script){
+					return;
+				}else{
+					ScriptDiscoveryService.loadOneScript(eventzget.script);
+				
+					lastProcessing.action = eventzget.action;
+					lastProcessing.script = eventzget.script;
+					
+					Script.setTimeout(function() {
+						sendRunningScriptList(); 
+					}, 2000);
+				}
 			}
 
 			if(eventzget.action === "uninstallScript"){
-				ScriptDiscoveryService.stopScript(eventzget.script, false);
 				
-				Script.setTimeout(function() {
-					sendRunningScriptList(); 
-				}, 2000);
-				
+				if(lastProcessing.action == eventzget.action && lastProcessing.script == eventzget.script){
+					return;
+				}else{
+					ScriptDiscoveryService.stopScript(eventzget.script, false);
+					
+					lastProcessing.action = eventzget.action;
+					lastProcessing.script = eventzget.script;
+					
+					Script.setTimeout(function() {
+						sendRunningScriptList(); 
+					}, 2000);
+				}	
 			}			
 
 			if(eventzget.action === "requestRunningScriptData"){
