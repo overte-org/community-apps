@@ -1,3 +1,5 @@
+"use strict";
+
 //  app-more.js
 //  VERSION 1.0
 //
@@ -92,7 +94,7 @@
 
 
 	
-	tablet.webEventReceived.connect(onMoreAppWebEventReceived);
+	//tablet.webEventReceived.connect(onMoreAppWebEventReceived);
 	
 	
 	function cleanup() {
