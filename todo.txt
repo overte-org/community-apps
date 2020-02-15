@@ -1,5 +1,8 @@
-1- Scipt handling management. BUG = make a double call.. why?
-4- documentation and insertion guide line
+1- documentation and insertion guide line
+
+2- Demo 
+https://kebhelion.github.io/apps_repository/more/app-more.js
+==========
 
 
-
+camera should do nothing when click in desktop
