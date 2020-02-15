@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Gravimeter</title>
+		<script type="text/javascript">
+			function getParameter(theParameter) { 
+			  var params = window.location.search.substr(1).split('&');
+			 
+			  for (var i = 0; i < params.length; i++) {
+				var p=params[i].split('=');
+				if (p[0] == theParameter) {
+				  return decodeURIComponent(p[1]);
+				}
+			  }
+			  return false;
+			}
+		
+
+		</script>
+		<style>
+
+		body{
+			background-color: #43484f;
+		}
+		
+		font.maintitle{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 40px;
+			color: #FFFFFF;
+			font-weight: 700;
+		}
+		
+		td{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 18px;
+			color: #FFFFFF;
+			font-weight: 700;		
+		}
+		input.x{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			color: #a30000;
+			font-weight: 700;		
+		}
+
+		input.y{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			color: #007505;
+			font-weight: 700;		
+		}
+
+		input.z{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			color: #000cba;
+			font-weight: 700;		
+		}		
+
+
+		
+		</style>
+	</head>
+	<body>
+
+		<div align = 'center'><font class='maintitle'>GRAVIMETER</font><br><br>
+
+		
+
+		<form name = "coord" id = "coord">
+		
+		<table style='width:430px;'>
+		<tr><td colspan='3'><br><br><br>GRAVITY ORIENTATION</td></tr>
+		<tr>
+		<td>X: <input name = "rx" id = "rx" class="x" type = "text" value = '0' size='6'></td>
+		<td>Y: <input name = "ry" id = "ry" class="y" type = "text" value = '0' size='6'></td>
+		<td>Z: <input name = "rz" id = "rz" class="z" type = "text" value = '0' size='6'></td>
+		</tr>
+		<tr><td colspan='3'><br><hr><br>POSITION</td></tr>
+		<tr>
+		<td>X: <input name = "x" id = "x" class="x" type = "text" value = '0' size='6'></td>
+		<td>Y: <input name = "y" id = "y" class="y" type = "text" value = '0' size='6'></td>
+		<td>Z: <input name = "z" id = "z" class="z" type = "text" value = '0' size='6'></td>
+		</tr>
+		
+		</table>
+		</form>
+		</div>
+		<script>
+				document.coord.x.value = getParameter('px');	
+				document.coord.y.value = getParameter('py');	
+				document.coord.z.value = getParameter('pz');
+				document.coord.rx.value = getParameter('rx');	
+				document.coord.ry.value = getParameter('ry');	
+				document.coord.rz.value = getParameter('rz');				
+
+		</script>
+	</body>
+</html>
