@@ -64,8 +64,8 @@
 		if(typeof eventz === "string"){
 			eventzget = JSON.parse(eventz);
 			
-			print("EVENT ACTION: " + eventzget.action);
-			print("EVENT SCRIPT: " + eventzget.script);
+			//print("EVENT ACTION: " + eventzget.action);
+			//print("EVENT SCRIPT: " + eventzget.script);
 			
 			if(eventzget.action === "installScript"){
 				ScriptDiscoveryService.loadOneScript(eventzget.script);
@@ -93,8 +93,7 @@
 	}
 
 
-	
-	//tablet.webEventReceived.connect(onMoreAppWebEventReceived);
+
 	
 	
 	function cleanup() {
