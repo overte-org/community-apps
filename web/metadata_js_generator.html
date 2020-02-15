@@ -139,9 +139,9 @@ String.prototype.escapeJSON = function() {
 		switch (ch)
 		{
 			case "\\": ch = "\\\\"; break;
-			case "\'": ch = "\\'"; break;
+			//case "\'": ch = "\\'"; break;
 			case "\"": ch = '\\"'; break;
-			case "\&": ch = "\\&"; break;
+			//case "\&": ch = "\\&"; break;
 			case "\t": ch = "\\t"; break;
 			case "\n": ch = "\\n"; break;
 			case "\r": ch = "\\r"; break;
@@ -196,6 +196,33 @@ function downloadFile(theContent, filename, type) {
 document.gen.dlapp.disabled = true;
 
 
+function FormatJsJson(obj){
+	var jsdata = 'var metadata = { "applications": [\n';
+	
+	obj.applications.forEach(function(item, index){
+		var comma = "";
+		if (index < obj.applications.length - 1 ){
+			comma = ",";
+		}
+		jsdata = jsdata + "      {\n";
+		jsdata = jsdata + '         "isActive": ' + item.isActive + ',\n';	
+		jsdata = jsdata + '         "directory": "' + item.directory + '",\n';	
+		jsdata = jsdata + '         "name": "' + item.name.escapeJSON() + '",\n';
+		jsdata = jsdata + '         "description": "' + item.description.escapeJSON() + '",\n';
+		jsdata = jsdata + '         "jsfile": "' + item.jsfile + '",\n';
+		jsdata = jsdata + '         "icon": "' + item.icon + '",\n';
+		jsdata = jsdata + '         "caption": "' + item.caption.escapeJSON() + '"\n';		
+		jsdata = jsdata + "      }" + comma + "\n";
+	});	
+
+	jsdata = jsdata + "   ]\n";
+	jsdata = jsdata + "};";
+	
+	return jsdata;
+}
+
+
+
 function genCode(){
 	var errormessage = "&nbsp;";
 	var name = document.gen.name.value;
@@ -226,12 +253,13 @@ function genCode(){
 				errormessage = "Error: The file names (Maim js file or Icon) must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ - .)";
 			}else{
 				appJsCode = {
+								"isActive": true,
 								"directory": directory,
-								"name": name.escapeJSON(),
-								"description": description.escapeJSON(),
+								"name": name,//.escapeJSON(),
+								"description": description,//.escapeJSON(),
 								"jsfile": directory + "/" + jsfilename,
 								"icon": directory + "/" + icon,
-								"caption": caption.escapeJSON()
+								"caption": caption //.escapeJSON()
 							};
 				document.gen.dlapp.disabled = false;
 				
@@ -239,7 +267,8 @@ function genCode(){
 				var newMetadata = JSON.parse(JSON.stringify(metadata));
 				newMetadata.applications.push(appJsCode);
 				
-				metaJsCode = "var metadata = " + JSON.stringify(newMetadata) + ";";
+				metaJsCode = FormatJsJson(newMetadata);
+				//metaJsCode = "var metadata = " + JSON.stringify(newMetadata) + ";";
 			}
 		}
 		
