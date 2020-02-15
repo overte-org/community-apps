@@ -95,11 +95,11 @@
 	function onScreenChanged(type, url) {
 		if (type == "Web" && url.indexOf(APP_URL) != -1){
 			//Active
-			print("MORE... ACTIVE");
+			//print("MORE... ACTIVE");
 			Appstatus = true;
 		}else{
 			//Inactive
-			print("MORE... INACTIVE");
+			//print("MORE... INACTIVE");
 			Appstatus = false;
 		}
 		
