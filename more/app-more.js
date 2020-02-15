@@ -22,6 +22,7 @@
 
 	
 	var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
+	tablet.screenChanged.connect(onScreenChanged);
 	var button = tablet.addButton({
 		text: APP_NAME,
 		icon: APP_ICON_INACTIVE,
@@ -93,11 +94,17 @@
 	}
 
 
-
+	function onScreenChanged(type, url) {
+		Appstatus = !Appstatus;
+		button.editProperties({
+			isActive: Appstatus
+		});
+	}
 	
 	
 	function cleanup() {
 		tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
+		tablet.screenChanged.disconnect(onScreenChanged);
 		tablet.removeButton(button);
 	}
 	
