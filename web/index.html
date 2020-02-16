@@ -18,14 +18,13 @@
 		
 			h1 {
 				font-family: Arial, Helvetica, sans-serif;
-				font-size: 28px;
-				color: #CFB538;
+				font-size: 30px;
+				color: #000000;
 				font-weight: 800;
 				text-decoration: none;
 				font-style: normal;
 				font-variant: normal;
 				text-transform: none;
-				text-shadow: 3px 3px 3px rgba(0,0,0,0.75);
 			}
 
 			font.appname {
@@ -72,6 +71,17 @@
 				text-transform: none;
 			}
 
+			font.greencommented {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 12px;
+				color: #009900;
+				font-weight: 500;
+				text-decoration: none;
+				font-style: italic;
+				font-variant: normal;
+				text-transform: none;
+			}
+
 			font.pager {
 				font-family: Arial, Helvetica, sans-serif;
 				font-size: 14px;
@@ -99,39 +109,38 @@
 	<body>
 		<div id="wrapper">
 			<div id="content">
-				<div align = 'center'><h1>"Project Athena" Applications Repository</h1></div>
-			   <p>This repository stores the optional <b>tablet's applications</b> and <b>functionalities</b> provided by the contributions of the community members.</p> 
+				<h1>"Project Athena" Applications Repository</h1>
+				<p>This repository stores the optional <b>tablet's applications</b> and <b>functionalities</b> provided by the contributions of the community members. 
+				If you have created an Application or functionality and want to offer it to the community, this is where you can do it.</p>
 
-				<p>If you have created an Application and want to offer it to the community, this is where you can do it.</p>
+				<h2>Before going further:</h2><ol>
+					<li>If your application/functionality is a <b>core feature</b> that you think that <b>required being delivered out-of-the-box with "Project Athena"</b>, you must instead consider making your contribution directly in the "<b>Project Athena</b>" code line. See instead the <b><a href = 'https://github.com/kasenvr/project-athena'>Project Athena</a></b> repository and contact their maintainers.</li><br>
+					<li>If your application/functionality has any <b>dependency with an external server or services</b>. <i>(If it has to deal in any ways with other servers than a Project Athena Domain or Metaverse API)</i> This repository is not where you should publish your application. It will have to be published from a different source like the <b>Marketplace</b> <i>(when it will exist)</i> or another web site.</li>
+				</ol>
+				<br>
+				<h2>Conditions for acceptance:</h2><ol>
+				<li>You must include in your script a <b>license</b> reference making your script fully open source:<br>
+				<font class = 'greencommented' >//  Distributed under the Apache License, Version 2.0.<br>
+				//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html</font><br>
+				</li><br>
+				<li>Avoid <b>spaces</b> and <b>special characters</b> in your <b>folders</b> and <b>file names</b>.<br><font class = 'greencommented' >(Stay with: "<b>a-z</b>", "<b>A-Z</b>", "<b>0-9</b>", "<b>-</b>", "<b>_</b>", "<b>.</b>")</font></li><br>
 
-				Before going further:
-				1- If your applications is a core feature that you think that must be delivered out-of-the-box with Athena, you must instead consider to make your contribution directly in the "Project Athena" release. See instead this repository [link] and contact their maintainers.
+				<li>Add your application/functionality in a <b>folder</b> under the "<b><a href = 'https://github.com/KebHelion/apps_repository/tree/master/applications'>applications</a></b>" directory.<br>
+				<font class = 'greencommented' >(Your main js file and your icon must be directly in that folder)</font></li><br>
 
-				2- If your application has any dependancy with an external server or services. (If it has to deal in any ways with another servers than a Project Athena Domain or Metaverse API) This repository is not where you should publish your application. It will have to be publish from a different source like the marketplace or another web site.
+				<li>You must add your application/functionality to the "<b>metadata.js</b>" file (in the "<b><a href = 'https://github.com/KebHelion/apps_repository/tree/master/applications'>applications</a></b>" directory) by generating a new one using this tool: <b><a href='metadata_js_generator.html'>Metadata Generator</a></b></li>
+				</ol>
 
-
-				Conditions for acceptance:
-				1- You must include in your script a license reference making your script fully open source:
-				//  Distributed under the Apache License, Version 2.0.
-				//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
-
-				2- Avoid space and special character in your folder an file names. (Stay with: "a-z", "A-Z", "0-9", "-", "_", ".")
-
-				3- Add your appliction in a folder under the "applications"(link) directory. (Your main js file and your icon must be directly in that folder)
-
-				4- You must add your application to the metadata.js file (in the applications(link) directory) by generating a new one using this tool: [link]
-
-
-				Submit a Pull Request to add your application folder and the new metadata.js.
-				(If you are not comfortable with those procedure, contact Keb Helion on discord.)
-
+				<p><b>Submit a "<u>Pull Request</u>" to add your "<u>application folder</u>" and the new "<u>metadata.js</u>" file.</b><br>
+				<font class = 'greencommented' >(If you are not comfortable with those procedures, contact <b>Keb Helion</b> on "Project Athena" Discord.)</font></p>
 
 
-				Guidelines for the code reviewer:
-				1- Test the applications
-				2- Make sure that the JSON contain in metadata.js is valid before accept the commit. (This will be directly in production once commited)
-				3- Test the "More..." application in the Project Athena.
-
+				<br>
+				<h2>Guidelines for the code reviewer:</h2><ol>
+				<li>Test the applications in the "<b>Project Athena</b>".</li><br>
+				<li>Make sure that the <b>JSON</b> and <b>Javascript</b> contained in "<b>metadata.js</b>" are <u>valid</u> before accepting the commit. <b>!!! This will be directly in production once committed. !!!</b></li><br>
+				<li>Test the "<b>More...</b>" application in the "<b>Project Athena</b>" after having done: "<b><i>Edit > Reload Content (Clears all caches)</i></b>", and at least <u>5 minutes</u> after the commit.</li>
+				</ol>
 
 				</p>	
 			</div>
