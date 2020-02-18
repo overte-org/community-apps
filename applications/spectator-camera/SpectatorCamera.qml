@@ -2,9 +2,7 @@
 //  SpectatorCamera.qml
 //  qml/hifi
 //
-//  Spectator Camera v2.6
-//
-//  Updated by Keb Helion on Febryary 2020.
+//  Spectator Camera v2.5
 //
 //  Created by Zach Fox on 2018-12-12
 //  Copyright 2018 High Fidelity, Inc.
@@ -18,8 +16,8 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtGraphicalEffects 1.0
 
-import stylesUit 1.0 as HifiStylesUit
-import controlsUit 1.0 as HifiControlsUit
+import "qrc:////qml//styles-uit" as HifiStylesUit
+import "qrc:////qml//controls-uit" as HifiControlsUit
 import "qrc:////qml//controls" as HifiControls
 import "qrc:////qml//hifi" as Hifi
 
@@ -62,7 +60,7 @@ Rectangle {
         // "Spectator" text
         HifiStylesUit.RalewaySemiBold {
             id: titleBarText;
-            text: "Spectator Camera 2.6";
+            text: "Spectator Camera 2.5";
             // Anchors
             anchors.left: parent.left;
             anchors.leftMargin: 30;
