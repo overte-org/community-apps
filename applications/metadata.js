@@ -9,7 +9,7 @@ var metadata = { "applications": [
          "caption": "MIRROR"
       },
       {
-         "isActive": true,
+         "isActive": false,
          "directory": "spectator-camera",
          "name": "Spectator Camera",
          "description": "Give you a video camera that can display its image on your monitor screen for video capture. It can capture from the camera or from the VR Headset. It can also take classic and spherical 360 snapshots (equirectangular format). Definitely a must.",
@@ -34,6 +34,15 @@ var metadata = { "applications": [
          "jsfile": "record/record.js",
          "icon": "record/icon.svg",
          "caption": "RECORD"
+      },
+      {
+         "isActive": true,
+         "directory": "domain-navigator",
+         "name": "Domain Navigator",
+         "description": "This tool is to help teleporting yourself rapidly where you need in a domain in a couple of clicks, without having to enter numbers in a path. Ideal for those who are working on large landscapes. (Precision: 80 meters.)",
+         "jsfile": "domain-navigator/dom_nav.js",
+         "icon": "domain-navigator/dom_nav_icon_i.png",
+         "caption": "DOM NAV"
       }
    ]
 };
