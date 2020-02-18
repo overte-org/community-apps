@@ -1,0 +1,8 @@
+Domain Navigator
+
+This tool is to help teleporting yourself rapidly where you need in a domain in a couple of clicks, without having to enter numbers in a path. Ideal for those who are working on large landscapes. (Precision: 80 meters.)
+
+domain-navigator
+dom_nav.js
+dom_nav_icon_i.png
+DOM NAV
