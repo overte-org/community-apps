@@ -129,6 +129,7 @@
 	
 	function cleanup() {
 		if (Appstatus) {
+			tablet.gotoHomeScreen();
 			tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
 		}
 		tablet.screenChanged.disconnect(onScreenChanged);
