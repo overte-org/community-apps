@@ -1,0 +1,274 @@
+<!DOCTYPE html><html>
+	<head>
+		<title>Domain Navigator</title>
+		<script src="jquery.min.js"></script>
+		<script type="text/javascript">
+			function getParameter(theParameter) { 
+			  var params = window.location.search.substr(1).split('&');
+			 
+			  for (var i = 0; i < params.length; i++) {
+				var p=params[i].split('=');
+				if (p[0] == theParameter) {
+				  return decodeURIComponent(p[1]);
+				}
+			  }
+			  return false;
+			}
+		
+		
+			 function main(){
+				 
+				 
+				 $(".tpbutton").click(function(){
+					 var clickEventz = {
+						 "type" : "give_tp_coor",
+						 "x" : document.coord.x.value,
+						 "y" : document.coord.y.value,
+						 "z" : document.coord.z.value						 
+					 };
+				
+				
+					 EventBridge.emitWebEvent(JSON.stringify(clickEventz));
+				 })
+				 
+				 $(".looknorth").click(function(){
+					 var clickEventz = {
+						 "type" : "look_to_north"						 
+					 };
+
+					 EventBridge.emitWebEvent(JSON.stringify(clickEventz));
+				 })			
+
+				 $(".looksouth").click(function(){
+					 var clickEventz = {
+						 "type" : "look_to_south"						 
+					 };
+
+					 EventBridge.emitWebEvent(JSON.stringify(clickEventz));
+				 })		
+
+				 $(".lookwest").click(function(){
+					 var clickEventz = {
+						 "type" : "look_to_west"						 
+					 };
+
+					 EventBridge.emitWebEvent(JSON.stringify(clickEventz));
+				 })		
+
+				 $(".lookeast").click(function(){
+					 var clickEventz = {
+						 "type" : "look_to_east"						 
+					 };
+
+					 EventBridge.emitWebEvent(JSON.stringify(clickEventz));
+				 })						 
+			}
+			 $(document).ready(main);
+
+
+
+			function FindPosition(oElement)
+			{
+			  if(typeof( oElement.offsetParent ) != "undefined")
+			  {
+				for(var posX = 0, posY = 0; oElement; oElement = oElement.offsetParent)
+				{
+				  posX += oElement.offsetLeft;
+				  posY += oElement.offsetTop;
+				}
+				  return [ posX, posY ];
+				}
+				else
+				{
+				  return [ oElement.x, oElement.y ];
+				}
+			}
+
+			function GetXZCoordinates(e)
+			{
+			  var PosX = 0;
+			  var PosY = 0;
+			  var ImgPos;
+			  ImgPos = FindPosition(cnvs1);
+			  if (!e) var e = window.event;
+			  if (e.pageX || e.pageY)
+			  {
+				PosX = e.pageX;
+				PosY = e.pageY;
+			  }
+			  else if (e.clientX || e.clientY)
+				{
+				  PosX = e.clientX + document.body.scrollLeft
+					+ document.documentElement.scrollLeft;
+				  PosY = e.clientY + document.body.scrollTop
+					+ document.documentElement.scrollTop;
+				}
+
+			  PosX = ((PosX - ImgPos[0])-200)*80;
+			  PosY = ((PosY - ImgPos[1])-200)*80;			  
+			  document.coord.x.value = PosX;
+			  document.coord.z.value = PosY;
+			  DrawPlanPos(PosX,PosY);
+			}
+			
+			function GetYCoordinates(e2)
+			{
+			  var PosX = 0;
+			  var PosY = 0;
+			  var ImgPos;
+			  ImgPos = FindPosition(cnvs2);
+			  if (!e2) var e2 = window.event;
+			  if (e2.pageX || e2.pageY)
+			  {
+				PosX = e2.pageX;
+				PosY = e2.pageY;
+			  }
+			  else if (e2.clientX || e2.clientY)
+				{
+				  PosX = e2.clientX + document.body.scrollLeft
+					+ document.documentElement.scrollLeft;
+				  PosY = e2.clientY + document.body.scrollTop
+					+ document.documentElement.scrollTop;
+				}
+
+			  PosY = (200-(PosY - ImgPos[1]))*80;
+			  document.coord.y.value = PosY;
+			  DrawAltiPos(PosY);
+			}		
+
+		</script>
+		<style>
+
+		body{
+			background-color: #43484f;
+		}
+		
+		font.maintitle{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 40px;
+			color: #FFFFFF;
+			font-weight: 700;
+		}
+		
+		td{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 18px;
+			color: #FFFFFF;
+			font-weight: 700;		
+		}
+		input.x{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			color: #a30000;
+			font-weight: 700;		
+		}
+
+		input.y{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			color: #007505;
+			font-weight: 700;		
+		}
+
+		input.z{
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			color: #000cba;
+			font-weight: 700;		
+		}		
+
+
+		
+		</style>
+	</head>
+	<body>
+
+		<div align = 'center'><font class='maintitle'>Domain Navigator</font><br><br>
+		<table><tr>
+		<td><canvas id='planCanvas' width='400px' height='400px' style="background: url('plan.png')"></canvas></td>
+		<td style='width:10px'></td>
+		<td><canvas id='altiCanvas' width='20px' height='400px' style="background: url('alti.png')"></canvas></td>
+		</tr>
+		</table>
+		
+		<script type="text/javascript">
+
+		var myImg = document.getElementById("plan");
+
+		var myImg2 = document.getElementById("alti");
+	
+		
+		var cnvs1 = document.getElementById("planCanvas");
+		var cnvs2 = document.getElementById("altiCanvas");
+		
+
+		
+		cnvs1.onmousedown = GetXZCoordinates;
+		cnvs2.onmousedown = GetYCoordinates;	
+		
+		var backgroundImage1 = new Image(); 
+		backgroundImage1.src = 'plan.png'; 
+		
+		var backgroundImage2 = new Image(); 
+		backgroundImage2.src = 'alti.png'; 		
+		
+
+		 function DrawPlanPos(x,z){ 
+		  ctx = cnvs1.getContext("2d");
+		  ctx.drawImage(backgroundImage1, 0, 0);
+		  ctx.beginPath();
+		  ctx.arc(200+(x/80), 200+(z/80), 3, 0, 2 * Math.PI, false);
+		  ctx.lineWidth = 2;
+		  ctx.strokeStyle = '#6600ff'; //1E62D0
+		  ctx.stroke();		
+		 }
+		 
+		 function DrawAltiPos(y){ 
+		  ctx = cnvs2.getContext("2d");
+		  ctx.drawImage(backgroundImage2, 0, 0);
+		  ctx.beginPath();
+		  ctx.moveTo(0, 200-(y/80));
+		  ctx.lineTo(20, 200-(y/80));
+		  ctx.lineWidth = 2;
+		  ctx.strokeStyle = '#6600ff';
+		  ctx.stroke();		
+		 } 		 
+		</script>
+		<form name = "coord" id = "coord">
+		<table style='width:430px;'><tr>
+		<td>X: <input name = "x" id = "x" class="x" type = "text" value = '0' size='6'></td>
+		<td>Y: <input name = "y" id = "y" class="y" type = "text" value = '0' size='6'></td>
+		<td>Z: <input name = "z" id = "z" class="z" type = "text" value = '0' size='6'></td>
+		</tr></table>
+		</form>
+		<table style='width:90%;'><tr><td>
+		<button class = 'tp tpbutton' value='' style='background:#1E62D0; color:#FFFFFF; font-family:Arial, Helvetica, sans-serif; font-size: 24px; font-weight:700; padding:6px; width:80%;'>Teleport</button>
+		<br><br>
+		</td><td style='width:95px;'>
+		<table>
+			<tr>
+				<td></td>
+				<td><img class = 'tp looknorth' src='north.png'></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><img class = 'tp lookwest' src='west.png'></td>
+				<td><img src='eye.png'></td>
+				<td><img class = 'tp lookeast' src='east.png'></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><img class = 'tp looksouth' src='south.png'></td>
+				<td></td>
+			</tr>
+		</table>
+		</td></tr></table></div>
+		<script>
+				document.coord.x.value = getParameter('x');	
+				document.coord.y.value = getParameter('y');	
+				document.coord.z.value = getParameter('z');	
+				DrawPlanPos(document.coord.x.value,document.coord.z.value);
+				DrawAltiPos(document.coord.y.value);
+		</script>
+	</body>
+</html>
