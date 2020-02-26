@@ -3,7 +3,7 @@ var metadata = { "applications": [
          "isActive": true,
          "directory": "doppelganger-mirror",
          "name": "Doppelganger-Mirror",
-         "description": "Generate an double of your avatar that only you can see. This allows you to examine your avatar and see how you move. The doppelganger can be grabbed and positioned like you want.",
+         "description": "Generate a double of your avatar that only you can see. This allows you to examine your avatar and see how you move. The doppelganger can be grabbed and positioned however you want.",
          "jsfile": "doppelganger-mirror/app-doppleganger.js",
          "icon": "doppelganger-mirror/doppleganger-i.svg",
          "caption": "MIRROR"

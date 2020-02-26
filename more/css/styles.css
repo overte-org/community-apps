@@ -9,9 +9,9 @@
 */
 
 body {
-    background: #73758c;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    background: #27343B;
+    font-family: 'Merriweather', sans-serif;
+    font-size: 14px;
     color: #FFFFFF;
     font-weight: 600;
     text-decoration: none;
@@ -21,7 +21,7 @@ body {
 }
 
 h1 {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Quicksand', sans-serif;
     font-size: 28px;
     color: #ffffff;
     font-weight: 800;
@@ -32,8 +32,20 @@ h1 {
     text-shadow: 3px 3px 3px rgba(63,64,76,1);
 }
 
+h1.mainTitle {
+    
+}
+
+p.mainDesc {
+    font-size: 16px;
+}
+
+p a {
+    color: SteelBlue;
+}
+
 font.appname {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Merriweather', sans-serif;
     font-size: 18px;
     color: #CFB538;
     font-weight: 800;
@@ -41,17 +53,23 @@ font.appname {
     font-style: normal;
     font-variant: normal;
     text-transform: none;
+    margin-bottom: 5px;
+    float: left;
+    clear: both;
 }
 
 font.appdesc {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
+    font-family: 'Merriweather', sans-serif;
+    font-size: 15px;
     color: #ffffff;
     font-weight: 500;
     text-decoration: none;
     font-style: normal;
     font-variant: normal;
     text-transform: none;
+    margin-bottom: 5px;
+    float: left;
+    clear: both;
 }
 
 font.noresult {
@@ -77,7 +95,7 @@ font.caption {
 }
 
 font.pager {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Quicksand', sans-serif;
     font-size: 14px;
     color: #B2B5D9;
     font-weight: 600;
@@ -114,6 +132,7 @@ button.install {
     border-radius: 6px;
     border: 2px solid #008CBA;
     transition-duration: 0.3s;
+    float: right;
 }
 
 button.install:hover {
@@ -130,6 +149,7 @@ button.uninstall {
     border-radius: 6px;
     border: 2px solid #b34700;
     transition-duration: 0.3s;
+    float: right;
 }
 
 button.uninstall:hover {
@@ -146,6 +166,7 @@ button.processing {
     border-radius: 6px;
     border: 2px solid #b59207;
     transition-duration: 0.3s;
+    float: right;
 }
 
 div.searchbox {

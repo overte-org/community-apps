@@ -17,35 +17,25 @@
 <body>
     <h1>Applications Metadata Generator ("metadata.js")</h1>
     <form name = 'gen'>
-    <sup>*</sup> Directory name: <input type = 'text' size = '60' maxlength="50" name='directory'>  (without any path.)<br><br><br>
+        <sup>*</sup> Directory name: <input type = 'text' size = '60' maxlength="50" name='directory'>  (without any path.)<br><br><br>
+        <sup>*</sup> Application Name: <input type = 'text' size = '60' maxlength="50" name='name'><br><br>
+        <sup>*</sup> Application Description: <br><textarea name ='description' rows = '6' style = 'width:60%;' maxlength="1000"></textarea><br><br><br>
+        <sup>*</sup> Main javascript file name: <input type = 'text' size = '60' maxlength="60" name='jsfilename'> (without any path.)<br><br><br><br>
+        <sup>*</sup> Icon file name: <input type = 'text' size = '60' maxlength="60" name='icon'> (without any path.)<br>
+        
+        <font class = 'explain'>Use the "inactive" tablet's icon of your applications. If the script doesn't use the tablet, add an image to<br>illustrate what it does. (Must be 50 X 50 pixels. Possible Format: ".png" or ".svg") </font><br>
+        <br>
+        Caption: <input type = 'text' size = '30' maxlength="12" name='caption'><br>
+        <font class = 'explain'>The same Caption that will appear in the tablet. If the script doesn't use the tablet, keep it null.</font><br><br><br>
+        
+        <input name = 'generate' type = 'button' onclick = 'genCode();' value ='Generate'><br><br>
+        <div id = 'errormessage'><font class = 'error'>&nbsp;</font></div><br><br>
+        <hr><br>INSTRUCTIONS:<br><br>
+        1- The file "metadata.js" must replace the current one in the "applications" folder.<br>
+        (The one where all the application's subfolders are stored)<br><br><br>
 
-
-
-    <sup>*</sup> Application Name: <input type = 'text' size = '60' maxlength="50" name='name'><br><br>
-
-
-    <sup>*</sup> Application Description: <br><textarea name ='description' rows = '6' style = 'width:60%;' maxlength="1000"></textarea><br><br><br>
-
-
-    <sup>*</sup> Main javascript file name: <input type = 'text' size = '60' maxlength="60" name='jsfilename'> (without any path.)<br><br><br><br>
-
-    <sup>*</sup> Icon file name: <input type = 'text' size = '60' maxlength="60" name='icon'> (without any path.)<br>
-    <font class = 'explain'>Use the "inactive" tablet's icon of your applications. If the script doesn't use the tablet, add an image to<br>illustrate what it does. (Must be 50 X 50 pixels. Possible Format: ".png" or ".svg") </font><br>
-    <br>
-    Caption: <input type = 'text' size = '30' maxlength="12" name='caption'><br>
-    <font class = 'explain'>The same Caption that will appear in the tablet. If the script doesn't use the tablet, keep it null.</font><br><br><br>
-
-
-
-    <input name = 'generate' type = 'button' onclick = 'genCode();' value ='Generate'><br><br>
-    <div id = 'errormessage'><font class = 'error'>&nbsp;</font></div><br><br>
-    <hr><br>INSTRUCTIONS:<br><br>
-    1- The file "metadata.js" must replace the current one in the "applications" folder.<br>
-    (The one where all the application's subfolders are stored)<br><br><br>
-
-    <input name = 'dlapp' type = 'button' onclick = 'downloadFile(document.gen.appCode.value, "metadata.js", "application/javascript");' value ='Download metadata.js'><br><br>
-    <textarea class = 'output' name ='appCode' rows = '12' style='width:80%;' readonly></textarea>
-
+        <input name = 'dlapp' type = 'button' onclick = 'downloadFile(document.gen.appCode.value, "metadata.js", "application/javascript");' value ='Download metadata.js'><br><br>
+        <textarea class = 'output' name ='appCode' rows = '12' style='width:80%;' readonly></textarea>
     </form>
     <script>
 
@@ -75,22 +65,22 @@
     	return result;
     };
 
-    function CheckAllowedChar(str){
+    function CheckAllowedChar(str) {
     	var allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
     	var ii;
-    	for(ii = 0; ii < str.length; ii = ii + 1 ){
-    		if(allowed.indexOf(str.charAt(ii)) == -1){
+    	for (ii = 0; ii < str.length; ii = ii + 1 ) {
+    		if (allowed.indexOf(str.charAt(ii)) == -1) {
     			return false;
     		}
     	}
     	return true;
     }
 
-    function CheckAllowedChar4files(str){
+    function CheckAllowedChar4files(str) {
     	var allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.";
     	var ii;
-    	for(ii = 0; ii < str.length; ii = ii + 1 ){
-    		if(allowed.indexOf(str.charAt(ii)) == -1){
+    	for (ii = 0; ii < str.length; ii = ii + 1 ) {
+    		if (allowed.indexOf(str.charAt(ii)) == -1) {
     			return false;
     		}
     	}
@@ -112,12 +102,12 @@
 
     document.gen.dlapp.disabled = true;
 
-    function FormatJsJson(obj){
+    function FormatJsJson(obj) {
     	var jsdata = 'var metadata = { "applications": [\n';
     	
-    	obj.applications.forEach(function(item, index){
+    	obj.applications.forEach(function(item, index) {
     		var comma = "";
-    		if (index < obj.applications.length - 1 ){
+    		if (index < obj.applications.length - 1 ) {
     			comma = ",";
     		}
     		jsdata = jsdata + "      {\n";
@@ -137,7 +127,7 @@
     	return jsdata;
     }
 
-    function genCode(){
+    function genCode() {
     	var errormessage = "&nbsp;";
     	var name = document.gen.name.value;
     	var description = document.gen.description.value;
@@ -156,13 +146,13 @@
     	jsfilename = jsfilename.trim();
     	description = description.replace(/\s+/g, ' ').trim();
     	
-    	if (directory == "" || name == "" || description == "" || jsfilename == "" || icon == "" ){
+    	if (directory == "" || name == "" || description == "" || jsfilename == "" || icon == "" ) {
     		errormessage = "Error: Something is missing.";
     	} else {
-    		if (CheckAllowedChar(directory) == false){
+    		if (CheckAllowedChar(directory) == false) {
     			errormessage = "Error: The directory name must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ -)";
     		} else {
-    			if (CheckAllowedChar4files(jsfilename) == false || CheckAllowedChar4files(icon) == false){
+    			if (CheckAllowedChar4files(jsfilename) == false || CheckAllowedChar4files(icon) == false) {
     				errormessage = "Error: The file names (Maim js file or Icon) must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ - .)";
     			} else {
     				appJsCode = {
