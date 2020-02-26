@@ -24,7 +24,7 @@ var metadata = { "applications": [
          "description": "This application returns a record of the orientation and the position of your avatar. This tool becomes very helpful when you want to build on a sphere with a radial gravity, where it's arduous to evaluate the perpendicularity of the floor.",
          "jsfile": "gravimeter/gravimeter.js",
          "icon": "gravimeter/gravimeter_icon.png",
-         "caption": "GAVITY"
+         "caption": "GRAVITY"
       },
       {
          "isActive": true,
@@ -43,6 +43,15 @@ var metadata = { "applications": [
          "jsfile": "domain-navigator/dom_nav.js",
          "icon": "domain-navigator/dom_nav_icon_i.png",
          "caption": "DOM NAV"
-      }
+     },
+     {
+        "isActive": true,
+        "directory": "vr-grabscale",
+        "name": "VR Grabscale",
+        "description": "This tool allows you to scale objects by grabbing them in VR.",
+        "jsfile": "vr-grabscale/VRBuildGrabScale.js",
+        "icon": "vr-grabscale/logo.png",
+        "caption": "VR SCALE"
+     }
    ]
 };
