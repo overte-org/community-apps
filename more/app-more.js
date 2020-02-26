@@ -33,20 +33,17 @@
 	});
 	
 	
-	function clicked(){
-		if (Appstatus == true){
-		
+	function clicked() {
+		if (Appstatus == true) {
 			tablet.webEventReceived.disconnect(onMoreAppWebEventReceived);
 			tablet.gotoHomeScreen();
 			Appstatus = false;
-		}else{
-
+		} else {
 			tablet.gotoWebScreen(APP_URL);			
 			tablet.webEventReceived.connect(onMoreAppWebEventReceived);		
 			Appstatus = true;
 		}
 			
-
 		button.editProperties({
 			isActive: Appstatus
 		});
@@ -55,25 +52,24 @@
 	
 	button.clicked.connect(clicked);
 
-	function sendRunningScriptList(){
+	function sendRunningScriptList() {
 		var currentlyRunningScripts = ScriptDiscoveryService.getRunning();
 		tablet.emitScriptEvent(JSON.stringify(currentlyRunningScripts));
 	}
 
-	
-	function onMoreAppWebEventReceived(eventz){
-		
-		if(typeof eventz === "string"){
+	function onMoreAppWebEventReceived(eventz) {
+        
+		if (typeof eventz === "string") {
 			eventzget = JSON.parse(eventz);
 			
 			//print("EVENT ACTION: " + eventzget.action);
 			//print("EVENT SCRIPT: " + eventzget.script);
 			
-			if(eventzget.action === "installScript"){
+			if (eventzget.action === "installScript") {
 				
-				if(lastProcessing.action == eventzget.action && lastProcessing.script == eventzget.script){
+				if (lastProcessing.action == eventzget.action && lastProcessing.script == eventzget.script) {
 					return;
-				}else{
+				} else {
 					ScriptDiscoveryService.loadOneScript(eventzget.script);
 				
 					lastProcessing.action = eventzget.action;
@@ -85,11 +81,11 @@
 				}
 			}
 
-			if(eventzget.action === "uninstallScript"){
+			if (eventzget.action === "uninstallScript") {
 				
-				if(lastProcessing.action == eventzget.action && lastProcessing.script == eventzget.script){
+				if (lastProcessing.action == eventzget.action && lastProcessing.script == eventzget.script) {
 					return;
-				}else{
+				} else {
 					ScriptDiscoveryService.stopScript(eventzget.script, false);
 					
 					lastProcessing.action = eventzget.action;
@@ -101,7 +97,7 @@
 				}	
 			}			
 
-			if(eventzget.action === "requestRunningScriptData"){
+			if (eventzget.action === "requestRunningScriptData") {
 				sendRunningScriptList();
 			}	
 
@@ -111,11 +107,11 @@
 
 
 	function onScreenChanged(type, url) {
-		if (type == "Web" && url.indexOf(APP_URL) != -1){
+		if (type == "Web" && url.indexOf(APP_URL) != -1) {
 			//Active
 			//print("MORE... ACTIVE");
 			Appstatus = true;
-		}else{
+		} else {
 			//Inactive
 			//print("MORE... INACTIVE");
 			Appstatus = false;

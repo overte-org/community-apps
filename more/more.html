@@ -1,3 +1,12 @@
+<!--
+//  more.html
+//
+//  Created by Keb Helion, February 2020.
+//  Copyright 2020 Project Athena and contributors.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
 <!DOCTYPE html>
 <html>
 	<head>
@@ -15,8 +24,7 @@
 				}
 				return result;
 			}
-
-			
+	
 			var offset = findGetParameter("offset");
 			if(offset === null){offset = 0;}
 			offset = parseInt(offset);
@@ -28,8 +36,6 @@
 			var search = findGetParameter("search");
 			if(search === null){search = "";}			
 	
-
-			
 			//Search
 			function doSearch(keyword){
 				location.href = "more.html?offset=0&search=" + encodeURI(keyword);
@@ -39,14 +45,11 @@
 				location.href = "more.html?offset=0";
 			}
 			
-			
-			
 			//Paths
 			var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
 			var rootPath = currentPath.replace("more/more.html", "applications/");
 			
 			//Running scripts 
-			
 			var buttonList = [];
 			
 			function requestRunningScriptData() {
@@ -55,27 +58,21 @@
 				};
 				EventBridge.emitWebEvent(JSON.stringify(readyEvent));
 			}
-			
-			
-			
-			EventBridge.scriptEventReceived.connect(function(message){
 
+			EventBridge.scriptEventReceived.connect(function(message){
 				//update the buttons
 				buttonList.forEach(function(item){
-					
 					var btn = "";
-					if(message.indexOf(item.url) != -1){
+					if (message.indexOf(item.url) != -1) {
 						//Means already running
 						btn = "<button class='uninstall' onclick='uninstall(" + '"' + item.url + '"' + ", " + '"' + item.id + '"' + ");'>Uninstall</button>";
-					}else{
+					} else {
 						//Means not already installed
 						btn = "<button class='install' onclick='install(" + '"' + item.url + '"' + ", " + '"' + item.id + '"' + ");'>Install</button>";
 					}
 					
 					document.getElementById(item.id).innerHTML = btn;
-
 				});
-				
             });
 
 			function install(script, btnId){
@@ -83,7 +80,6 @@
 				var btn = "<button class='processing' >Processing...</button>";
 				document.getElementById(btnId).innerHTML = btn;
 
-			
 				//Action
 				var readyEvent = {
 					"action": "installScript",
@@ -91,8 +87,6 @@
 				};
 				
 				EventBridge.emitWebEvent(JSON.stringify(readyEvent));
-				
-
 
 			}
 
@@ -106,180 +100,18 @@
 					"action": "uninstallScript",
 					"script": script
 				};
-				
-				EventBridge.emitWebEvent(JSON.stringify(readyEvent));					
-
-			
+                
+				EventBridge.emitWebEvent(JSON.stringify(readyEvent));
 			}
-
-	
-
+            
 		</script>
-		<style>
-		
-			body {
-				background: #73758c;
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 12px;
-				color: #FFFFFF;
-				font-weight: 600;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-			}
-		
-			h1 {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 28px;
-				color: #ffffff;
-				font-weight: 800;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-				text-shadow: 3px 3px 3px rgba(63,64,76,1);
-			}
-
-			font.appname {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 18px;
-				color: #CFB538;
-				font-weight: 800;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-			}
-
-			font.appdesc {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 14px;
-				color: #ffffff;
-				font-weight: 500;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-			}
-
-			font.noresult {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 18px;
-				color: #aaaaaa;
-				font-weight: 500;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-			}
-
-			font.caption {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 12px;
-				color: #ffffff;
-				font-weight: 600;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-			}
-
-			font.pager {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 14px;
-				color: #B2B5D9;
-				font-weight: 600;
-				text-decoration: none;
-				font-style: normal;
-				font-variant: normal;
-				text-transform: none;
-			}
-			
-			div.iconContainer{
-				border-radius: 15px;
-				background: #000000;
-				padding: 5px;
-				width: 70px;
-				height: 70px;
-				text-align: center;
-			}
-			
-			table.item {
-				background: #3E415E;
-			}
-			
-			td {
-				vertical-align: top;
-				padding: 5px;
-			}
-
-			button.install {
-				font-family: Arial, Helvetica, sans-serif;
-				background-color: #008CBA;
-				font-size: 16px;
-				color: #ffffff;
-				font-weight: 600;
-				border-radius: 6px;
-				border: 2px solid #008CBA;
-				transition-duration: 0.3s;
-			}
-			
-			button.install:hover {
-			  background-color: #10afe3; 
-			  border: 2px solid #10afe3;
-			}
-
-			button.uninstall {
-				font-family: Arial, Helvetica, sans-serif;
-				background-color: #b34700;
-				font-size: 16px;
-				color: #ffffff;
-				font-weight: 600;
-				border-radius: 6px;
-				border: 2px solid #b34700;
-				transition-duration: 0.3s;
-			}
-			
-			button.uninstall:hover {
-			  background-color: #e34c22; 
-			  border: 2px solid #e34c22;
-			}
-
-			button.processing {
-				font-family: Arial, Helvetica, sans-serif;
-				background-color: #b59207;
-				font-size: 16px;
-				color: #ffffff;
-				font-weight: 600;
-				border-radius: 6px;
-				border: 2px solid #b59207;
-				transition-duration: 0.3s;
-			}
-
-			div.searchbox {
-				border-radius: 6px;
-				background: #ffffff;
-				padding: 4px;
-				border: 0px;
-				vertical-align: middle;
-			}
-			
-			input.searchtextbox{
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 14px;
-				color: #000000;
-				font-weight: 400;
-				text-decoration: none;
-				border: 0px;
-				outline-color: #ffffff;
-			}
-			
-		</style>
+        
+        <link href="css/styles.css" rel="stylesheet">
+        
 	</head>
 	<body><form name = "searchbar">
 		<h1>Add more functionalities...</h1>
-		
+		<p>Want to add your own app? Read the <a href="../web/index.html">guide</a>!</p>
 		<table style = "width:100%;">
 			<tr >
 				<td style = "vertical-align:middle; text-align:left;">
@@ -306,12 +138,7 @@
 		<div style="width:98%; text-align:right;"><div style = "vertical-align: middle;" id = 'pager_footer'></div>		
 		
 		<script>
-
 			document.searchbar.searchtextbox.value = search;
-			
-
-
-			
 
 			function DisplayApp(item) {
 				pageContent = pageContent + "<a name = '" + window.btoa(item.name) + "'><table class='item'><tr>";
@@ -329,7 +156,6 @@
 				pageContent = pageContent + "<td><font class='appname'>" + item.name + "<br></font><font class = 'appdesc'>" + item.description + "<br></font><div id = '"+ window.btoa(item.name) +"' align='right'>" + btn + "</div></td>";
 				pageContent = pageContent + "</tr></table><br><br>";				
 			}
-		
 
 			var counterDir = -1;
 			var counterDisp = 0;
@@ -354,7 +180,7 @@
 			}
 			
 			//pager
-			
+            
 			function pagetoPrevious(){
 				offset = offset - perpage;
 				if (offset < 0){
@@ -394,7 +220,5 @@
 			
 			requestRunningScriptData();
 		</script>
-
-		
 	</body>
 </html>
