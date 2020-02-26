@@ -1,291 +1,194 @@
+<!--
+//  metadata_js_generator.html
+//
+//  Created by Keb Helion, February 2020.
+//  Copyright 2020 Project Athena and contributors.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
 <!DOCTYPE html>
 <html>
 <head>
-<title>Applications Metadata Generator ("metadata.js")</title>
+    <title>Applications Metadata Generator ("metadata.js")</title>
+    <link href="css/metadata_gen.css" rel="stylesheet">
+    <script type="text/javascript" src="../applications/metadata.js"></script>
 </head>
-<script type="text/javascript" src="../applications/metadata.js"></script>
-<style>
-h1 {
-	font-size: 24px;
-	color: #CFB538;
-	font-weight: 800;
-	text-decoration: none;
-	font-style: normal;
-	font-variant: normal;
-	text-transform: none;
-}
-
-font.error {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 16px;
-	color: #FF0000;
-	font-weight: 700;
-	text-decoration: none;
-	font-style: normal;
-	font-variant: normal;
-	text-transform: none;
-}
-
-font.explain {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 10px;
-	color: #CFB538;
-	font-weight: 500;
-	text-decoration: none;
-	font-style:italic;
-	font-variant: normal;
-	text-transform: none;
-}
-
-input {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	color: #000000;
-	font-weight: 500;
-	text-decoration: none;
-	font-style: normal;
-	font-variant: normal;
-	text-transform: none;
-}
-
-textarea {
-	width: 100%;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	color: #000000;
-	font-weight: 500;
-	text-decoration: none;
-	font-style: normal;
-	font-variant: normal;
-	text-transform: none;
-}
-
-textarea.output {
-	background: #ffff66;
-	width: 100%;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	color: #000000;
-	font-weight: 700;
-	text-decoration: none;
-	font-style: normal;
-	font-variant: normal;
-	text-transform: none;
-}
-
-sup {
-	color: #ff0000;
-}
-
-body {
-	background: #3E415E;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 12px;
-	color: #FFFFFF;
-	font-weight: 600;
-	text-decoration: none;
-	font-style: normal;
-	font-variant: normal;
-	text-transform: none;
-}
-
-input[type="button"]:disabled {
-  color: #bbbbbb;
-}
-
-</style>
 <body>
-<h1>Applications Metadata Generator ("metadata.js")</h1>
-<form name = 'gen'>
-<sup>*</sup> Directory name: <input type = 'text' size = '60' maxlength="50" name='directory'>  (without any path.)<br><br><br>
+    <h1>Applications Metadata Generator ("metadata.js")</h1>
+    <form name = 'gen'>
+    <sup>*</sup> Directory name: <input type = 'text' size = '60' maxlength="50" name='directory'>  (without any path.)<br><br><br>
 
 
 
-<sup>*</sup> Application Name: <input type = 'text' size = '60' maxlength="50" name='name'><br><br>
+    <sup>*</sup> Application Name: <input type = 'text' size = '60' maxlength="50" name='name'><br><br>
 
 
-<sup>*</sup> Application Description: <br><textarea name ='description' rows = '6' style = 'width:60%;' maxlength="1000"></textarea><br><br><br>
+    <sup>*</sup> Application Description: <br><textarea name ='description' rows = '6' style = 'width:60%;' maxlength="1000"></textarea><br><br><br>
 
 
-<sup>*</sup> Main javascript file name: <input type = 'text' size = '60' maxlength="60" name='jsfilename'> (without any path.)<br><br><br><br>
+    <sup>*</sup> Main javascript file name: <input type = 'text' size = '60' maxlength="60" name='jsfilename'> (without any path.)<br><br><br><br>
 
-<sup>*</sup> Icon file name: <input type = 'text' size = '60' maxlength="60" name='icon'> (without any path.)<br>
-<font class = 'explain'>Use the "inactive" tablet's icon of your applications. If the script doesn't use the tablet, add an image to<br>illustrate what it does. (Must be 50 X 50 pixels. Possible Format: ".png" or ".svg") </font><br>
-<br>
-Caption: <input type = 'text' size = '30' maxlength="12" name='caption'><br>
-<font class = 'explain'>The same Caption that will appear in the tablet. If the script doesn't use the tablet, keep it null.</font><br><br><br>
-
-
-
-<input name = 'generate' type = 'button' onclick = 'genCode();' value ='Generate'><br><br>
-<div id = 'errormessage'><font class = 'error'>&nbsp;</font></div><br><br>
-<hr><br>INSTRUCTIONS:<br><br>
-1- The file "metadata.js" must replace the current one in the "applications" folder.<br>
-(The one where all the application's subfolders are stored)<br><br><br>
-
-<input name = 'dlapp' type = 'button' onclick = 'downloadFile(document.gen.appCode.value, "metadata.js", "application/javascript");' value ='Download metadata.js'><br><br>
-<textarea class = 'output' name ='appCode' rows = '12' style='width:80%;' readonly></textarea>
+    <sup>*</sup> Icon file name: <input type = 'text' size = '60' maxlength="60" name='icon'> (without any path.)<br>
+    <font class = 'explain'>Use the "inactive" tablet's icon of your applications. If the script doesn't use the tablet, add an image to<br>illustrate what it does. (Must be 50 X 50 pixels. Possible Format: ".png" or ".svg") </font><br>
+    <br>
+    Caption: <input type = 'text' size = '30' maxlength="12" name='caption'><br>
+    <font class = 'explain'>The same Caption that will appear in the tablet. If the script doesn't use the tablet, keep it null.</font><br><br><br>
 
 
 
-</form>
-<script>
+    <input name = 'generate' type = 'button' onclick = 'genCode();' value ='Generate'><br><br>
+    <div id = 'errormessage'><font class = 'error'>&nbsp;</font></div><br><br>
+    <hr><br>INSTRUCTIONS:<br><br>
+    1- The file "metadata.js" must replace the current one in the "applications" folder.<br>
+    (The one where all the application's subfolders are stored)<br><br><br>
 
-String.prototype.escapeJSON = function() {
-	var result = "";
-	for (var i = 0; i < this.length; i++)
-	{
-		var ch = this[i];
-		switch (ch)
-		{
-			case "\\": ch = "\\\\"; break;
-			//case "\'": ch = "\\'"; break;
-			case "\"": ch = '\\"'; break;
-			//case "\&": ch = "\\&"; break;
-			case "\t": ch = "\\t"; break;
-			case "\n": ch = "\\n"; break;
-			case "\r": ch = "\\r"; break;
-			case "\b": ch = "\\b"; break;
-			case "\f": ch = "\\f"; break;
-			case "\v": ch = "\\v"; break;
-			default: break;
-		}
+    <input name = 'dlapp' type = 'button' onclick = 'downloadFile(document.gen.appCode.value, "metadata.js", "application/javascript");' value ='Download metadata.js'><br><br>
+    <textarea class = 'output' name ='appCode' rows = '12' style='width:80%;' readonly></textarea>
 
-		result += ch;
-	}
+    </form>
+    <script>
 
-	return result;
-};
+    String.prototype.escapeJSON = function() {
+    	var result = "";
+    	for (var i = 0; i < this.length; i++)
+    	{
+    		var ch = this[i];
+    		switch (ch)
+    		{
+    			case "\\": ch = "\\\\"; break;
+    			//case "\'": ch = "\\'"; break;
+    			case "\"": ch = '\\"'; break;
+    			//case "\&": ch = "\\&"; break;
+    			case "\t": ch = "\\t"; break;
+    			case "\n": ch = "\\n"; break;
+    			case "\r": ch = "\\r"; break;
+    			case "\b": ch = "\\b"; break;
+    			case "\f": ch = "\\f"; break;
+    			case "\v": ch = "\\v"; break;
+    			default: break;
+    		}
+            
+    		result += ch;
+    	}
+        
+    	return result;
+    };
 
-function CheckAllowedChar(str){
-	var allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
-	var ii;
-	for(ii = 0; ii < str.length; ii = ii + 1 ){
-		if(allowed.indexOf(str.charAt(ii)) == -1){
-			return false;
-		}
-	}
-	return true;
-}
+    function CheckAllowedChar(str){
+    	var allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
+    	var ii;
+    	for(ii = 0; ii < str.length; ii = ii + 1 ){
+    		if(allowed.indexOf(str.charAt(ii)) == -1){
+    			return false;
+    		}
+    	}
+    	return true;
+    }
 
-function CheckAllowedChar4files(str){
-	var allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.";
-	var ii;
-	for(ii = 0; ii < str.length; ii = ii + 1 ){
-		if(allowed.indexOf(str.charAt(ii)) == -1){
-			return false;
-		}
-	}
-	return true;
-}
-
-
-function downloadFile(theContent, filename, type) {
-    var element = document.createElement('a');
-	element.href = window.URL.createObjectURL(new Blob([theContent], {type: '' + type }));
-    element.download = filename;
-	// Append anchor to body.
-	document.body.appendChild(element);
-	element.click();
-
-	// Remove anchor from body
-	document.body.removeChild(element);
-}
+    function CheckAllowedChar4files(str){
+    	var allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.";
+    	var ii;
+    	for(ii = 0; ii < str.length; ii = ii + 1 ){
+    		if(allowed.indexOf(str.charAt(ii)) == -1){
+    			return false;
+    		}
+    	}
+    	return true;
+    }
 
 
-document.gen.dlapp.disabled = true;
+    function downloadFile(theContent, filename, type) {
+        var element = document.createElement('a');
+    	element.href = window.URL.createObjectURL(new Blob([theContent], {type: '' + type }));
+        element.download = filename;
+    	// Append anchor to body.
+    	document.body.appendChild(element);
+    	element.click();
 
+    	// Remove anchor from body
+    	document.body.removeChild(element);
+    }
 
-function FormatJsJson(obj){
-	var jsdata = 'var metadata = { "applications": [\n';
-	
-	obj.applications.forEach(function(item, index){
-		var comma = "";
-		if (index < obj.applications.length - 1 ){
-			comma = ",";
-		}
-		jsdata = jsdata + "      {\n";
-		jsdata = jsdata + '         "isActive": ' + item.isActive + ',\n';	
-		jsdata = jsdata + '         "directory": "' + item.directory + '",\n';	
-		jsdata = jsdata + '         "name": "' + item.name.escapeJSON() + '",\n';
-		jsdata = jsdata + '         "description": "' + item.description.escapeJSON() + '",\n';
-		jsdata = jsdata + '         "jsfile": "' + item.jsfile + '",\n';
-		jsdata = jsdata + '         "icon": "' + item.icon + '",\n';
-		jsdata = jsdata + '         "caption": "' + item.caption.escapeJSON() + '"\n';		
-		jsdata = jsdata + "      }" + comma + "\n";
-	});	
+    document.gen.dlapp.disabled = true;
 
-	jsdata = jsdata + "   ]\n";
-	jsdata = jsdata + "};";
-	
-	return jsdata;
-}
+    function FormatJsJson(obj){
+    	var jsdata = 'var metadata = { "applications": [\n';
+    	
+    	obj.applications.forEach(function(item, index){
+    		var comma = "";
+    		if (index < obj.applications.length - 1 ){
+    			comma = ",";
+    		}
+    		jsdata = jsdata + "      {\n";
+    		jsdata = jsdata + '         "isActive": ' + item.isActive + ',\n';	
+    		jsdata = jsdata + '         "directory": "' + item.directory + '",\n';	
+    		jsdata = jsdata + '         "name": "' + item.name.escapeJSON() + '",\n';
+    		jsdata = jsdata + '         "description": "' + item.description.escapeJSON() + '",\n';
+    		jsdata = jsdata + '         "jsfile": "' + item.jsfile + '",\n';
+    		jsdata = jsdata + '         "icon": "' + item.icon + '",\n';
+    		jsdata = jsdata + '         "caption": "' + item.caption.escapeJSON() + '"\n';		
+    		jsdata = jsdata + "      }" + comma + "\n";
+    	});	
 
+    	jsdata = jsdata + "   ]\n";
+    	jsdata = jsdata + "};";
+    	
+    	return jsdata;
+    }
 
+    function genCode(){
+    	var errormessage = "&nbsp;";
+    	var name = document.gen.name.value;
+    	var description = document.gen.description.value;
+    	var jsfilename = document.gen.jsfilename.value;
+    	var icon = document.gen.icon.value;
+    	var caption = document.gen.caption.value;
+    	var directory = document.gen.directory.value;	
+    	var appJsCode = "";
+    	var metaJsCode = "";
+    	document.gen.dlapp.disabled = true;
 
-function genCode(){
-	var errormessage = "&nbsp;";
-	var name = document.gen.name.value;
-	var description = document.gen.description.value;
-	var jsfilename = document.gen.jsfilename.value;
-	var icon = document.gen.icon.value;
-	var caption = document.gen.caption.value;
-	var directory = document.gen.directory.value;	
-	var appJsCode = "";
-	var metaJsCode = "";
-	document.gen.dlapp.disabled = true;
-
-	
-	caption = caption.toUpperCase();
-	caption = caption.trim()
-	icon = icon.trim();
-	name = name.trim();
-	jsfilename = jsfilename.trim();
-	description = description.replace(/\s+/g, ' ').trim();
-	
-	if (directory == "" || name == "" || description == "" || jsfilename == "" || icon == "" ){
-		errormessage = "Error: Something is missing.";
-	}else{
-		if (CheckAllowedChar(directory) == false){
-			errormessage = "Error: The directory name must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ -)";
-		}else{
-			if (CheckAllowedChar4files(jsfilename) == false || CheckAllowedChar4files(icon) == false){
-				errormessage = "Error: The file names (Maim js file or Icon) must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ - .)";
-			}else{
-				appJsCode = {
-								"isActive": true,
-								"directory": directory,
-								"name": name,//.escapeJSON(),
-								"description": description,//.escapeJSON(),
-								"jsfile": directory + "/" + jsfilename,
-								"icon": directory + "/" + icon,
-								"caption": caption //.escapeJSON()
-							};
-				document.gen.dlapp.disabled = false;
-				
-				//add entry to current metadata
-				var newMetadata = JSON.parse(JSON.stringify(metadata));
-				newMetadata.applications.push(appJsCode);
-				
-				metaJsCode = FormatJsJson(newMetadata);
-				//metaJsCode = "var metadata = " + JSON.stringify(newMetadata) + ";";
-			}
-		}
-		
-		
-		
-		
-
-
-	}
-	document.gen.appCode.value = metaJsCode;
-
-	
-	document.getElementById("errormessage").innerHTML = "<font class = 'error'>" + errormessage + "</font>";
-		
-}
-</script>
-
-
+    	caption = caption.toUpperCase();
+    	caption = caption.trim()
+    	icon = icon.trim();
+    	name = name.trim();
+    	jsfilename = jsfilename.trim();
+    	description = description.replace(/\s+/g, ' ').trim();
+    	
+    	if (directory == "" || name == "" || description == "" || jsfilename == "" || icon == "" ){
+    		errormessage = "Error: Something is missing.";
+    	} else {
+    		if (CheckAllowedChar(directory) == false){
+    			errormessage = "Error: The directory name must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ -)";
+    		} else {
+    			if (CheckAllowedChar4files(jsfilename) == false || CheckAllowedChar4files(icon) == false){
+    				errormessage = "Error: The file names (Maim js file or Icon) must not contain space or special characters. (Allowed: a-z A-Z 0-9 _ - .)";
+    			} else {
+    				appJsCode = {
+                        "isActive": true,
+                        "directory": directory,
+                        "name": name,//.escapeJSON(),
+                        "description": description,//.escapeJSON(),
+                        "jsfile": directory + "/" + jsfilename,
+                        "icon": directory + "/" + icon,
+                        "caption": caption //.escapeJSON()
+                    };
+    				document.gen.dlapp.disabled = false;
+    				
+    				//add entry to current metadata
+    				var newMetadata = JSON.parse(JSON.stringify(metadata));
+    				newMetadata.applications.push(appJsCode);
+    				
+    				metaJsCode = FormatJsJson(newMetadata);
+    				//metaJsCode = "var metadata = " + JSON.stringify(newMetadata) + ";";
+    			}
+    		}
+    	}
+    	document.gen.appCode.value = metaJsCode;
+        
+    	document.getElementById("errormessage").innerHTML = "<font class = 'error'>" + errormessage + "</font>";
+    }
+    </script>
 </body>
 </html>
