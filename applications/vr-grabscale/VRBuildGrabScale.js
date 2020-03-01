@@ -1,7 +1,7 @@
 //
 //  VRBuildGrabScale.js
 //  
-//  Created by Basinsky on 2/2/2020
+//  Created by Basinsky on 2 Feb 2020
 //  
 //  Script to scale in separate XYZ directions by grabbing. 
 //
