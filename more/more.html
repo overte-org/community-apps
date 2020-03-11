@@ -15,6 +15,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <script id="metadataScriptTag" type="text/javascript" src="https://kasenvr.github.io/community-apps/applications/metadata.js"></script>
         <script>
             //Defaults
             DEFAULT_PER_PAGE = 3;
@@ -23,16 +24,20 @@
             //Paths
             var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
             var rootPath;
-            var metadataScript = document.createElement("script");
+            var metadataScript = document.getElementById("metadataScriptTag");
             
             if (currentPath.includes("kasenvr.github.io") || !currentPath.includes("file:/")) { // Loading app from repo or filesystem.
                 rootPath = currentPath.replace("more/more.html", "applications/");
-                metadataScript.src = "../applications/metadata.js";
-                console.info("Loading apps and metadata locally.");
+                if (metadataScript.src != "../applications/metadata.js") {
+                    metadataScript.src = "../applications/metadata.js";
+                    console.info("Loading apps and metadata locally.");        
+                }
             } else {
                 rootPath = "https://kasenvr.github.io/community-apps/applications/";
-                metadataScript.src = "https://kasenvr.github.io/community-apps/applications/metadata.js";
-                console.info("Loading apps and metadata remotely.");
+                if (metadataScript.src != "https://kasenvr.github.io/community-apps/applications/metadata.js") {
+                    metadataScript.src = "https://kasenvr.github.io/community-apps/applications/metadata.js";
+                    console.info("Loading apps and metadata remotely.");
+                }
             }
 
             document.getElementsByTagName("head")[0].appendChild(metadataScript);
