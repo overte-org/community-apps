@@ -60,7 +60,7 @@
     function onMoreAppWebEventReceived(eventz) {
         
         if (typeof eventz === "string") {
-            eventzget = JSON.parse(eventz);
+            var eventzget = JSON.parse(eventz);
             
             //print("EVENT ACTION: " + eventzget.action);
             //print("EVENT SCRIPT: " + eventzget.script);
