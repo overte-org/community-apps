@@ -116,7 +116,7 @@
 
 
     function onScreenChanged(type, url) {
-        if (type === "Web" && url.indexOf(APP_URL) != -1) {
+        if (type === "Web" && url.indexOf(APP_URL) !== -1) {
             //Active
             //print("MORE... ACTIVE");
             Appstatus = true;
