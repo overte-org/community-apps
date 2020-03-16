@@ -73,11 +73,16 @@
     
             //Search
             function doSearch(keyword) {
-                location.href = "more.html?offset=0&search=" + encodeURI(keyword);
+                offset = 0;
+                search = keyword;
+                listBuilder(keyword, offset, perpage);
             }
 
             function clearSearch() {
-                location.href = "more.html?offset=0";
+                offset = 0;
+                document.searchbar.searchtextbox.value = "";
+                search = "";
+                listBuilder("", offset, perpage);
             }
             
             //Running scripts 
@@ -139,9 +144,8 @@
         <link href="css/styles.css" rel="stylesheet">
 
     </head>
-    <body><form name = "searchbar">
-        <h1 class="mainTitle">Add more functionalities...</h1>
-        <p class="mainDesc">Want to add your own app? Read the <a href="https://kasenvr.github.io/community-apps/web/index.html">guide</a>!</p>
+    <body><form name = "searchbar" onsubmit="submitForm(event);">
+        <font class="mainTitle">Add more functionalities...</font><br>
         <table style = "width:100%;">
             <tr >
                 <td style = "vertical-align:middle; text-align:left;">
@@ -149,7 +153,7 @@
                         <tr>
                             <td style = "vertical-align:middle; text-align:left;">
                                 <div class = "searchbox">
-                                    <input class = "searchtextbox" name = "searchtextbox" size = "26" maxlength="32"> <a href="#" onclick='clearSearch();'><img src="del-x-16.png"></a>
+                                    <input class = "searchtextbox" name = "searchtextbox" size = "26" maxlength="32" onkeypress="monitorEnter(event, this);"> <a href="#" onclick='clearSearch();'><img src="del-x-16.png"></a>
                                 </div>
                             </td>
                             <td style = "vertical-align:middle; text-align:left;">
@@ -163,29 +167,29 @@
                 </td>
             </tr>
         </table>
-        </form>
+        </form><!--br-->
         <div id = "data"></div>
         <div style="width:98%; text-align:right;">
-            <div style = "vertical-align: middle;" id = 'pager_footer'><!-- More info placeholder --></div>
+            <div style = "vertical-align: middle;" id = 'pager_footer'></div>
         </div>
         <hr>
         <p class="mainDesc">Want to contribute and add your own app?<br>
         Read the <a href="https://kasenvr.github.io/community-apps/web/index.html">guide</a>!</p>
-        <script>
+        <script>        
              function monitorEnter(e) {
                 var code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) { 
                     doSearch(document.searchbar.searchtextbox.value);
                 }
             } 
-
+            
             function submitForm(event){
                 event.preventDefault();
             } 
             
             document.searchbar.searchtextbox.value = search;
             var pageContent = "";
-
+            
             function DisplayApp(item) {
                 pageContent = pageContent + "<a name = '" + window.btoa(item.directory) + "'><table class='item'><tr>";
                 pageContent = pageContent + "<td><div class='iconContainer'><img src='" + rootPath + item.icon + "' style='width:50px;'><br><font class = 'caption'>" + item.caption + "</font></div></td>";
@@ -200,9 +204,9 @@
                 buttonList.push(btndata);
 
                 pageContent = pageContent + "<td><font class='appname'>" + item.name + "<br></font><font class = 'appdesc'>" + item.description + "<br></font><div id = '"+ window.btoa(item.directory) +"' align='right'>" + btn + "</div></td>";
-                pageContent = pageContent + "</tr></table><br>";
+                pageContent = pageContent + "</tr></table><br>";                
             }
-
+            
             function listBuilder(searchKeyword, listOffset, listPerPage) {
                 buttonList = [];
                 var counterDir = -1;
@@ -211,7 +215,7 @@
                 var lowItem = "";
                 var needNext = false;
                 pageContent = "";
-
+                
                 for (index = 0; index < metadata.applications.length; index++) {
                     lowItem = metadata.applications[index].name.toLowerCase();
                     if (lowItem.indexOf(searchKeyword.toLowerCase()) !== -1 && metadata.applications[index].isActive == true) { 
@@ -226,21 +230,21 @@
                         }
                     }
                 }
-
+               
                 var pagerPrevious = "<a href='#' onclick='pagetoPrevious();'><img src='minus-16.png'></a>";
                 if (listOffset <= 0) {
                     pagerPrevious = "<img src='blank_minus-16.png'>";
                 }
-
+                
                 var pagerNext = "<a href='#' onclick='pagetoNext();'><img src='plus-16.png'></a>";
                 if (needNext == false) {
                     pagerNext = "<img src='blank_plus-16.png'>";
-                }
-
+                }            
+                
                 var countA = listOffset + 1;
-
+                
                 var countB = listOffset + counterDisp;
-
+                
                 var pagerHtml = pagerPrevious + "<font class='pager'>&nbsp;&nbsp;" + countA + " - " + countB  + "&nbsp;&nbsp;</font>" + pagerNext; 
 
                 if (counterDisp > 0 ) {
@@ -250,39 +254,32 @@
                 } else {
                     document.getElementById("data").innerHTML = "<hr><div align='center'><font class='noresult'><br><br><br><br>Sorry, no result found.<br><br><br><br><br><br></font></div><hr>";
                 }
-
-                requestRunningScriptData();
+                
+                requestRunningScriptData();            
+            
             }
+            
 
+            
+            //pager
+            
             function pagetoPrevious(){
                 offset = offset - perpage;
                 if (offset < 0) {
                     offset = 0;
                 }
-                listBuilder(search, offset, perpage);
+                listBuilder(search, offset, perpage);           
             }
             
             function pagetoNext(){
                 offset = offset + perpage;
-                location.href = "more.html?offset=" + offset + "&perpage=" + perpage + "&search=" + encodeURI(search);
+                listBuilder(search, offset, perpage);
             }
             
-            var pagerPrevious = "<a href='#' onclick='pagetoPrevious();'><img src='minus-16.png'></a>";
-            if (offset <= 0) {
-                pagerPrevious = "<img src='blank_minus-16.png'>";
-            }
-
+            
             listBuilder(search, offset, perpage);
-
-            if (counterDisp > 0 ) {
-                document.getElementById("pager_top").innerHTML = pagerHtml;
-                document.getElementById("data").innerHTML = pageContent;
-                document.getElementById("pager_footer").innerHTML = pagerHtml;
-            } else {
-                document.getElementById("data").innerHTML = "<hr><div align='center'><font class='noresult'><br><br><br><br>Sorry, no result found.<br><br><br><br><br><br></font></div><hr>";
-            }
             
-            requestRunningScriptData();
+
         </script>
     </body>
 </html>
