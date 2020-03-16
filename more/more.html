@@ -123,7 +123,6 @@
                 };
                 
                 EventBridge.emitWebEvent(JSON.stringify(readyEvent));
-
             }
 
             function uninstall(script, btnId){
@@ -137,9 +136,8 @@
                 
                 EventBridge.emitWebEvent(JSON.stringify(readyEvent));
             }
-            
         </script>
-
+        
         <link href="https://fonts.googleapis.com/css?family=Merriweather|Quicksand:400,700&display=swap" rel="stylesheet">
         <link href="css/styles.css" rel="stylesheet">
 
@@ -254,15 +252,10 @@
                 } else {
                     document.getElementById("data").innerHTML = "<hr><div align='center'><font class='noresult'><br><br><br><br>Sorry, no result found.<br><br><br><br><br><br></font></div><hr>";
                 }
-                
                 requestRunningScriptData();            
-            
             }
             
-
-            
             //pager
-            
             function pagetoPrevious(){
                 offset = offset - perpage;
                 if (offset < 0) {
@@ -275,10 +268,8 @@
                 offset = offset + perpage;
                 listBuilder(search, offset, perpage);
             }
-            
-            
+
             listBuilder(search, offset, perpage);
-            
 
         </script>
     </body>
