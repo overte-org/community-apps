@@ -13,11 +13,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //    
 (function() {
-    const ROOT = Script.resolvePath('').split("app-more.js")[0];
-    const APP_NAME = "MORE...";
-    const APP_URL = ROOT + "more.html";
-    const APP_ICON_INACTIVE = ROOT + "appicon_i.png";
-    const APP_ICON_ACTIVE = ROOT + "appicon_a.png";
+    var ROOT = Script.resolvePath('').split("app-more.js")[0];
+    var APP_NAME = "MORE...";
+    var APP_URL = ROOT + "more.html";
+    var APP_ICON_INACTIVE = ROOT + "appicon_i.png";
+    var APP_ICON_ACTIVE = ROOT + "appicon_a.png";
     var appStatus = false;
     var lastProcessing = {
             "action": "",
