@@ -1,5 +1,0 @@
-Direct link https://kebhelion.github.io/apps_repository/more/app-more.js
-==========
-
-
-camera should do nothing when click in desktop
