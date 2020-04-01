@@ -8,6 +8,7 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
+var WANT_DEBUG = false;
 var isGrabLeftInProgress = false;
 var isGrabRightInProgress = false;
 var isGrabLeftAndRight = false;
@@ -15,9 +16,9 @@ var grabbedLeftEntityID;
 var grabbedRightEntityID;
 var channelName = "Hifi-Object-Manipulation";
 var closeEntities = [];
-var entityToBeGrabbedID = null;
-var RIGHT_JOINT;
-var LEFT_JOINT;
+var entityToBeGrabbedID;
+var RIGHT_JOINT = MyAvatar.getJointIndex("RightHandMiddle1");
+var LEFT_JOINT = MyAvatar.getJointIndex("LeftHandMiddle1");
 var startHandDistance = 0;
 var isScaling = false;
 var newScale = 1;
@@ -33,11 +34,10 @@ var SCALE_RATIO = 2.2;
 var GIZMO_CYLINDER_LENGTH = 0.3;
 var GIZMO_CYLINDER_LENGTH_RATIO = 0.025;
 var GIZMO_CYLINDER_DIAMETER = GIZMO_CYLINDER_LENGTH * GIZMO_CYLINDER_LENGTH_RATIO;
-var GIZMO_CENTER_DIAMETER = 0.2;
+var GIZMO_CENTER_DIAMETER = 0.05;
 var GIZMO_END_DIAMETER = 0.02;
 var GIZMO_END_POSITION = GIZMO_CYLINDER_LENGTH * 0.5;
 var GIZMO_DEFAULT_SCALE = 0.2;
-var WANT_DEBUG = false;
 var gizmoShapeIDs = [];
 var DECIMAL_PRECISION = 4;
 var ENTITIES_TO_UPDATE;
@@ -51,8 +51,10 @@ var gizmoYplusID;
 var gizmoYminusID;
 var gizmoZplusID;
 var gizmoZminusID;
+var debugRightHandID;
+var debugLeftHandID;
 var minimum = 1000;
-var index = 0; 
+var index = -1; 
 var distanceToGizmoXplus = 0;
 var distanceToGizmoXmin = 0;
 var distanceToGizmoYplus = 0;
@@ -62,7 +64,12 @@ var distanceToGizmoZmin = 0;
 var isScaleModeX = false;
 var isScaleModeY = false;
 var isScaleModeZ = false;
-var gizmoEndpoints = [];
+var gizmoEndpointsDistanceLeft = [];
+var rightGripState = 0;
+var leftGripState = 0;
+var LEFT_HAND_INDEX = MyAvatar.getJointIndex("LeftHand");
+var RIGHT_HAND_INDEX = MyAvatar.getJointIndex("RightHand");
+
 
 var overlayID = Overlays.addOverlay("text3d", {
     text: "hover",
@@ -240,15 +247,61 @@ function createGizmo() {
     });
     gizmoShapeIDs.push(gizmoZminusID);
     ENTITIES_TO_UPDATE = [gizmoXplusID, gizmoXminusID, gizmoYplusID, gizmoYminusID, gizmoZplusID, gizmoZminusID];
+    // add spheres at joint positions for debugging
+    if (WANT_DEBUG) {
+        debugLeftHandID = Entities.addEntity({
+            type: "Shape",        
+            shape: "Sphere",                       
+            name: "gizmoCenter",
+            parentID: MyAvatar.sessionUUID,
+            parentJointIndex: LEFT_JOINT,        
+            description: "",            
+            localPosition: { x: 0, y: 0, z: 0},      
+            lifetime: -1,
+            color: { r: 255, g: 100, b: 100 },
+            alpha: 0.5,
+            localDimensions: { x: 0.05, y: 0.05, z: 0.05 },
+            collisionless: true,
+            userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
+        });
+        gizmoShapeIDs.push(debugLeftHandID);   
+        debugRightHandID = Entities.addEntity({
+            type: "Shape",        
+            shape: "Sphere",                       
+            name: "gizmoCenter",
+            parentID: MyAvatar.sessionUUID,
+            parentJointIndex: RIGHT_JOINT,         
+            description: "",            
+            localPosition: { x: 0, y: 0, z: 0},      
+            lifetime: -1,
+            color: { r: 100, g: 255, b: 100 },
+            alpha: 0.5,
+            localDimensions: { x: 0.05, y: 0.05, z: 0.05 },
+            collisionless: true,
+            userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
+        });
+        gizmoShapeIDs.push(debugRightHandID); 
+    }    
 }
 
 function updateOverlay() {
     overlayPosition = Vec3.sum(MyAvatar.position, Vec3.multiplyQbyV(MyAvatar.orientation, { x: 0, y: 2, z: -2 }));  
+    var nameR;
+    var nameL;    
+    if (grabbedRightEntityID) {
+        nameR = Entities.getEntityProperties(grabbedRightEntityID,["name"]).name;
+    }
+    if (grabbedLeftEntityID) {
+        nameL = Entities.getEntityProperties(grabbedLeftEntityID,["name"]).name;
+    }    
     var text = [
         "  GrabLeft: " + isGrabLeftInProgress + 
         "  GrabRight: " + isGrabRightInProgress +
-        "  isGrabLeftAndRight: " + isGrabLeftAndRight,        
+        "  isGrabLeftAndRight: " + isGrabLeftAndRight,
+        "  gripStateLeft: " + leftGripState + "  gripStateRight: " + rightGripState,        
         "  isScaling: " + isScaling + " newScale: " + newScale,
+        "  GrabbedLeftName: " + nameL + "  GrabbedRightName: " + nameR,
+        "  GrabbedLeftID: " + grabbedLeftEntityID + "  GrabbedRightID: " + grabbedRightEntityID,
         "  HandposLeft:  " + JSON.stringify(Vec3.subtract(handPositionLeft,MyAvatar.position)),
         "  HandposRight:  " + JSON.stringify(Vec3.subtract(handPositionRight,MyAvatar.position)),        
         "  dxplus: " + distanceToGizmoXplus.toFixed(DECIMAL_PRECISION) +
@@ -258,7 +311,7 @@ function updateOverlay() {
         "  dymin: " + distanceToGizmoYmin.toFixed(DECIMAL_PRECISION) +
         "  dzmin: " + distanceToGizmoZmin.toFixed(DECIMAL_PRECISION),        
         "  isScaleModeX:  " + isScaleModeX + "  isScaleModeY:  " + isScaleModeY +"  isScaleModeZ:  " + isScaleModeZ,
-        "  index:   "+ index + "minimum:   " + minimum        
+        "  index:   "+ index + "minimum:   " + minimum.toFixed(DECIMAL_PRECISION)       
     ].filter(Boolean).join('\n');
 
     Overlays.editOverlay(overlayID, {
@@ -374,16 +427,27 @@ function startBuilding() {
     if (WANT_DEBUG) {
         updateOverlay();
     }    
-    if (isGrabLeftInProgress && isGrabRightInProgress) {
+    if (isGrabLeftInProgress || isGrabRightInProgress) {
         if (grabbedLeftEntityID) {
             entityToBeGrabbedID = grabbedLeftEntityID;
         }
         if (grabbedRightEntityID) {
             entityToBeGrabbedID = grabbedRightEntityID;
         }
-        isGrabLeftAndRight = true;               
+        // use gripstate if other controller is outside grip diameter (0.3 m)
+        if (grabbedLeftEntityID || grabbedRightEntityID) {
+            rightGripState = Controller.getValue(Controller.Standard.RightGrip);        
+            leftGripState = Controller.getValue(Controller.Standard.LeftGrip);        
+            if (leftGripState > 0.5 && rightGripState > 0.5) {        
+                isGrabLeftAndRight = true;  
+            } else {
+                isGrabLeftAndRight = false; 
+            }
+        }                            
     } else { 
-        entityToBeGrabbedID = null;             
+        entityToBeGrabbedID = null;
+        grabbedLeftEntityID = null;
+        grabbedRightEntityID = null;
         isGrabLeftAndRight = false; 
         isScaling = false;
         isDirectionFound = false;
@@ -391,6 +455,7 @@ function startBuilding() {
         isScaleModeY = false;
         isScaleModeZ = false;
         newScale = 2;
+        index = -1;
         hideGizmo();       
     }
 
@@ -407,12 +472,17 @@ function startBuilding() {
         updateGizmoPositionRotation(entityPosition,entityRotation);
         var localPositions = Entities.getMultipleEntityProperties(ENTITIES_TO_UPDATE, "localPosition");
         for (var i = 0; i < localPositions.length; i++) {
-            gizmoEndpoints[i] = Vec3.distance(handPositionLeft,
+            gizmoEndpointsDistanceLeft[i] = Vec3.distance(handPositionLeft,
                 Entities.localToWorldPosition(localPositions[i].localPosition, ENTITIES_TO_UPDATE[i], -1));
         }
-        minimum = Math.min(gizmoEndpoints[0],gizmoEndpoints[1],gizmoEndpoints[2],gizmoEndpoints[3],gizmoEndpoints[4],gizmoEndpoints[5]);        
-       
-        index = gizmoEndpoints.indexOf(minimum);
+        minimum = Math.min(gizmoEndpointsDistanceLeft[0],
+            gizmoEndpointsDistanceLeft[1],
+            gizmoEndpointsDistanceLeft[2],
+            gizmoEndpointsDistanceLeft[3],
+            gizmoEndpointsDistanceLeft[4],
+            gizmoEndpointsDistanceLeft[5]);        
+    
+        index = gizmoEndpointsDistanceLeft.indexOf(minimum);
         if (index === 0 || index === 1) {
             if (!isDirectionFound) {
                 isScaleModeX = true;
@@ -436,13 +506,17 @@ function startBuilding() {
                 isScaleModeZ = true;
                 isDirectionFound = true;
             }
-        }       
+        }
     }
 }
 
 Script.scriptEnding.connect(function() {
     Entities.deleteEntity(overlayID);     
     Entities.deleteEntity(gizmoCenterID);
+    if (WANT_DEBUG) {
+        Entities.deleteEntity(debugLeftHandID);
+        Entities.deleteEntity(debugRightHandID);
+    }
     Messages.messageReceived.disconnect(onMessageReceived);
     Messages.unsubscribe(channelName);
     Script.update.disconnect(startBuilding);
