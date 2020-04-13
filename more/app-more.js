@@ -68,7 +68,7 @@
 
             if (instruction.action === "installScript") {
                 if (lastProcessing.action !== instruction.action || lastProcessing.script !== instruction.script) {
-                    ScriptDiscoveryService.loadOneScript(instruction.script);
+                    ScriptDiscoveryService.loadScript(instruction.script, true, false, false, true, false); // Force reload the script, do not use cache.
                     lastProcessing.action = instruction.action;
                     lastProcessing.script = instruction.script;
                     Script.setTimeout(function() {
