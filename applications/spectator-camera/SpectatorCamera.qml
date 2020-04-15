@@ -2,7 +2,7 @@
 //  SpectatorCamera.qml
 //  qml/hifi
 //
-//  Spectator Camera v2.5
+//  Spectator Camera v2.
 //
 //  Created by Zach Fox on 2018-12-12
 //  Copyright 2018 High Fidelity, Inc.
@@ -60,7 +60,7 @@ Rectangle {
         // "Spectator" text
         HifiStylesUit.RalewaySemiBold {
             id: titleBarText;
-            text: "Spectator Camera 2.5";
+            text: "Spectator Camera 2.7";
             // Anchors
             anchors.left: parent.left;
             anchors.leftMargin: 30;
@@ -454,9 +454,71 @@ Rectangle {
                 }
             }
 
+//------------------------------------------------------------------------------------------
+            Item {
+                id: toneMap;
+                visible: masterSwitch.checked;
+                anchors.top: fieldOfView.bottom;
+                anchors.topMargin: 18;
+                anchors.left: parent.left;
+                anchors.right: parent.right;
+                height: 35;
+
+                HifiStylesUit.RalewaySemiBold {
+                    id: toneMapLabel;
+                    text: "Tone mapping curve: " + toneMapSlider.value;
+                    size: 20;
+                    color: hifi.colors.white;
+                    anchors.left: parent.left;
+                    anchors.top: parent.top;
+                    anchors.bottom: parent.bottom;
+                    width: 220;
+                    horizontalAlignment: Text.AlignLeft;
+                    verticalAlignment: Text.AlignVCenter;
+                }
+
+                HifiControlsUit.Slider {
+                    id: toneMapSlider;
+                    anchors.top: parent.top;
+                    anchors.bottom: parent.bottom;
+                    anchors.right: resetToneMap.left;
+                    anchors.rightMargin: 8;
+                    anchors.left: toneMapLabel.right;
+                    anchors.leftMargin: 8;
+                    colorScheme: hifi.colorSchemes.dark;
+                    from: 0.0;
+                    to: 3.0;
+                    value: 1.0;
+                    stepSize: 1;
+
+                    onValueChanged: {
+                        sendToScript({method: 'updateToneMap', toneCurve: value});
+                    }
+                    onPressedChanged: {
+                        if (!pressed) {
+                            sendToScript({method: 'updateToneMap', toneCurve: value});
+                        }
+                    }
+                }
+
+                HifiControlsUit.GlyphButton {
+                    id: resetToneMap;
+                    anchors.verticalCenter: parent.verticalCenter;
+                    anchors.right: parent.right;
+                    anchors.rightMargin: -8;
+                    height: parent.height - 8;
+                    width: height;
+                    glyph: hifi.glyphs.reload;
+                    onClicked: {
+                        toneMapSlider.value = 1.0;
+                    }
+                }
+            }
+//----------------------------------------------------------------------------------------
+
             Item {
                 visible: HMD.active;
-                anchors.top: fieldOfView.bottom;
+                anchors.top: toneMap.bottom;
                 anchors.topMargin: 18;
                 anchors.left: parent.left;
                 anchors.right: parent.right;

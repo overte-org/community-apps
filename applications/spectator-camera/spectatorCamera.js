@@ -3,10 +3,13 @@
 /*global Tablet, Script,  */
 /* eslint indent: ["error", 4, { "outerIIFEBody": 0 }] */
 //
-// spectatorCamera.js
+// spectatorCamera.js 2.7
 //
 // Created by Zach Fox on 2017-06-05
 // Copyright 2017 High Fidelity, Inc
+//
+// modified by Silverfish on 2020-01-22
+// 
 //
 // Distributed under the Apache License, Version 2.0
 // See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -44,25 +47,30 @@
     //      -Vertical field of view
     //      -Near clip plane distance
     //      -Far clip plane distance
-    //   -viewFinderOverlay: The in-world overlay that displays the spectator camera's view.
+    //   -viewFinderLocalEntity: The in-world local entity that displays the spectator camera's view.
     //   -camera: The in-world entity that corresponds to the spectator camera.
     //   -cameraRotation: The rotation of the spectator camera.
     //   -cameraPosition: The position of the spectator camera.
-    //   -glassPaneWidth: The width of the glass pane above the spectator camera that holds the viewFinderOverlay.
-    //   -viewFinderOverlayDim: The x, y, and z dimensions of the viewFinderOverlay.
+    //   -glassPaneWidth: The width of the glass pane above the spectator camera that holds the viewFinderLocalEntity.
+    //   -viewFinderLocalEntityDim: The x, y, and z dimensions of the viewFinderLocalEntity.
     //   -camera: The camera model which is grabbable.
-    //   -viewFinderOverlay: The preview of what the spectator camera is viewing, placed inside the glass pane.
+    //   -viewFinderLocalEntity: The preview of what the spectator camera is viewing, placed inside the glass pane.
     var spectatorCameraConfig = Render.getConfig("SecondaryCamera");
-    var viewFinderOverlay = false;
+    var viewFinderLocalEntity = false;
     var camera = false;
     var cameraRotation;
     var cameraPosition;
-    var glassPaneWidth = 0.16;
-    // The negative y dimension for viewFinderOverlay is necessary for now due to the way Image3DOverlay
-    // draws textures, but should be looked into at some point. Also the z dimension shouldn't affect
-    // the overlay since it is an Image3DOverlay so it is set to 0.
-    var viewFinderOverlayDim = { x: glassPaneWidth, y: -glassPaneWidth, z: 0 };
+    //var glassPaneWidth = 0.30;
+    var cameraViewWidth = 0.25;
+   // var cameraViewHeight = 0.2;
+    var cameraViewAspect = 16/9;
+    var toneCurve = 1;
+    var cameraName = "Spectator Camera";
+
+    var viewFinderLocalEntityDim = { x: cameraViewWidth, y: cameraViewWidth, z: 0 };
     function spectatorCameraOn() {
+        Render.getConfig("SecondaryCameraJob.ToneMapping").curve = toneCurve;
+
         // Sets the special texture size based on the window it is displayed in, which doesn't include the menu bar
         spectatorCameraConfig.enableSecondaryCameraRenderConfigs(true);
         spectatorCameraConfig.resetSizeSpectatorCamera(Window.innerWidth, Window.innerHeight);
@@ -73,22 +81,22 @@
             "collidesWith": "static,dynamic,kinematic,",
             "collisionMask": 7,
             "dynamic": false,
-            "modelURL": Script.resolvePath("spectator-camera.fbx"),
-            "name": "Spectator Camera",
+            "modelURL": Script.resolvePath("newcam.fbx"),
+            "name": cameraName,
             "registrationPoint": {
-                "x": 0.56,
-                "y": 0.545,
-                "z": 0.23
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
             },
             "rotation": cameraRotation,
             "position": cameraPosition,
-            "shapeType": "simple-compound",
+            "shapeType": "simple-hull",
             "type": "Model",
             "userData": "{\"grabbableKey\":{\"grabbable\":true}}",
             "isVisibleInSecondaryCamera": false
         }, true);
         spectatorCameraConfig.attachedEntityId = camera;
-        updateOverlay();
+        createLocalEntity();
         if (!HMD.active) {
             setMonitorShowsCameraView(false);
         } else {
@@ -108,7 +116,7 @@
         // It's easy for this to happen if the user crashes while the Spectator Camera is on.
         // We do this down here (after the new one is rezzed) so that we don't accidentally delete
         // the newly-rezzed model.
-        var entityIDs = Entities.findEntitiesByName("Spectator Camera", MyAvatar.position, 100, false);
+        var entityIDs = Entities.findEntitiesByName(cameraName, MyAvatar.position, 100, false);
         entityIDs.forEach(function (currentEntityID) {
             var currentEntityOwner = Entities.getEntityProperties(currentEntityID, ['owningAvatarID']).owningAvatarID;
             if (currentEntityOwner === MyAvatar.sessionUUID && currentEntityID !== camera) {
@@ -155,10 +163,10 @@
                 deleteCamera();
             }
         }
-        if (viewFinderOverlay) {
-            Overlays.deleteOverlay(viewFinderOverlay);
+        if (viewFinderLocalEntity) {
+            Entities.deleteEntity(viewFinderLocalEntity);
         }
-        viewFinderOverlay = false;
+        viewFinderLocalEntity = false;
         setDisplay(monitorShowsCameraView);
     }
 
@@ -212,10 +220,10 @@
         addOrRemoveButton(false);
         tablet.screenChanged.connect(onTabletScreenChanged);
         Window.domainChanged.connect(onDomainChanged);
-        Window.geometryChanged.connect(resizeViewFinderOverlay);
+        Window.geometryChanged.connect(resizeViewFinderLocalEntity);
         Controller.keyPressEvent.connect(keyPressEvent);
         HMD.displayModeChanged.connect(onHMDChanged);
-        viewFinderOverlay = false;
+        viewFinderLocalEntity = false;
         camera = false;
         registerButtonMappings();
     }
@@ -284,53 +292,72 @@
             setMonitorShowsCameraViewAndSendToQml(!monitorShowsCameraView);
         }
     }
-    function updateOverlay() {
-        // The only way I found to update the viewFinderOverlay without turning the spectator camera on and off is to delete and recreate the
-        //     overlay, which is inefficient but resizing the window shouldn't be performed often
-        if (viewFinderOverlay) {
-            Overlays.deleteOverlay(viewFinderOverlay);
+
+    
+
+    function createLocalEntity() {
+        if (viewFinderLocalEntity) {
+            Entities.deleteEntity(viewFinderLocalEntity);
         }
-        viewFinderOverlay = Overlays.addOverlay("image3d", {
-            url: "resource://spectatorCameraFrame",
+        viewFinderLocalEntity = Entities.addEntity({
+            type: "Image",
+            name: "viewFinderLocalEntity",
+            imageURL: "resource://spectatorCameraFrame",
+            grab: {grabbable: false},
             emissive: true,
             parentID: camera,
             alpha: 1,
-            localRotation: { w: 1, x: 0, y: 0, z: 0 },
-            localPosition: { x: 0, y: 0.13, z: 0.126 },
-            dimensions: viewFinderOverlayDim
-        });
+            localRotation: Quat.fromPitchYawRollDegrees(0, 180, 180),
+            localPosition: { x: 0.01, y: -0.0, z: 0.0 },
+            dimensions: viewFinderLocalEntityDim,
+            isVisibleInSecondaryCamera: false,
+            ignorePickIntersection: true
+        }); //"local");
+        var windowGeometry = [];
+        windowGeometry.width = Window.innerWidth;
+        windowGeometry.height = Window.innerHeight;
+        resizeViewFinderLocalEntity(windowGeometry);
     }
 
-    // Function Name: resizeViewFinderOverlay()
+    // Function Name: resizeViewFinderLocalEntity()
     //
     // Description:
-    //   -A function called when the window is moved/resized, which changes the viewFinderOverlay's texture and dimensions to be
+    //   -A function called when the window is moved/resized, which changes the viewFinderLocalEntity's texture and dimensions to be
     //    appropriately altered to fit inside the glass pane while not distorting the texture. The "geometryChanged" argument gives information
     //    on how the window changed, including x, y, width, and height.
     //
     // Relevant Variables:
     //   -glassPaneRatio: The aspect ratio of the glass pane, currently set as a 16:9 aspect ratio (change if model changes).
-    //   -verticalScale: The amount the viewFinderOverlay should be scaled if the window size is vertical.
-    //   -squareScale: The amount the viewFinderOverlay should be scaled if the window size is not vertical but is more square than the
+    //   -verticalScale: The amount the viewFinderLocalEntity should be scaled if the window size is vertical.
+    //   -squareScale: The amount the viewFinderLocalEntity should be scaled if the window size is not vertical but is more square than the
     //     glass pane's aspect ratio.
-    function resizeViewFinderOverlay(geometryChanged) {
-        var glassPaneRatio = 16 / 9;
-        var verticalScale = 1 / glassPaneRatio;
-        var squareScale = verticalScale * (1 + (1 - (1 / (geometryChanged.width / geometryChanged.height))));
 
-        if (geometryChanged.height > geometryChanged.width) { //vertical window size
-            viewFinderOverlayDim = { x: (glassPaneWidth * verticalScale), y: (-glassPaneWidth * verticalScale), z: 0 };
-        } else if ((geometryChanged.width / geometryChanged.height) < glassPaneRatio) { //square-ish window size, in-between vertical and horizontal
-            viewFinderOverlayDim = { x: (glassPaneWidth * squareScale), y: (-glassPaneWidth * squareScale), z: 0 };
-        } else { //horizontal window size
-            viewFinderOverlayDim = { x: glassPaneWidth, y: -glassPaneWidth, z: 0 };
+    function resizeViewFinderLocalEntity(geometryChanged) {
+        //var glassPaneRatio = 16 / 9;
+        //var verticalScale = 1 / glassPaneRatio;
+        //var squareScale = verticalScale * (1 + (1 - (1 / (geometryChanged.width / geometryChanged.height))));
+
+        var windowAspect =  geometryChanged.width / geometryChanged.height;
+        var cameraViewHeight =  cameraViewWidth * 1/(cameraViewAspect)
+
+        if (windowAspect <= 1) { //window is more square than viewfinder
+            //print("portrait");
+            viewFinderLocalEntityDim = { x: (cameraViewHeight), y: cameraViewHeight, z: 0 };
+        } else if ((windowAspect > 1) && (windowAspect < cameraViewAspect)) {//landscape but less than viewfinder aspect
+            //print("landscape");
+            viewFinderLocalEntityDim = { x: (cameraViewHeight * windowAspect), y: (cameraViewHeight * windowAspect), z: 0 };
+        }else{
+            //print("widescreen");
+            viewFinderLocalEntityDim = { x: (cameraViewWidth), y: (cameraViewWidth), z: 0 };
         }
-        updateOverlay();
+
+        Entities.editEntity(viewFinderLocalEntity, {dimensions: viewFinderLocalEntityDim});
+
         // if secondary camera is currently being used for mirror projection then don't update it's aspect ratio (will be done in spectatorCameraOn)
         if (!spectatorCameraConfig.mirrorProjection) {
             spectatorCameraConfig.resetSizeSpectatorCamera(geometryChanged.width, geometryChanged.height);
         }
-        setDisplay(monitorShowsCameraView);
+        //setDisplay(monitorShowsCameraView);
     }
 
     const SWITCH_VIEW_FROM_CONTROLLER_DEFAULT = false;
@@ -458,7 +485,7 @@
     }
 
     function onStillSnapshotTaken() {
-        Render.getConfig("SecondaryCameraJob.ToneMapping").curve = 1;
+        Render.getConfig("SecondaryCameraJob.ToneMapping").curve = toneCurve;
         sendToQml({
             method: 'finishedProcessingStillSnapshot'
         });
@@ -469,7 +496,6 @@
                 method: 'startedProcessingStillSnapshot'
             });
 
-            Render.getConfig("SecondaryCameraJob.ToneMapping").curve = 0;
             // Wait a moment before taking the snapshot for the tonemapping curve to update
             Script.setTimeout(function () {
                 Audio.playSound(SOUND_SNAPSHOT, {
@@ -668,6 +694,10 @@
             case 'updateCameravFoV':
                 spectatorCameraConfig.vFoV = message.vFoV;
                 break;
+            case 'updateToneMap':
+                toneCurve = message.toneCurve;
+                Render.getConfig("SecondaryCameraJob.ToneMapping").curve = toneCurve;
+                 break;               
             case 'setFlashStatus':
                 setFlashStatus(message.enabled);
                 break;
@@ -710,7 +740,7 @@
     function shutdown() {
         spectatorCameraOff();
         Window.domainChanged.disconnect(onDomainChanged);
-        Window.geometryChanged.disconnect(resizeViewFinderOverlay);
+        Window.geometryChanged.disconnect(resizeViewFinderLocalEntity);
         wireSignals(false);
         addOrRemoveButton(true);
         if (tablet) {
