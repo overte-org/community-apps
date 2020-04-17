@@ -12,7 +12,7 @@ var metadata = { "applications": [
          "isActive": true,
          "directory": "spectator-camera",
          "name": "Spectator Camera",
-         "description": "Give you a video camera that can display its image on your monitor screen for video capture. It can capture from the camera or from the VR Headset. It can also take classic and spherical 360 snapshots (equirectangular format). A precious tool to generate coherent Ambient Sources for your Zone Entities. (Require a QML Whitelist configuration to work: 1- Go to menu \"Setting > Entity Script \/ QML Whitelist\". 2- Enable the whitelist. 3- Add this url to your whitelist: \"https:\/\/kasenvr.github.io\/community-apps\/applications\/spectator-camera\/SpectatorCamera.qml\". 4- Click \"Save Changes\".)",
+         "description": "Give you a video camera that can display its image on your monitor screen for video capture. It can capture from the camera or from the VR Headset. It can also take classic and spherical 360 snapshots (equirectangular format). Definitely a must.",
          "jsfile": "spectator-camera/spectatorCamera.js",
          "icon": "spectator-camera/spectator-i.svg",
          "caption": "SPECTATOR"
