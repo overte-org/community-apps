@@ -55,7 +55,7 @@
         var runningScriptJson;
         for (var j = 0; j < currentlyRunningScripts.length; j++) {
             runningScriptJson = currentlyRunningScripts[j].url;
-            if (runningScriptJson.indexOf("https://kasenvr.github.io/community-apps/applications") !== -1) {
+            if (runningScriptJson.indexOf("https://cdn.vircadia.com/community-apps/applications") !== -1) {
                 newMessage += "_" + runningScriptJson;
             }
         }
