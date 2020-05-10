@@ -30,7 +30,7 @@ var metadata = { "applications": [
          "isActive": true,
          "directory": "record",
          "name": "Record",
-         "description": "With this application, you can make a recording of your avatar (movements and voice), replay it and get a double of yourself. (Require to run an Assignment Client Script on the domain)",
+         "description": "With this application, you can make a recording of your avatar (movements and voice), and replay it as a copy of yourself. (Requires an Assignment Client Script to be run on the domain.)",
          "jsfile": "record/record.js",
          "icon": "record/icon.svg",
          "caption": "RECORD"
