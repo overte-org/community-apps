@@ -1,0 +1,179 @@
+﻿<!--
+radar.html
+
+Created by David Rowe on 19 Nov 2017.
+Copyright 2017-2020 David Rowe.
+
+Information: http://ctrlaltstudio.com/vircadia/radar
+
+Distributed under the Apache License, Version 2.0.
+See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Radar</title>
+    <link rel="stylesheet" type="text/css" href="radar.css" />
+</head>
+
+<body>
+    <header>
+        <h1>Radar</h1>
+        <div>
+            <span id="settings-button">&#x26ed;</span>
+            <span id="help-button">?</span>
+        </div>
+        <hr />
+    </header>
+
+    <section>
+        <div id="radar-circle">
+            <div id="radar-circle-overlay">
+                <img src="../assets/radar-circle-overlay.png" />
+                <div id="teleport-circle"></div>
+            </div>
+            <div id="radar-circle-display"></div>
+            <div id="avatar-label"></div>
+            <div id="avatar-count">Avatars: <span>0</span></div>
+        </div>
+        <table id="radar-scale">
+            <tr><td id="radar-scale-left"></td><td>0m</td><td id="radar-scale-right"></td></tr>
+        </table>
+    </section>
+
+    <footer>
+        <hr />
+        <form id="controls">
+            <table id="scale">
+                <thead>
+                    <tr><td colspan="13">Scale <span class="units">m</span></td></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="radio" name="scale" value="10" id="scale10" /><label for="scale10">10</label></td>
+                        <td><input type="radio" name="scale" value="20" id="scale20" /><label for="scale20">20</label></td>
+                        <td><input type="radio" name="scale" value="50" id="scale50" /><label for="scale50">50</label></td>
+                        <td><input type="radio" name="scale" value="100" id="scale100" /><label for="scale100">100</label></td>
+                        <td><input type="radio" name="scale" value="200" id="scale200" /><label for="scale200">200</label></td>
+                        <td><input type="radio" name="scale" value="500" id="scale500" /><label for="scale500">500</label></td>
+                        <td><input type="radio" name="scale" value="1000" id="scale1000" /><label for="scale1000">1k</label></td>
+                        <td><input type="radio" name="scale" value="2000" id="scale2000" /><label for="scale2000">2k</label></td>
+                        <td><input type="radio" name="scale" value="5000" id="scale5000" /><label for="scale5000">5k</label></td>
+                        <td><input type="radio" name="scale" value="10000" id="scale10000" /><label for="scale10000">10k</label></td>
+                        <td><input type="radio" name="scale" value="20000" id="scale20000" /><label for="scale20000">20k</label></td>
+                        <td><input type="radio" name="scale" value="50000" id="scale50000" /><label for="scale50000">50k</label></td>
+                        <td><input type="radio" name="scale" value="100000" id="scale100000" /><label for="scale100000">100k</label></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </footer>
+
+    <form id="settings" class="dialog">
+        <h2>Settings</h2>
+
+        <p>Show own avatar:</p>
+        <ul class="radio">
+            <li><input type="radio" name="show-own" value="2" id="show-own-always" /><label for="show-own-always">Always.</label></li>
+            <li><input type="radio" name="show-own" value="1" id="show-own-third" /><label for="show-own-third">When not in first person view.</label></li>
+            <li><input type="radio" name="show-own" value="0" id="show-own-never" /><label for="show-own-never">Never.</label></li>
+        </ul>
+
+        <p>Refresh rate:</p>
+        <ul class="radio">
+            <li><input type="radio" name="refresh-rate" value="4" id="refresh-rate-fastest" /><label for="refresh-rate-fastest">Fast.</label></li>
+            <li><input type="radio" name="refresh-rate" value="3" id="refresh-rate-faster" /><label for="refresh-rate-faster">Medium-fast.</label></li>
+            <li><input type="radio" name="refresh-rate" value="2" id="refresh-rate-medium" /><label for="refresh-rate-medium">Medium.</label></li>
+            <li><input type="radio" name="refresh-rate" value="1" id="refresh-rate-slower" /><label for="refresh-rate-slower">Medium-slow.</label></li>
+            <li><input type="radio" name="refresh-rate" value="0" id="refresh-rate-slowest" /><label for="refresh-rate-slowest">Slow.</label></li>
+        </ul>
+
+        <div class="ok">
+            <input type="button" value="OK" />
+        </div>
+    </form>
+
+    <form id="help" class="dialog">
+        <h2>About</h2>
+
+        <div id="version">2.3.0</div>
+
+        <div id="help-content">
+
+            <p>Shows where people are in the domain.</p>
+
+            <ul>
+                <li>Works in both HMD and desktop.</li>
+                <li>The center is your camera location.</li>
+                <li>
+                    The orientation is per:
+                    <ul>
+                        <li>The tablet in HMD mode.</li>
+                        <li>Your camera in desktop mode.</li>
+                    </ul>
+                </li>
+                <li>Your avatar is displayed as a green dot per the settings.</li>
+                <li>
+                    Other peoples&rsquo; avatar dots are colored:
+                    <ul>
+                        <li>Blue if above you: blueness increases with height difference.</li>
+                        <li>White if level with you.</li>
+                        <li>Red if below you: redness increases with height difference.</li>
+                    </ul>
+                </li>
+                <li>
+                    To show display names:
+                    <ul>
+                        <li>Hover a dot to show the avatar&rsquo;s display name.</li>
+                        <li>Click the dot to persist showing its display name.</li>
+                        <li>Stop showing a display name by clicking the dot, the display name, or the radar background.</li>
+                    </ul>
+                </li>
+                <li>
+                    To teleport:
+                    <ul>
+                        <li>Click and hold on the radar circle. A green search circle is displayed.</li>
+                        <li>The horizontally closest avatar is highlighted as are any of similar elevation.</li>
+                        <li>Release the click to teleport to that position at the elevation of the closest avatar, or your 
+                        current elevation if no avatar is in the search circle.</li>
+                        <li>To cancel a teleport, drag off the radar circle.</li>
+                    </ul>
+                </li>
+                <li>The scale sets the search radius and distances above and below.</li>
+                <li>The avatars count is the number of avatars displayed.</li>
+            </ul>
+
+            <p>Settings:</p>
+            <ul>
+                <li>Show own avatar: Configure when to show a dot for your own avatar.</li>
+                <li>Refresh rate: Configure how often the avatar dots and radar orientation are updated.</li>
+            </ul>
+
+            <p>Disclaimers:</p>
+            <ul>
+                <li>The user identification provided by this app is not guaranteed: users can set their display name to 
+                whatever they like.</li>
+                <li>The content of the display names displayed by this app is not moderated by this app.</li>
+            </ul>
+
+            <p>More information: <a href="http://ctrlaltstudio.com/vircadia/radar">http://ctrlaltstudio.com</a><br />
+            Copyright 2017-2020 David Rowe.<br />
+            Distributed under the Apache License, 2.0.</a>.<br />
+            Donations appreciated.
+            </p>
+
+        </div>
+
+        <div class="ok">
+            <input type="button" value="OK" />
+        </div>
+    </form>
+
+    <script src="radar.js"></script>
+</body>
+
+</html>

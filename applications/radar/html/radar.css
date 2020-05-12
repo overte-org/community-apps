@@ -1,0 +1,474 @@
+﻿/*!
+radar.css
+
+Created by David Rowe on 19 Nov 2017.
+Copyright 2017-2020 David Rowe.
+
+Information: http://ctrlaltstudio.com/vircadia/radar
+
+Distributed under the Apache License, Version 2.0.
+See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+
+Attributions:
+- Raleway font: https://github.com/impallari/Raleway. Copyright (c) 2010, Matt McInerney (matt@pixelspread.com), Copyright (c) 
+  2011, Pablo Impallari (www.impallari.com|impallari@gmail.com), Copyright (c) 2011, Rodrigo Fuenzalida 
+  (www.rfuenzalida.com|hello@rfuenzalida.com), with Reserved Font Name < Raleway >.  Licensed under the SIL Open Font License, 
+  Version 1.1, available at http://scripts.sil.org/OFL.
+- Fira Sans font: https://github.com/mozilla/Fira. Digitized data copyright (c) 2012-2015, The Mozilla 
+  Foundation and Telefonica S.A. with Reserved Font Name < Fira >. Licensed under the SIL Open Font License, Version 1.1, 
+  available at http://scripts.sil.org/OFL.
+*/
+
+@font-face {
+    font-family: Raleway-Regular;
+    src: url(./fonts/Raleway-Regular.ttf)
+}
+
+@font-face {
+    font-family: Raleway-SemiBold;
+    src: url(./fonts/Raleway-SemiBold.ttf)
+}
+
+@font-face {
+    font-family: FiraSans-Regular;
+    src: url(./fonts/FiraSans-Regular.ttf)
+}
+
+@font-face {
+    font-family: FiraSans-SemiBold;
+    src: url(./fonts/FiraSans-SemiBold.ttf)
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    user-select: none;
+}
+
+html {
+    width: 100%;
+    height: 100%;
+    color: #e3e3e3;
+    background-color: #404040;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+h1 {
+    position: relative;
+    top: 9px;
+    font-family: "Raleway-Regular";
+    font-weight: normal;
+    font-size: 18px;
+    color: #ffffff;
+    text-shadow: 1px 1px #252525;
+}
+
+    h1 span {
+        font-size: 14px;
+    }
+
+hr {
+    width: 100%;
+    height: 2px;
+    border: none;
+    border-top: 1px solid #252525;
+    border-bottom: 1px solid #575757;
+}
+
+header {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    padding: 0 20px 0 20px;
+}
+
+    header div {
+        position: absolute;
+        right: 20px;
+        top: 8px;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+        header div span {
+            padding-left: 10px;
+        }
+
+            header div span:hover {
+                color: #00b4ef;
+            }
+
+            header div #help-button {
+                font-size: 21px;
+                position: relative;
+                top: 1px;
+            }
+
+header hr {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+section {
+    margin: 40px 20px 40px 20px;
+}
+
+#radar-circle {
+    position: relative;
+    width: 420px;
+    height: 420px;
+    margin: 0 auto 0 auto;
+    border-radius: 210px;
+    background-color: rgb(48, 48, 48);
+}
+
+#radar-circle-display {
+    width: 100%;
+    height: 100%;
+}
+
+#radar-circle-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 214px;
+    border: 1px solid #575757;
+    background: radial-gradient(rgba(48, 48, 48, 0.0) 0%, rgba(48, 48, 48, 0.0) 60%, rgba(87, 87, 87, 1.0) 80%);
+    pointer-events: none;
+    clip-path: circle(210px at center);
+}
+
+    #radar-circle-overlay img {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+.dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    margin-top: -4px;
+    border-radius: 4px;
+    padding: 0;
+    z-index: 20;
+    text-align: center;
+}
+
+    .dot:hover {
+        width: 12px;
+        height: 12px;
+        margin-top: -6px;
+        margin-left: -6px;
+        border-radius: 6px;
+        padding: 2px;
+        z-index: 30;
+    }
+
+    .dot.highlighted {
+        width: 12px;
+        height: 12px;
+        margin-top: -6px;
+        margin-left: -6px;
+        border-radius: 6px;
+        border: 2px solid #00ff00;
+        padding: 2px;
+    }
+
+    .dot.labeled {
+        z-index: 30 !important;
+    }
+
+.my-dot {
+    background-color: #00ff00 !important;
+    z-index: 10;
+}
+
+#avatar-label {
+    position: absolute;
+    height: 14px;
+    padding: 0 3px 0 3px;
+    border-radius: 3px;
+    margin-top: -16px;
+    color: #ffffff;
+    background-color: rgba(48, 48, 48, 0.35);
+    font-family: "Raleway-Regular";
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 13px;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 40;
+    display: none;
+}
+
+#teleport-circle {
+    position: absolute;
+    width: 82px;
+    height: 82px;
+    border-radius: 41px;
+    background-color: rgba(0, 255, 0, 0.2);
+    display: none;
+}
+
+#avatar-count {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-family: "Raleway-Regular";
+    font-weight: normal;
+    font-size: 15px;
+}
+
+    #avatar-count span {
+        display: inline-block;
+        min-width: 15px;
+        text-align: right;
+        font-family: "FiraSans-Regular";
+        font-size: 15px;
+    }
+
+#radar-scale {
+    width: 420px;
+    margin: 10px auto 10px auto;
+}
+
+    #radar-scale td {
+        width: 33%;
+        text-align: center;
+        font-family: "FiraSans-Regular";
+        font-weight: normal;
+        font-size: 15px;
+    }
+
+        #radar-scale td:first-child {
+            text-align: left;
+        }
+
+        #radar-scale td:last-child {
+            text-align: right;
+        }
+
+footer {
+    position: relative;
+    width: 100%;
+    padding: 40px 20px 0 20px;
+}
+
+    footer hr {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+
+#scale {
+    width: 100%;
+}
+
+    #scale thead td {
+        text-align: left;
+        padding-bottom: 5px;
+        font-family: "Raleway-SemiBold";
+        font-weight: normal;
+        font-size: 14px;
+    }
+
+    #scale tbody td {
+        display: block;
+        float: left;
+        width: 7.6%;
+        text-align: center;
+        font-family: "FiraSans-Regular";
+        font-weight: normal;
+        font-size: 15px;
+    }
+
+    #scale input[type=radio]:checked + label::before {
+        line-height: 11px;
+    }
+
+.units {
+    font-family: "Raleway-Regular";
+    font-weight: normal;
+    font-size: 13px;
+}
+
+input[type=radio] {
+    display: none;
+}
+
+    input[type=radio] + label::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        padding: 0;
+        background-image: linear-gradient(#7D7D7D, #6B6A6B);
+        display: inline-block;
+        margin: 0 10px 0 10px;
+        line-height: 11px;
+        position: relative;
+        top: 1px;
+    }
+
+    input[type=radio]:checked + label::before {
+        font-size: 18px;
+        content: "\25cf";
+        color: #00b4ef;
+        line-height: 9px;
+        position: relative;
+        top: 0;
+    }
+
+    input[type=radio] + label:hover::before {
+        background-image: linear-gradient(#ffffff, #afafaf);
+    }
+
+
+form.dialog {
+    position: absolute;
+    top: 40px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 20px;
+    padding: 20px;
+    z-index: 100;
+    border-radius: 15px;
+    border: 1px solid #676767;
+    box-shadow: 1px 1px #252525;
+    background-color: #505050;
+    font-family: "Raleway-Regular";
+    font-weight: normal;
+    font-size: 14px;
+    color: #f3f3f3;
+    visibility: hidden;
+}
+
+    form.dialog.visible {
+        visibility: visible;
+    }
+
+h2 {
+    font-family: "Raleway-Regular";
+    font-weight: normal;
+    font-size: 16px;
+    color: #ffffff;
+    text-shadow: 1px 1px #252525;
+}
+
+#version {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-family: "FiraSans-Regular";
+    font-weight: normal;
+    font-size: 15px;
+    font-style: italic;
+    color: #e3e3e3;
+}
+
+p {
+    margin-top: 15px;
+}
+
+ul {
+    margin-left: 20px;
+}
+
+li {
+    margin-top: 3px;
+}
+
+    li li {
+        margin-top: 1px;
+    }
+
+a {
+    color: #00c0ff;
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+.radio {
+    margin-left: 0;
+}
+
+    .radio li {
+        list-style-type: none;
+        margin-top: 5px;
+    }
+
+.ok {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+    .ok input {
+        width: 100px;
+        height: 30px;
+        border: none;
+        border-radius: 7.5px;
+        font-size: 13px;
+        font-weight: bold;
+        color: #f8f8f8;
+    }
+
+        .ok input {
+            background: linear-gradient(#00b4ef, #1080b8);
+        }
+
+            .ok input:focus {
+                outline: none;
+            }
+
+            .ok input:hover {
+                background: linear-gradient(#00b4ef, #00b4ef);
+            }
+
+#help-content {
+    margin-top: 15px;
+    padding-right: 4px;
+    height: 502px;
+    overflow-y: auto;
+}
+
+    #help-content p:first-child {
+        margin-top: 0;
+    }
+
+::-webkit-scrollbar {
+    width: 18px;
+    height: 18px;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 9px;
+    background: #484848;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 9px;
+    background: #707070;
+}
