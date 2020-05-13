@@ -9,7 +9,7 @@ var metadata = { "applications": [
          "caption": "MIRROR"
       },
       {
-         "isActive": false,
+         "isActive": true,
          "directory": "spectator-camera",
          "name": "Spectator Camera",
          "description": "Give you a video camera that can display its image on your monitor screen for video capture. It can capture from the camera or from the VR Headset. It can also take classic and spherical 360 snapshots (equirectangular format). Definitely a must.",
