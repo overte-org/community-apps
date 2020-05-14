@@ -14,6 +14,7 @@
 //    
 (function() {
     var ROOT = Script.resolvePath('').split("app-more.js")[0];
+    var DEV_PARAMETER = Script.resolvePath('').split("?")[1];
     var APP_NAME = "MORE...";
     var APP_URL = ROOT + "more.html";
     var APP_ICON_INACTIVE = ROOT + "appicon_i.png";
@@ -24,13 +25,17 @@
             "script": ""
         };
     
+    if (DEV_PARAMETER && DEV_PARAMETER === "dev") {
+        APP_URL = ROOT + "more.html?" + DEV_PARAMETER;
+    }
+    
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
     tablet.screenChanged.connect(onScreenChanged);
     var button = tablet.addButton({
         text: APP_NAME,
         icon: APP_ICON_INACTIVE,
         activeIcon: APP_ICON_ACTIVE
-    });   
+    });
     
     function clicked() {
         if (appStatus) {
