@@ -14,8 +14,9 @@
 //    
 (function() {
     var ROOT = Script.resolvePath('').split("app-more.js")[0];
+    var DEV_PARAMETER = Script.resolvePath('').split("?")[1];
     var APP_NAME = "MORE...";
-    var APP_URL = ROOT + "more.html";
+    var APP_URL = (ROOT + "more.html" + (DEV_PARAMETER === "dev" ? "?dev" : "")).replace(/%5C/g, "/");
     var APP_ICON_INACTIVE = ROOT + "appicon_i.png";
     var APP_ICON_ACTIVE = ROOT + "appicon_a.png";
     var appStatus = false;
@@ -30,7 +31,7 @@
         text: APP_NAME,
         icon: APP_ICON_INACTIVE,
         activeIcon: APP_ICON_ACTIVE
-    });   
+    });
     
     function clicked() {
         if (appStatus) {
