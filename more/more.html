@@ -265,7 +265,8 @@
                 listBuilder(search, offset, perpage);
             }
             
-            $.getScript( metadataScriptSrc, function( data, textStatus, jqxhr ) {
+            $.getScript(metadataScriptSrc, function(data, textStatus, jqxhr) {
+
                 listBuilder(search, offset, perpage);
             });
 

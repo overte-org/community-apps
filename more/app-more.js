@@ -25,7 +25,8 @@
             "script": ""
         };
     
-    if (DEV_PARAMETER && DEV_PARAMETER === "dev") {
+    if (DEV_PARAMETER === "dev") {
+
         APP_URL = ROOT + "more.html?" + DEV_PARAMETER;
     }
     
