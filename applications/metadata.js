@@ -52,6 +52,15 @@ var metadata = { "applications": [
         "jsfile": "vr-grabscale/VRBuildGrabScale.js",
         "icon": "vr-grabscale/logo.png",
         "caption": "VR SCALE"
+     },
+     {
+        "isActive": true,
+        "directory": "radar",
+        "name": "Radar",
+        "description": "Show where people are and teleport in the domain.",
+        "jsfile": "radar/radar.js",
+        "icon": "radar/assets/radar-i.svg",
+        "caption": "RADAR"
      }
    ]
 };
