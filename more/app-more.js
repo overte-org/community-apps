@@ -25,10 +25,6 @@
             "script": ""
         };
     
-    if (DEV_PARAMETER === "dev") {
-        APP_URL = ROOT + "more.html?" + DEV_PARAMETER;
-    }
-    
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
     tablet.screenChanged.connect(onScreenChanged);
     var button = tablet.addButton({
