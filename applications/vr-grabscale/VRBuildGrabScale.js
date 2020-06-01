@@ -30,7 +30,7 @@ var entityRotation;
 var isDirectionFound = false;
 var handPositionLeft;
 var handPositionRight;
-var SCALE_RATIO = 2.2;
+var SCALE_RATIO = 0.3;
 var GIZMO_CYLINDER_LENGTH = 0.3;
 var GIZMO_CYLINDER_LENGTH_RATIO = 0.025;
 var GIZMO_CYLINDER_DIAMETER = GIZMO_CYLINDER_LENGTH * GIZMO_CYLINDER_LENGTH_RATIO;
@@ -38,6 +38,9 @@ var GIZMO_CENTER_DIAMETER = 0.05;
 var GIZMO_END_DIAMETER = 0.02;
 var GIZMO_END_POSITION = GIZMO_CYLINDER_LENGTH * 0.5;
 var GIZMO_DEFAULT_SCALE = 0.2;
+var LIFETIME = 300; // sec
+var EXPIRE_OFFSET = 10; // sec
+var SEC_TO_MS = 1000;
 var gizmoShapeIDs = [];
 var DECIMAL_PRECISION = 4;
 var ENTITIES_TO_UPDATE;
@@ -65,6 +68,7 @@ var isScaleModeX = false;
 var isScaleModeY = false;
 var isScaleModeZ = false;
 var gizmoEndpointsDistanceLeft = [];
+var gizmoEndpointsDistanceRight = [];
 var rightGripState = 0;
 var leftGripState = 0;
 var LEFT_HAND_INDEX = MyAvatar.getJointIndex("LeftHand");
@@ -79,7 +83,7 @@ var overlayID = Overlays.addOverlay("text3d", {
     lineHeight: 0.05,
     dimensions: { x: 2, y: 0.5, z: 0.5 },
     drawInFront: true
-}, "local");  
+}, "local"); 
 
 function createGizmo() {    
     gizmoCenterID = Entities.addEntity({
@@ -88,13 +92,14 @@ function createGizmo() {
         name: "gizmoCenter",        
         description: "",            
         position: { x: 0, y: 0, z: 0},      
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 100, g: 100, b: 100 },
+        renderLayer: "front",
         alpha: 0.5,
         dimensions: { x: GIZMO_CENTER_DIAMETER, y: GIZMO_CENTER_DIAMETER, z: GIZMO_CENTER_DIAMETER },
-        collisionless: true,
+        collisionless: true,       
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoCenterID);
   
     var tempRotation = Quat.fromPitchYawRollRadians(0, 0, 0);
@@ -106,13 +111,14 @@ function createGizmo() {
         description: "",            
         localPosition: { x: 0, y: 0, z: 0 },
         localRotation: tempRotation,      
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 100, g: 0, b: 0 },
+        renderLayer: "front",
         alpha: 1,
-        dimensions: { x: GIZMO_CYLINDER_LENGTH, y: GIZMO_END_DIAMETER, z: GIZMO_END_DIAMETER },
+        dimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH, z: GIZMO_CYLINDER_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false} }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoXaxisID);
 
     tempRotation = Quat.fromPitchYawRollRadians(0 , 0 ,-Math.PI/2);  
@@ -124,13 +130,14 @@ function createGizmo() {
         description: "",            
         localPosition: { x: 0, y: 0, z: 0 },
         localRotation: tempRotation,      
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 0, g: 100, b: 0 },
+        renderLayer: "front",
         alpha: 1,
-        dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_CYLINDER_LENGTH, z: GIZMO_END_DIAMETER },
+        dimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH, z: GIZMO_CYLINDER_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoYaxisID);
 
     tempRotation = Quat.fromPitchYawRollRadians(-Math.PI/2,0,0);
@@ -142,13 +149,14 @@ function createGizmo() {
         description: "",            
         localPosition: { x: 0, y: 0, z: 0 },
         localRotation: tempRotation,      
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 0 ,g: 0, b: 100 },
+        renderLayer: "front",
         alpha: 1,
-        dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_END_DIAMETER, z: GIZMO_CYLINDER_LENGTH },
+        dimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH, z: GIZMO_CYLINDER_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoZaxisID);
 
     gizmoXplusID = Entities.addEntity({
@@ -158,13 +166,14 @@ function createGizmo() {
         parentID: gizmoXaxisID,        
         description: "",            
         localPosition: { x: 0, y: GIZMO_END_POSITION, z: 0 },         
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 255, g: 0, b: 0 },
+        renderLayer: "front",
         alpha: 1,
         dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_END_DIAMETER, z: GIZMO_END_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoXplusID);
 
     gizmoXminusID = Entities.addEntity({
@@ -174,13 +183,14 @@ function createGizmo() {
         parentID: gizmoXaxisID,        
         description: "",            
         localPosition: { x: 0, y: -GIZMO_END_POSITION, z: 0 },
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 255, g: 0, b: 0},
+        renderLayer: "front",
         alpha: 1,
         dimensions: {x: GIZMO_END_DIAMETER,y: GIZMO_END_DIAMETER,z: GIZMO_END_DIAMETER},
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoXminusID);
 
     gizmoYplusID = Entities.addEntity({
@@ -190,13 +200,14 @@ function createGizmo() {
         parentID: gizmoYaxisID,        
         description: "",            
         localPosition: { x: 0, y: GIZMO_END_POSITION, z: 0 },         
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 0, g: 255, b: 0 },
+        renderLayer: "front",
         alpha: 1,
         dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_END_DIAMETER, z: GIZMO_END_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoYplusID);
 
     gizmoYminusID = Entities.addEntity({
@@ -206,13 +217,14 @@ function createGizmo() {
         parentID: gizmoYaxisID,        
         description: "",            
         localPosition: { x: 0, y: -GIZMO_END_POSITION, z: 0 },
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 0, g: 255, b: 0 },
+        renderLayer: "front",
         alpha: 1,
         dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_END_DIAMETER, z: GIZMO_END_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoYminusID);
 
     gizmoZplusID = Entities.addEntity({
@@ -222,13 +234,14 @@ function createGizmo() {
         parentID: gizmoZaxisID,        
         description: "",            
         localPosition: { x: 0, y: GIZMO_END_POSITION, z: 0 },         
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 0, g: 0, b: 255 },
+        renderLayer: "front",
         alpha: 1,
         dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_END_DIAMETER, z: GIZMO_END_DIAMETER },
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoZplusID);
 
     gizmoZminusID = Entities.addEntity({
@@ -238,13 +251,14 @@ function createGizmo() {
         parentID: gizmoZaxisID,        
         description: "",            
         localPosition: { x: 0, y: -GIZMO_END_POSITION, z: 0},
-        lifetime: -1,
+        lifetime: LIFETIME,
         color: { r: 0, g: 0, b: 255 },
+        renderLayer: "front",
         alpha: 1,
         dimensions: { x: GIZMO_END_DIAMETER, y: GIZMO_END_DIAMETER, z: GIZMO_END_DIAMETER},
         ignoreForCollisions: true,
         userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-    });
+    },"avatar");
     gizmoShapeIDs.push(gizmoZminusID);
     ENTITIES_TO_UPDATE = [gizmoXplusID, gizmoXminusID, gizmoYplusID, gizmoYminusID, gizmoZplusID, gizmoZminusID];
     // add spheres at joint positions for debugging
@@ -257,13 +271,14 @@ function createGizmo() {
             parentJointIndex: LEFT_JOINT,        
             description: "",            
             localPosition: { x: 0, y: 0, z: 0},      
-            lifetime: -1,
+            lifetime: LIFETIME,
             color: { r: 255, g: 100, b: 100 },
+            renderLayer: "front",
             alpha: 0.5,
             localDimensions: { x: 0.05, y: 0.05, z: 0.05 },
             collisionless: true,
             userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-        });
+        },"avatar");
         gizmoShapeIDs.push(debugLeftHandID);   
         debugRightHandID = Entities.addEntity({
             type: "Shape",        
@@ -273,13 +288,14 @@ function createGizmo() {
             parentJointIndex: RIGHT_JOINT,         
             description: "",            
             localPosition: { x: 0, y: 0, z: 0},      
-            lifetime: -1,
+            lifetime: LIFETIME,
             color: { r: 100, g: 255, b: 100 },
+            renderLayer: "front",
             alpha: 0.5,
             localDimensions: { x: 0.05, y: 0.05, z: 0.05 },
             collisionless: true,
             userData: "{ \"grabbableKey\": { \"grabbable\": false, \"triggerable\": false } }"    
-        });
+        },"avatar");
         gizmoShapeIDs.push(debugRightHandID); 
     }    
 }
@@ -345,13 +361,13 @@ function getJointIndex() {
 
 function updateGizmoScale(scaleUpdateX, scaleUpdateY, scaleUpdateZ) {
     Entities.editEntity(gizmoXaxisID, {        
-        dimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH*scaleUpdateX*2, z: GIZMO_CYLINDER_DIAMETER }        
+        localDimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH*scaleUpdateX*2, z: GIZMO_CYLINDER_DIAMETER }        
     });
     Entities.editEntity(gizmoYaxisID, {        
-        dimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH*scaleUpdateY*2, z: GIZMO_CYLINDER_DIAMETER }       
+        localDimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH*scaleUpdateY*2, z: GIZMO_CYLINDER_DIAMETER }       
     });
     Entities.editEntity(gizmoZaxisID, {        
-        dimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH*scaleUpdateZ*2, z: GIZMO_CYLINDER_DIAMETER }       
+        localDimensions: { x: GIZMO_CYLINDER_DIAMETER, y: GIZMO_CYLINDER_LENGTH*scaleUpdateZ*2, z: GIZMO_CYLINDER_DIAMETER }       
     });
     Entities.editEntity(gizmoXplusID, {
         localPosition: {x: 0, y: GIZMO_END_POSITION*scaleUpdateX*2, z: 0 }       
@@ -390,7 +406,7 @@ function isGizmo(id) {
 }
 
 function startScaling() {    
-    if (!isScaling) {        
+    if (!isScaling) {               
         showGizmo();
         var startHandPositionLeft = MyAvatar.getJointPosition(LEFT_JOINT);
         var startHandPositionRight = MyAvatar.getJointPosition(RIGHT_JOINT);
@@ -414,12 +430,14 @@ function startScaling() {
     if (isScaleModeZ) {
         newDimensions = { x: oldDimensions.x, y: oldDimensions.y, z: oldDimensions.z* newScale };       
         scaleZ = newScale;
-    }    
-    Entities.editEntity(entityToBeGrabbedID,{dimensions: newDimensions});    
-    updateGizmoScale(
-        oldDimensions.x*scaleX*SCALE_RATIO,
-        oldDimensions.y*scaleY*SCALE_RATIO,
-        oldDimensions.z*scaleZ*SCALE_RATIO);         
+    }
+    if (isScaleModeX || isScaleModeY || isScaleModeZ) {    
+        Entities.editEntity(entityToBeGrabbedID,{dimensions: newDimensions});    
+        updateGizmoScale(
+            scaleX*SCALE_RATIO, 
+            scaleY*SCALE_RATIO, 
+            scaleZ*SCALE_RATIO); 
+    }         
 }
 
 
@@ -463,16 +481,18 @@ function startBuilding() {
         startScaling();
     }
 
-    if (entityToBeGrabbedID) {
+    if (entityToBeGrabbedID) {        
+        handPositionLeft = MyAvatar.getJointPosition(LEFT_JOINT);
+        handPositionRight = MyAvatar.getJointPosition(RIGHT_JOINT);        
         var entityProperties = Entities.getEntityProperties(entityToBeGrabbedID,["position","rotation"]);
         entityPosition = entityProperties.position;
-        entityRotation = entityProperties.rotation;
-        handPositionLeft = MyAvatar.getJointPosition(LEFT_JOINT);
-        handPositionRight = MyAvatar.getJointPosition(RIGHT_JOINT);
+        entityRotation = entityProperties.rotation;         
         updateGizmoPositionRotation(entityPosition,entityRotation);
         var localPositions = Entities.getMultipleEntityProperties(ENTITIES_TO_UPDATE, "localPosition");
         for (var i = 0; i < localPositions.length; i++) {
             gizmoEndpointsDistanceLeft[i] = Vec3.distance(handPositionLeft,
+                Entities.localToWorldPosition(localPositions[i].localPosition, ENTITIES_TO_UPDATE[i], -1));
+            gizmoEndpointsDistanceRight[i+6] = Vec3.distance(handPositionRight,
                 Entities.localToWorldPosition(localPositions[i].localPosition, ENTITIES_TO_UPDATE[i], -1));
         }
         minimum = Math.min(gizmoEndpointsDistanceLeft[0],
@@ -480,10 +500,16 @@ function startBuilding() {
             gizmoEndpointsDistanceLeft[2],
             gizmoEndpointsDistanceLeft[3],
             gizmoEndpointsDistanceLeft[4],
-            gizmoEndpointsDistanceLeft[5]);        
+            gizmoEndpointsDistanceLeft[5],
+            gizmoEndpointsDistanceRight[6],
+            gizmoEndpointsDistanceRight[7],
+            gizmoEndpointsDistanceRight[8],
+            gizmoEndpointsDistanceRight[9],
+            gizmoEndpointsDistanceRight[10],
+            gizmoEndpointsDistanceRight[11]);        
     
-        index = gizmoEndpointsDistanceLeft.indexOf(minimum);
-        if (index === 0 || index === 1) {
+        index = gizmoEndpointsDistanceLeft.indexOf(minimum);        
+        if (index === 0 || index === 1 || index === 6 || index === 7) {
             if (!isDirectionFound) {
                 isScaleModeX = true;
                 isScaleModeY = false;
@@ -491,7 +517,7 @@ function startBuilding() {
                 isDirectionFound = true;
             }
         }
-        if (index === 2 || index === 3) {
+        if (index === 2 || index === 3 || index === 8 || index === 9) {
             if (!isDirectionFound) {
                 isScaleModeY = false;
                 isScaleModeY = true;
@@ -499,7 +525,7 @@ function startBuilding() {
                 isDirectionFound = true;
             }
         }
-        if (index === 4 || index === 5) {
+        if (index === 4 || index === 5 || index === 10 || index === 11) {
             if (!isDirectionFound) {
                 isScaleModeZ = false;
                 isScaleModeY = false;
@@ -567,4 +593,12 @@ Messages.messageReceived.connect(onMessageReceived);
 createGizmo();
 getJointIndex();
 updateGizmoScale(GIZMO_DEFAULT_SCALE);
+var lifeTimeUpdater = Script.setInterval(function() {  
+    if (gizmoCenterID) {
+        Entities.deleteEntity (gizmoCenterID);
+        createGizmo();
+        print("lifetimeupdater");
+    }
+}, (LIFETIME - EXPIRE_OFFSET) * SEC_TO_MS);
+
 Script.update.connect(startBuilding);
