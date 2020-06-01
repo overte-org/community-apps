@@ -61,6 +61,15 @@ var metadata = { "applications": [
         "jsfile": "radar/radar.js",
         "icon": "radar/assets/radar-i.svg",
         "caption": "RADAR"
-     }
+    },
+    {
+       "isActive": true,
+       "directory": "refresh-app",
+       "name": "Refresh App",
+       "description": "Add two buttons that refresh your avatar and attachments.",
+       "jsfile": "refresh-app/refreshApp.js",
+       "icon": "refresh-app/refresh-circle-w.png",
+       "caption": "REFRESH"
+    }
    ]
 };
