@@ -57,7 +57,7 @@ var metadata = { "applications": [
         "isActive": true,
         "directory": "radar",
         "name": "Radar",
-        "description": "Show where people are and teleport in the domain.",
+        "description": "Show where people are and teleport in the domain. <a href='http://ctrlaltstudio.com/vircadia/radar' target=`_blank`>More info...</a>",
         "jsfile": "radar/radar.js",
         "icon": "radar/assets/radar-i.svg",
         "caption": "RADAR"
