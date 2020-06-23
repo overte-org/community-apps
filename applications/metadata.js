@@ -70,6 +70,15 @@ var metadata = { "applications": [
        "jsfile": "refresh-app/refreshApp.js",
        "icon": "refresh-app/refresh-circle-w.png",
        "caption": "REFRESH"
-    }
-   ]
+    },
+    {
+        "isActive": true,
+        "directory": "nametags",
+        "name": "Nametags",
+        "description": "Display users' display names above their heads. <a href='http://ctrlaltstudio.com/vircadia/nametags' target=`_blank`>More info...</a>",
+        "jsfile": "nametags/nametags.js",
+        "icon": "nametags/assets/nametags-i.svg",
+        "caption": "NAMETAGS"
+    },
+]
 };
