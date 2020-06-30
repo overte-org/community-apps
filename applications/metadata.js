@@ -4,8 +4,8 @@ var metadata = { "applications": [
         "directory": "inventory-app",
         "name": "Inventory App",
         "description": "The inventory app allows you to store, use, and share items in Vircadia.",
-        "jsfile": "inventory-app/inventory.js",
-        "icon": "inventory-app/inventory-i.svg",
+        "jsfile": "inventory-app/dist/inventory.js",
+        "icon": "inventory-app/dist/inventory-i.svg",
         "caption": "INVENTORY"
     },
     {
