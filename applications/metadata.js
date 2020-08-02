@@ -80,5 +80,14 @@ var metadata = { "applications": [
         "icon": "nametags/assets/nametags-i.svg",
         "caption": "NAMETAGS"
     },
+    {
+        "isActive": true,
+        "directory": "attach-avatar-app",
+        "name": "Attach Avatar",
+        "description": "Attaches your avatar to another avatar via a collisionless platform.",
+        "jsfile": "attach-avatar-app/attachAvatarApp.js",
+        "icon": "attach-avatar-app/assets/account-child-circle.png",
+        "caption": "ATCH AVI"
+    }
 ]
 };
