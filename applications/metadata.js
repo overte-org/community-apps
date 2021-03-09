@@ -93,7 +93,7 @@ var metadata = { "applications": [
          "isActive": true,
          "directory": "materialDataCreator",
          "name": "Material Data Creator",
-         "description": "This tool helps you to cook your own material data with a real-time preview. From that, you can generate directly a Material entity or a .json file that can be used in Material entities.",
+         "description": "This tool helps you create your own material data with a real-time preview. From that, you can directly generate a Material entity or a .json file that can be used in Material entities.",
          "jsfile": "materialDataCreator/appMaterialDataCreator.js",
          "icon": "materialDataCreator/images/icon_materialDate_inactive.png",
          "caption": "MAT-GEN"
