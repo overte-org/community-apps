@@ -131,7 +131,8 @@
                                     "opacityMap": "DO NOT USE",
                                     "emissiveMap": "",
                                     "scatteringMap": "",
-                                    "occlusionMap": ""                                   
+                                    "occlusionMap": "",
+                                    "cullFaceMode": "CULL_BACK"
                                 }; 
 
 
@@ -153,7 +154,8 @@
                                     "opacityMap": "DO NOT USE",
                                     "emissiveMap": "",
                                     "scatteringMap": "",
-                                    "occlusionMap": ""                                    
+                                    "occlusionMap": "",
+                                    "cullFaceMode": "CULL_BACK"
                                 };   
                                 
                 document.materialEditor.reset();
@@ -179,6 +181,7 @@
                 document.materialEditor.emissiveMap.value = "";
                 document.materialEditor.scatteringMap.value = "";
                 document.materialEditor.occlusionMap.value = "";
+                document.materialEditor.cullFaceMode.value = "CULL_BACK";
                 generateMaterialJSON();                
             }
                 
@@ -210,6 +213,7 @@
                 document.materialEditor.emissiveMap.value = material.emissiveMap;
                 document.materialEditor.scatteringMap.value = material.scatteringMap;
                 document.materialEditor.occlusionMap.value = material.occlusionMap;
+                document.materialEditor.cullFaceMode.value = material.cullFaceMode;
                 
             }
             
@@ -304,7 +308,8 @@
                 }
                 if (material.occlusionMap !== "") {
                     materialData += '            "occlusionMap": "' + material.occlusionMap.escapeJSON() + '",' + "\n";
-                }                
+                }
+                materialData += '            "cullFaceMode": "' + material.cullFaceMode + '",' + "\n";
                 materialData += '            "model": "hifi_pbr"' + "\n";
                 materialData += '        }' + "\n";
                 materialData += '    ]' + "\n";
@@ -490,9 +495,16 @@
             <div class='group'>
             <font class='label'>Occlusion Map (Grayscale) URL:</font> <input name = 'occlusionMap' type = 'text' style= 'width:100%;' oninput="save('occlusionMap', this);">
             </div>
+
+            <div class='group'>
+            <font class='label'>Material displayed on surface: </font><br> 
+            <input type="radio" checked name = 'cullFaceMode' value = 'CULL_BACK' oninput="save('cullFaceMode', this);">Outside&nbsp;&nbsp;&nbsp;
+            <input type="radio" checked name = 'cullFaceMode' value = 'CULL_FRONT' oninput="save('cullFaceMode', this);">Inside&nbsp;&nbsp;&nbsp;
+            <input type="radio" name = 'cullFaceMode' value = 'CULL_NONE' oninput="save('cullFaceMode', this);">Both<br>
+            </div>
+
             <input type='button' class = 'copybtn' name='copy' value = 'Copy' onclick='copyToClipboard(document.materialEditor.output.value);'><br>
             <textarea name='output' id='output' rows = '21' class='output'></textarea>
-        
         
         </td><td style=' background-image: url("images/trottoire.png"); background-repeat: repeat;'>&nbsp;</td></tr></table>
         
