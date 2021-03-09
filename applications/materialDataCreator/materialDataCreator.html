@@ -312,7 +312,7 @@
                 
                 document.materialEditor.output.value = materialData;
                 var message = {
-                    "chanel": chanel,
+                    "channel": channel,
                     "action": "updateMaterialData",
                     "materialData": materialData,
                     "materialRecord": material
@@ -347,7 +347,7 @@
                 return result;
             };
             
-            var chanel = "materialDataCreator.ak.vircadia";
+            var channel = "materialDataCreator.ak.vircadia";
 
 
 			function copyToClipboard(data) {
@@ -360,7 +360,7 @@
             
             function demo(shape) {
                 var message = {
-                    "chanel": chanel,
+                    "channel": channel,
                     "action": "changeDemoShape",
                     "shape": shape
                 };
@@ -371,7 +371,7 @@
             
             function exportAsJson() {
                 var message = {
-                    "chanel": chanel,
+                    "channel": channel,
                     "action": "exportMaterialAsJson"
                 };
                 
@@ -381,7 +381,7 @@
 
             function createMaterialEntity() {
                 var message = {
-                    "chanel": chanel,
+                    "channel": channel,
                     "action": "createMaterialEntity"
                 };
                 
@@ -391,7 +391,7 @@
             
             function teleportToServerless() {
                  var message = {
-                    "chanel": chanel,
+                    "channel": channel,
                     "action": "teleportToServerless"
                 };
                 
@@ -400,7 +400,7 @@
             
             function toggleDayNight() {
                  var message = {
-                    "chanel": chanel,
+                    "channel": channel,
                     "action": "toggleDayNight"
                 };
                 
@@ -459,7 +459,7 @@
             </div>
             
             <div class='group'>
-            <font class='label'>Normal (bump) Map URL:</font> <input name = 'normalMap' type = 'text' style= 'width:100%;' oninput="save('normalMap', this);">
+            <font class='label'>Normal Map URL:</font> <input name = 'normalMap' type = 'text' style= 'width:100%;' oninput="save('normalMap', this);">
             </div>
             
             <div class='group'>
@@ -468,7 +468,7 @@
             <table style='width:100%'><tr><td style='width: 50%; text-align: left;'><font class = 'Explain'>|&lt; Transparent</font></td><td style='width: 50%; text-align: right;'><font class = 'Explain'>Opaque &gt;|</font></td></tr></table>
             <font class='label'>Opacity Map: </font> <input type="radio" checked name = 'opacityMap' value = 'DO NOT USE' oninput="save('opacityMap', this);">Do not used&nbsp;&nbsp;&nbsp;
             <input type="radio" name = 'opacityMap' value = 'USE' oninput="save('opacityMap', this);">Use<br>
-            <font class='Explain'>Not, for an opacity map, the alpha layer of the Albedo Map must be used. ( &lt; 2% and > 98% are suported, otherwise the avarage will be applied to all the surface. )</font>
+            <font class='Explain'>Note: For an opacity map, the alpha layer of the Albedo Map must be used. ( &lt; 2% and > 98% are supported, otherwise the average will be applied to all the surface. )</font>
             </div>
             
             <div class='group'>
@@ -526,7 +526,7 @@
 
             EventBridge.scriptEventReceived.connect(function (message) {
                 var messageObj = JSON.parse(message);
-                if (messageObj.chanel === chanel) {
+                if (messageObj.channel === channel) {
                     if (messageObj.action === "initializeMaterial") {
                         if (messageObj.material !== undefined) {
                             material = messageObj.material;
@@ -559,7 +559,7 @@
                 You can use this button to toggle between day and night in the serverless preconfigured environment.
                 <br><hr>
                 <img  class='reset' src="images/reset.png"><br>
-                This button resets the material data as new blank material.
+                This button resets the material data to a new blank material.
                 <br><hr>
                 <img class='save' src="images/save_as_json.png"><br>
                 You can use this button to export the material data as a .json file. Such a .json file can be used in a material entity. It's mainly useful when you plan to reuse the same material for many entities. Using a .json file can simplify the update of a material used on many entities.
