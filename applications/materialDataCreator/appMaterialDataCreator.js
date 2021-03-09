@@ -130,7 +130,7 @@
             }
             if ( eventObj.action === "exportMaterialAsJson") {
                 Window.saveFileChanged.connect(onFileSaveChanged);
-                Window.saveAsync("Select Where to Save", "", "*.json");
+                Window.saveAsync("Select where to save", "", "*.json");
             }            
             if ( eventObj.action === "teleportToServerless") {
                 deleteDemo();
