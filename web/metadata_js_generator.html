@@ -103,8 +103,9 @@
     document.gen.dlapp.disabled = true;
 
     function FormatJsJson(obj) {
-    	var jsdata = 'var metadata = { "applications": [\n';
-    	
+    	var jsdata = 'var metadata = { "applications":\n';
+     	jsdata = jsdata + "    [\n";
+
     	obj.applications.forEach(function(item, index) {
     		var comma = "";
     		if (index < obj.applications.length - 1 ) {
@@ -123,7 +124,7 @@
 
     	jsdata = jsdata + "    ]\n";
     	jsdata = jsdata + "};";
-    	
+
     	return jsdata;
     }
 
