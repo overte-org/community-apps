@@ -103,27 +103,28 @@
     document.gen.dlapp.disabled = true;
 
     function FormatJsJson(obj) {
-    	var jsdata = 'var metadata = { "applications": [\n';
-    	
+    	var jsdata = 'var metadata = { "applications":\n';
+     	jsdata = jsdata + "    [\n";
+
     	obj.applications.forEach(function(item, index) {
     		var comma = "";
     		if (index < obj.applications.length - 1 ) {
     			comma = ",";
     		}
-    		jsdata = jsdata + "      {\n";
-    		jsdata = jsdata + '         "isActive": ' + item.isActive + ',\n';	
-    		jsdata = jsdata + '         "directory": "' + item.directory + '",\n';	
-    		jsdata = jsdata + '         "name": "' + item.name.escapeJSON() + '",\n';
-    		jsdata = jsdata + '         "description": "' + item.description.escapeJSON() + '",\n';
-    		jsdata = jsdata + '         "jsfile": "' + item.jsfile + '",\n';
-    		jsdata = jsdata + '         "icon": "' + item.icon + '",\n';
-    		jsdata = jsdata + '         "caption": "' + item.caption.escapeJSON() + '"\n';		
-    		jsdata = jsdata + "      }" + comma + "\n";
+    		jsdata = jsdata + "        {\n";
+    		jsdata = jsdata + '            "isActive": ' + item.isActive + ',\n';	
+    		jsdata = jsdata + '            "directory": "' + item.directory + '",\n';	
+    		jsdata = jsdata + '            "name": "' + item.name.escapeJSON() + '",\n';
+    		jsdata = jsdata + '            "description": "' + item.description.escapeJSON() + '",\n';
+    		jsdata = jsdata + '            "jsfile": "' + item.jsfile + '",\n';
+    		jsdata = jsdata + '            "icon": "' + item.icon + '",\n';
+    		jsdata = jsdata + '            "caption": "' + item.caption.escapeJSON() + '"\n';		
+    		jsdata = jsdata + "        }" + comma + "\n";
     	});	
 
-    	jsdata = jsdata + "   ]\n";
+    	jsdata = jsdata + "    ]\n";
     	jsdata = jsdata + "};";
-    	
+
     	return jsdata;
     }
 
