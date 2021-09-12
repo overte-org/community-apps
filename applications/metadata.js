@@ -98,6 +98,15 @@ var metadata = { "applications":
             "jsfile": "materialDataCreator/appMaterialDataCreator.js",
             "icon": "materialDataCreator/images/icon_materialDate_inactive.png",
             "caption": "MAT-GEN"
+        },
+        {
+            "isActive": true,
+            "directory": "blocks",
+            "name": "Blocks",
+            "description": "Script to create blocks in a Minecraft way",
+            "jsfile": "blocks/Blocks.js",
+            "icon": "blocks/blocks-inactive.svg",
+            "caption": "BLOCKS"
         }
     ]
 };
