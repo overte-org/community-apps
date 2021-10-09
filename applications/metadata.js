@@ -107,6 +107,15 @@ var metadata = { "applications":
             "jsfile": "blocks/Blocks.js",
             "icon": "blocks/blocks-inactive.svg",
             "caption": "BLOCKS"
+        },
+        {
+            "isActive": true,
+            "directory": "nyx-ui",
+            "name": "Nyx UI",
+            "description": "A UI overlay system to add functionality.",
+            "jsfile": "nyx-ui/nyx.js",
+            "icon": "nyx-ui/icon.png",
+            "caption": "NYX"
         }
     ]
 };
