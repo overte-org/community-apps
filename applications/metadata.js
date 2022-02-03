@@ -107,6 +107,15 @@ var metadata = { "applications":
             "jsfile": "blocks/Blocks.js",
             "icon": "blocks/blocks-inactive.svg",
             "caption": "BLOCKS"
+        },
+        {
+            "isActive": true,
+            "directory": "odometer",
+            "name": "Odometer",
+            "description": "Tool to record the distance traveled by your avatar.",
+            "jsfile": "odometer/odometer.js",
+            "icon": "odometer/appicon_i.png",
+            "caption": "ODOMETER"
         }
     ]
 };
