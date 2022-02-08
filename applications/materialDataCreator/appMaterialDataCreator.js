@@ -4,6 +4,7 @@
 //
 //  Created by Alezia Kurdis, April 12th, 2020.
 //  Copyright 2020 Vircadia and contributors.
+//  Copyright 2022 Overte e.V.
 //
 //  A tool to generate materialData.
 //
@@ -19,7 +20,7 @@
     var APP_ICON_INACTIVE = ROOT + "images/icon_materialDate_inactive.png";
     var APP_ICON_ACTIVE = ROOT + "images/icon_materialDate_active.png"; 
     var appStatus = false;
-    var channel = "materialDataCreator.ak.vircadia";
+    var channel = "materialDataCreator.ak.overte";
     var nightmode = false;
     var demoID, materialID;
     var currentMaterialRecord;
@@ -250,10 +251,10 @@
                 position: prop.position
             };
         }         
-        if (shape === "vircadia"){
+        if (shape === "brand"){
             newDemoDefinition = {
                 type: "Model", 
-                modelURL: ROOT + "models/vircadia.fbx",
+                modelURL: ROOT + "models/brand.fbx",
                 name: "MATERIAL DEMO",
                 grab: {
                     grabbable: true
