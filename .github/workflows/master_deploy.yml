@@ -14,7 +14,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Deploy More repository
-      uses: SamKirkland/FTP-Deploy-Action@4.2.0
+      uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
         server: ftp.tuxfamily.org
         username: ${{ secrets.GHA_MORE_FTP_USER }}
