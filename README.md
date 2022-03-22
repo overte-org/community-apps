@@ -1,11 +1,11 @@
 # Community Apps Repository
-Applications repository for Vircadia, pulled directly from GitHub. You can add or edit your app in the "More" application by opening a pull request to this repo.
+Applications repository for Overte, pullable directly from GitHub. You can add or edit your app in the "More" application by opening a pull request to this repository.
 
 Direct link to run the "More..." application in the interface: 
-https://cdn.vircadia.com/community-apps/more/app-more.js
+https://more.overte.org/more/app-more.js
 
 See all the details about adding your app here: 
-https://cdn.vircadia.com/community-apps/web/index.html
+https://overte-org.github.io/community-apps/web/index.html
 
 ### Contributors
 
