@@ -1,0 +1,27 @@
+name: More repository Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_site:
+    runs-on: ubuntu-20.04
+
+    name: Deploy "More" repository
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Deploy More repository
+      uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      with:
+        server: ftp.tuxfamily.org
+        username: ${{ secrets.GHA_MORE_FTP_USER }}
+        password: ${{ secrets.GHA_MORE_FTP_PASS }}
+        local-dir: ./
+        server-dir: overte/more.overte.org-web/htdocs/
+        exclude: |
+          **/staging/**
+          **/.*
+          **/.*/**
