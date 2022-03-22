@@ -89,7 +89,7 @@
          },
          "ambientLight":{
             "ambientIntensity":0.80000001192093,
-            "ambientURL":"https://cdn.vircadia.com/community-apps/applications/materialDataCreator/images/zoneDayAmbient.jpg"
+            "ambientURL":"https://more.overte.org/applications/materialDataCreator/images/zoneDayAmbient.jpg"
          },
          "skybox":{
             "color":{
@@ -97,7 +97,7 @@
                "green":255,
                "blue":255
             },
-            "url":"https://cdn.vircadia.com/community-apps/applications/materialDataCreator/images/zoneDaySky.png"
+            "url":"https://more.overte.org/applications/materialDataCreator/images/zoneDaySky.png"
          },
          "haze":{
             "hazeRange":800,
@@ -175,7 +175,7 @@
          },
          "ambientLight":{
             "ambientIntensity":0.25,
-            "ambientURL":"https://cdn.vircadia.com/community-apps/applications/materialDataCreator/images/zoneNightAmbient.jpg"
+            "ambientURL":"https://more.overte.org/applications/materialDataCreator/images/zoneNightAmbient.jpg"
          },
          "skybox":{
             "color":{
@@ -183,7 +183,7 @@
                "green":255,
                "blue":255
             },
-            "url":"https://cdn.vircadia.com/community-apps/applications/materialDataCreator/images/zoneNightSky.png"
+            "url":"https://more.overte.org/applications/materialDataCreator/images/zoneNightSky.png"
          },
          "haze":{
             "hazeRange":800,
@@ -216,16 +216,16 @@
     {
         "id": "{b4d3fdbb-6fcc-4333-bf76-3dd4d0f9c64d}",
         "type": "Model",
-        "name": "VIRCADIA LOGO",
+        "name": "BRAND LOGO",
         "position": {
             "x": -18.6195,
             "y": 3.5842,
             "z": -10.7500
         },
         "dimensions": {
-            "x": 16.0391902923584,
-            "y": 2.659592866897583,
-            "z": 0.5929432511329651
+            "x": 9.42,
+            "y": 2.48,
+            "z": 0.34
         },
         "rotation": {
             "x": 0,
@@ -236,7 +236,7 @@
         "grab": {
             "grabbable": false
         },
-        "modelURL": "https://cdn.vircadia.com/community-apps/applications/materialDataCreator/models/VIRCADIA_LOGO_NIGHT.fbx",
+        "modelURL": "https://more.overte.org/applications/materialDataCreator/models/BRAND_LOGO_NIGHT.fbx",
         "animation": {
             "allowTranslation": false
     }
@@ -244,16 +244,16 @@
         {
         "id": "{28a9cae1-ef3f-4e24-84ef-a954d48bd84f}",
         "type": "Model",
-        "name": "VIRCADIA LOGO",
+        "name": "BRAND LOGO",
         "position": {
             "x": 18.6195,
             "y": 3.5842,
             "z": -10.7500
         },
         "dimensions": {
-            "x": 16.0391902923584,
-            "y": 2.659592866897583,
-            "z": 0.5929432511329651
+            "x": 9.42,
+            "y": 2.48,
+            "z": 0.34
         },
         "rotation": {
             "x": 0,
@@ -264,7 +264,7 @@
         "grab": {
             "grabbable": false
         },
-        "modelURL": "https://cdn.vircadia.com/community-apps/applications/materialDataCreator/models/VIRCADIA_LOGO_NIGHT.fbx",
+        "modelURL": "https://more.overte.org/applications/materialDataCreator/models/BRAND_LOGO_NIGHT.fbx",
         "animation": {
             "allowTranslation": false
         }

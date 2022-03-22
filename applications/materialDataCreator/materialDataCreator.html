@@ -4,6 +4,7 @@
 //
 //  Created by Alezia Kurdis, April 12th, 2020.
 //  Copyright 2020 Vircadia and contributors.
+//  Copyright 2022 Overte e.V.
 //
 //  A tool to generate materialData.
 //
@@ -118,7 +119,7 @@
                                     "name": "untitled",
                                     "albedo": "#ffffff",
                                     "metallic": 0.001,
-                                    "roughness": 0.5,
+                                    "roughness": 1.0,
                                     "opacity": 1,
                                     "emissive": "#000000",
                                     "bloom": 1,
@@ -133,7 +134,8 @@
                                     "emissiveMap": "",
                                     "scatteringMap": "",
                                     "occlusionMap": "",
-                                    "cullFaceMode": "CULL_BACK"
+                                    "cullFaceMode": "CULL_BACK",
+                                    "defaultFallthrough": false
                                 }; 
 
 
@@ -142,7 +144,7 @@
                                     "name": "untitled",
                                     "albedo": "#ffffff",
                                     "metallic": 0.001,
-                                    "roughness": 0.5,
+                                    "roughness": 1.0,
                                     "opacity": 1,
                                     "emissive": "#000000",
                                     "bloom": 1,
@@ -157,7 +159,8 @@
                                     "emissiveMap": "",
                                     "scatteringMap": "",
                                     "occlusionMap": "",
-                                    "cullFaceMode": "CULL_BACK"
+                                    "cullFaceMode": "CULL_BACK",
+                                    "defaultFallthrough": false
                                 };   
                                 
                 document.materialEditor.reset();
@@ -166,7 +169,7 @@
                 document.materialEditor.metallic.value = 1;
                 document.materialEditor.metallic_value.value = 0.001;
                 document.materialEditor.roughness.value = 500;
-                document.materialEditor.roughness_value.value = 0.5;
+                document.materialEditor.roughness_value.value = 1.0;
                 document.materialEditor.opacity.value = 1000;
                 document.materialEditor.opacity_value.value = 1;
                 document.materialEditor.emissive.value = "#000000";
@@ -185,6 +188,7 @@
                 document.materialEditor.scatteringMap.value = "";
                 document.materialEditor.occlusionMap.value = "";
                 document.materialEditor.cullFaceMode.value = "CULL_BACK";
+                document.materialEditor.defaultFallthrough.checked = false;
                 generateMaterialJSON();                
             }
                 
@@ -219,6 +223,7 @@
                 document.materialEditor.scatteringMap.value = material.scatteringMap;
                 document.materialEditor.occlusionMap.value = material.occlusionMap;
                 document.materialEditor.cullFaceMode.value = material.cullFaceMode;
+                document.materialEditor.defaultFallthrough.value = material.defaultFallthrough;
                 
             }
             
@@ -232,7 +237,11 @@
                         if (attribute === "unlit") {
                             material[attribute] = valueContainer.checked;
                         } else {
-                            material[attribute] = valueContainer.value;
+                            if (attribute === "defaultFallthrough") {
+                                material[attribute] = valueContainer.checked;
+                            } else {
+                                material[attribute] = valueContainer.value;
+                            }
                         }
                     }
                 }
@@ -268,64 +277,104 @@
             function generateMaterialJSON() {
                 
                 var materialData = "";
+                var fstMaterialData = "";
+                
                 
                 materialData += '{' + "\n";
                 materialData += '    "materialVersion": 1,' + "\n";
                 materialData += '    "materials": [' + "\n";
-                materialData += '        {' + "\n";               
+                materialData += '        {' + "\n";
+                
+                fstMaterialData += '{"mat::' + material.name.escapeJSON() + '": {"materials":[{ "name": "' + material.name.escapeJSON() + '"';
+                    
                 if (material.name !== "") {
                     materialData += '            "name": "' + material.name.escapeJSON() + '",' + "\n";
-                } 
+                }
+                
+                
                 materialData += '            "albedo": ' + hexToRgb(material.albedo, 1) + ',' + "\n";
+                fstMaterialData += ', "albedo": ' + hexToRgb(material.albedo, 1);
+                
                 if (material.metallicMap === "") {
                     materialData += '            "metallic": ' + material.metallic + ',' + "\n";
+                    fstMaterialData += ', "metallic": ' + material.metallic;
                 }
-                if (material.roughnessMap === "") {                
+                if (material.roughnessMap === "" && material.roughness !== 1.0) {                
                     materialData += '            "roughness": ' + material.roughness + ',' + "\n";
+                    fstMaterialData += ', "roughness": ' + material.roughness;
                 }
-                if (material.opacityMap === "DO NOT USE") {
+                if (material.opacityMap === "DO NOT USE" && material.opacity !== 1.0) {
                     materialData += '            "opacity": ' + material.opacity + ',' + "\n";
+                    fstMaterialData += ', "opacity": ' + material.opacity;
                 }
-                materialData += '            "emissive": ' + hexToRgb(material.emissive, material.bloom) + ',' + "\n";
-                if (material.scatteringMap === "") {
+                if (material.emissive !== "#000000") {
+                    materialData += '            "emissive": ' + hexToRgb(material.emissive, material.bloom) + ',' + "\n";
+                    fstMaterialData += ', "emissive": ' + hexToRgb(material.emissive, material.bloom);
+                }
+                if (material.scatteringMap === "" && material.scattering !== 0) {
                     materialData += '            "scattering": ' + material.scattering + ',' + "\n";
-                } 
-                materialData += '            "unlit": ' + material.unlit + ',' + "\n";
+                    fstMaterialData += ', "scattering": ' + material.scattering;
+                }
+                if (material.unlit === true) {
+                    materialData += '            "unlit": ' + material.unlit + ',' + "\n";
+                    fstMaterialData += ', "unlit": ' + material.unlit;
+                }
                 if (material.normalMap !== "") {
                     materialData += '            "normalMap": "' + material.normalMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "normalMap": "' + material.normalMap.escapeJSON() + '"';
                 }
                 if (material.albedoMap !== "") {
                     materialData += '            "albedoMap": "' + material.albedoMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "albedoMap": "' + material.albedoMap.escapeJSON() + '"';
                 }
                 if (material.metallicMap !== "") {
                     materialData += '            "metallicMap": "' + material.metallicMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "metallicMap": "' + material.metallicMap.escapeJSON() + '"';
                 }
                 if (material.roughnessMap !== "") {
                     materialData += '            "roughnessMap": "' + material.roughnessMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "roughnessMap": "' + material.roughnessMap.escapeJSON() + '"';
                 }
                 if (material.opacityMap === "OPACITY_MAP_MASK" || material.opacityMap === "OPACITY_MAP_BLEND") {
                     materialData += '            "opacityMap": "' + material.albedoMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "opacityMap": "' + material.albedoMap.escapeJSON() + '"';
                     materialData += '            "opacityMapMode": "' + material.opacityMap + '",' + "\n";
+                    fstMaterialData += ', "opacityMapMode": "' + material.opacityMap + '"';
                     if (material.opacityMap === "OPACITY_MAP_MASK") {
                         materialData += '            "opacityCutoff": ' + material.opacityCutoff + ',' + "\n";
+                        fstMaterialData += ', "opacityCutoff": ' + material.opacityCutoff;
                     }
                 }  
                 if (material.emissiveMap !== "") {
                     materialData += '            "emissiveMap": "' + material.emissiveMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "emissiveMap": "' + material.emissiveMap.escapeJSON() + '"';
                 }                 
                 if (material.scatteringMap !== "") {
                     materialData += '            "scatteringMap": "' + material.scatteringMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "scatteringMap": "' + material.scatteringMap.escapeJSON() + '"';
                 }
                 if (material.occlusionMap !== "") {
                     materialData += '            "occlusionMap": "' + material.occlusionMap.escapeJSON() + '",' + "\n";
+                    fstMaterialData += ', "occlusionMap": "' + material.occlusionMap.escapeJSON() + '"';
                 }
                 materialData += '            "cullFaceMode": "' + material.cullFaceMode + '",' + "\n";
+                fstMaterialData += ', "cullFaceMode": "' + material.cullFaceMode + '"';
+                if (material.defaultFallthrough === true) {
+                    materialData += '            "defaultFallthrough": ' + material.defaultFallthrough + ',' + "\n";
+                    fstMaterialData += ', "defaultFallthrough": ' + material.defaultFallthrough;
+                }
                 materialData += '            "model": "hifi_pbr"' + "\n";
+                fstMaterialData += ', "model": "hifi_pbr"';
                 materialData += '        }' + "\n";
                 materialData += '    ]' + "\n";
                 materialData += '}';
                 
+                
+                fstMaterialData += '}]}}';
+                
                 document.materialEditor.output.value = materialData;
+                document.materialEditor.fstoutput.value = fstMaterialData;
+                
                 var message = {
                     "channel": channel,
                     "action": "updateMaterialData",
@@ -362,7 +411,7 @@
                 return result;
             };
             
-            var channel = "materialDataCreator.ak.vircadia";
+            var channel = "materialDataCreator.ak.overte";
 
 
 			function copyToClipboard(data) {
@@ -437,7 +486,7 @@
                 <td style= 'width: 10%;'><a href='#' onclick='demo("cube");'><img class='demo' src="images/demo_cube.png"></a></td>
                 <td style= 'width: 10%;'><a href='#' onclick='demo("sphere");'><img class='demo' src="images/demo_sphere.png"></a></td>
                 <td style= 'width: 10%;'><a href='#' onclick='demo("teapot");'><img class='demo' src="images/demo_teapot.png"></a></td>
-                <td style= 'width: 10%;'><a href='#' onclick='demo("vircadia");'><img class='demo' src="images/demo_vircadia.png"></a></td>
+                <td style= 'width: 10%;'><a href='#' onclick='demo("brand");'><img class='demo' src="images/demo_brand.png"></a></td>
                 <td style= 'width: 5%;'>&nbsp;</td>
                 <td style= 'width: 10%;'><a href='#' onclick='teleportToServerless();'><img class='studio' src="images/studio.png"></a></td>
                 <td style= 'width: 10%;'><a href='#' onclick='toggleDayNight();'><img class='studio' src="images/toggle_day_night.png"></a></td>
@@ -520,8 +569,16 @@
             <input type="radio" name = 'cullFaceMode' value = 'CULL_NONE' oninput="save('cullFaceMode', this);">Both<br>
             </div>
 
+            <div class='group'>
+            <font class='label'>Keep other existing material's properties: </font><br> 
+            <font class='label'>defaultFallthrough:</font> <input type="checkbox" name = 'defaultFallthrough' oninput="save('defaultFallthrough', this);">
+            </div>
+
             <input type='button' class = 'copybtn' name='copy' value = 'Copy' onclick='copyToClipboard(document.materialEditor.output.value);'><br>
             <textarea name='output' id='output' rows = '21' class='output'></textarea>
+            <br><br>
+            <input type='button' class = 'copybtn' name='copy-fst' value = 'Copy for .fst materialMap array' onclick='copyToClipboard(document.materialEditor.fstoutput.value);'><br>
+            <textarea name='fstoutput' id='fstoutput' rows = '6' class='output'></textarea>            
         
         </td><td style=' background-image: url("images/trottoire.png"); background-repeat: repeat;'>&nbsp;</td></tr></table>
         
@@ -578,7 +635,7 @@
             <div style='text-align:right; font-size:14px; color:#999999; width:95%;'>&#10006;</div><br><br>
             <div style='width:95%;'>
                 <img class='demo' src="images/demo_cube.png"> <img class='demo' src="images/demo_sphere.png"> 
-                <img class='demo' src="images/demo_teapot.png"> <img class='demo' src="images/demo_vircadia.png"><br>
+                <img class='demo' src="images/demo_teapot.png"> <img class='demo' src="images/demo_brand.png"><br>
                 You can use these buttons to change the shape of the demonstration entity.
                 <br><hr>
                 <img class='studio' src="images/studio.png"><br>
