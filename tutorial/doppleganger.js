@@ -1,14 +1,11 @@
 "use strict";
 //======================================
-// Version 1.1
-// Addaption to "Local" Entities (since Overlays get deprecated for "Model" type.)
-// by Alezia Kurdis on February 2020
-//======================================
-// Version 1.0
+//
 //  doppleganger.js
 //
 //  Created by Timothy Dedischew on 04/21/2017.
 //  Copyright 2017 High Fidelity, Inc.
+//  Copyright 2020 Vircadia contibutors.
 //  Copyright 2022 Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
@@ -25,7 +22,7 @@
 //
 // This should be helpful for inspecting your own look and debugging avatars, etc.
 //
-// The doppleganger is created as an overlay so that others do not see it -- and this also allows for the
+// The doppleganger is created as a local entity so that others do not see it -- this also allows for the
 // highest possible update rate when keeping joint data in sync.
 //
 // NOTE: THIS IS A MODIFIED VERSION SPECIFICALLY FOR THE TUTORIAL.
@@ -71,7 +68,7 @@ function Doppleganger(options) {
 
     // @public
     this.active = false;   // whether doppleganger is currently being displayed/updated
-    this.entityID = null; // current doppleganger's Entity id
+    this.entityID = null;  // current doppleganger's Entity id
     this.frame = 0;        // current joint update frame
 
     // @signal - emitted when .active state changes
