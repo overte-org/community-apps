@@ -1,0 +1,33 @@
+{
+  "DataVersion": 0,
+  "Entities": [
+    {
+        "type": "Sphere",
+        "name": "LIGHT_BULB",
+        "locked": false,
+        "dimensions": {
+            "x": 0.06,
+            "y": 0.06,
+            "z": 0.06
+        },
+        "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "w": 1
+        },
+        "grab": {
+            "grabbable": false
+        },
+        "color": {
+            "red": 255,
+            "green": 255,
+            "blue": 255
+        },
+        "userData": "{\"lightIntensity\":5,\"lightSpotCutOff\": 30,\"lightRange\": 10}",
+        "script": "https://aleziakurdis.github.io/lightBulb/lightBulb.js"
+    }
+    ],
+  "Id": "{5cbb14bf-ca6c-4aa9-bcfa-1a53c8438669}",
+  "Version": 133
+}
