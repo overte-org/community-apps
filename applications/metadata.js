@@ -67,7 +67,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "radar",
             "name": "Radar",
-            "description": "Show where people are and teleport in the domain. <a href='http://ctrlaltstudio.com/vircadia/radar' target=`_blank`>More info...</a>",
+            "description": "Show where people are and teleport in the domain.",
             "jsfile": "radar/radar.js",
             "icon": "radar/assets/radar-i.svg",
             "caption": "RADAR"
@@ -85,7 +85,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "nametags",
             "name": "Nametags",
-            "description": "Display users' display names above their heads. <a href='http://ctrlaltstudio.com/vircadia/nametags' target=`_blank`>More info...</a>",
+            "description": "Display users' display names above their heads.",
             "jsfile": "nametags/nametags.js",
             "icon": "nametags/assets/nametags-i.svg",
             "caption": "NAMETAGS"
@@ -116,6 +116,15 @@ var metadata = { "applications":
             "jsfile": "odometer/odometer.js",
             "icon": "odometer/appicon_i.png",
             "caption": "ODOMETER"
+        },
+        {
+            "isActive": true,
+            "directory": "aaswitcher",
+            "name": "Anti-Aliasing Switcher",
+            "description": "Allow different Anti-Aliasing configuration for HMD and Desktop. This application changes automatically the Anti-Aliasing configuration as you put on or remove your VR Headset.",
+            "jsfile": "aaswitcher/app-aaSwitcher.js",
+            "icon": "aaswitcher/icon_inactive.png",
+            "caption": "AA-SWITCH"
         }
     ]
 };

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+    aaSwitcher.html
+
+    Created by Alezia Kurdis, April 7th 2022.
+    Copyright 2022 Overte e.V.
+
+    This application UI let you setup different Anti-Aliasing setup for HMD and Desktop.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script>
+            //Parameters
+            
+            function findGetParameter(parameterName) {
+                var result = null,
+                    tmp = [];
+                var items = location.search.substr(1).split("&");
+                for (var index = 0; index < items.length; index++) {
+                    tmp = items[index].split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                }
+                return result;
+            }
+
+            //Paths
+            var thisPageName = "aaSwitcher.html";       
+            var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            var ROOTPATH = currentPath.replace(thisPageName, "");
+
+            var channel = "com.overte.aaswitcher";
+            
+
+        </script>
+        <style>
+            @font-face {
+                font-family: FiraSans-SemiBold;
+                src: url(FiraSans-SemiBold.ttf);
+            }
+
+            body {
+                background: #3b424a;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                color: #FFFFFF;
+                text-decoration: none;
+                font-style: normal;
+                font-variant: normal;
+                text-transform: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="width:100%; text-align:center;"><h1 style='color:#FFFF00;'>ANTI-ALIASING SWITCHER</h1></div>
+        <hr>
+        <div id='activeMode'></div><hr>
+        <h1>HMD:</h1>
+        <input type = "radio" id="hmdAA0" name="hmdAA" onclick="checkHmdAA(this.value);" value = "0">None<br>
+        <input type = "radio" id="hmdAA1" name="hmdAA" onclick="checkHmdAA(this.value);" value = "1">TAA<br>
+        <input type = "radio" id="hmdAA2" name="hmdAA" onclick="checkHmdAA(this.value);" value = "2">FXAA<br>
+        <hr>
+        <h1>DESKTOP:</h1>
+        <input type = "radio" id="desktopAA0" name="desktopAA" onclick="checkDesktopAA(this.value);" value = "0">None<br>
+        <input type = "radio" id="desktopAA1" name="desktopAA" onclick="checkDesktopAA(this.value);" value = "1">TAA<br>
+        <input type = "radio" id="desktopAA2" name="desktopAA" onclick="checkDesktopAA(this.value);" value = "2">FXAA<br>
+        <script>
+            function setForm() {
+                document.getElementById("hmdAA0").checked = false;
+                document.getElementById("hmdAA1").checked = false;
+                document.getElementById("hmdAA2").checked = false;
+                var currentRadio = "hmdAA" + hmdAA;
+                document.getElementById(currentRadio).checked = true;
+                
+                document.getElementById("desktopAA0").checked = false;
+                document.getElementById("desktopAA1").checked = false;
+                document.getElementById("desktopAA2").checked = false;
+                currentRadio = "desktopAA" + desktopAA;
+                document.getElementById(currentRadio).checked = true;
+                
+                if (isActive === "ON") {
+                    document.getElementById("activeMode").innerHTML = "<h1 style='color:#00ff00;'>ON</h1><button type='button' onclick='activator();'>Deactivate</button>";
+                } else {
+                    document.getElementById("activeMode").innerHTML = "<h1 style='color:#ff2200;'>OFF</h1><button type='button' onclick='activator();'>Activate</button>";
+                }
+            }
+
+            function checkHmdAA(value) {
+                hmdAA = value;
+                var goSignal = {
+                    "channel": channel,
+                    "action": "HMDAA",
+                    "value": hmdAA
+                    };
+                EventBridge.emitWebEvent(JSON.stringify(goSignal));
+            }
+
+            function checkDesktopAA(value) {
+                desktopAA = value;
+                var goSignal = {
+                    "channel": channel,
+                    "action": "DESKTOPAA",
+                    "value": desktopAA
+                    };
+                EventBridge.emitWebEvent(JSON.stringify(goSignal));                
+            }
+            
+            function activator() {
+                if (isActive === "ON") {
+                    isActive = "OFF";
+                } else {
+                    isActive = "ON";
+                }
+                var goSignal = {
+                    "channel": channel,
+                    "action": "ACTIVATION",
+                    "value": isActive
+                    };
+                EventBridge.emitWebEvent(JSON.stringify(goSignal));                
+                setForm();
+            }
+ 
+            var hmdAA = findGetParameter("hmdAA");
+            if (hmdAA === "") {
+                hmdAA = "1";
+            }
+
+            var desktopAA = findGetParameter("desktopAA");
+            if (desktopAA === "") {
+                desktopAA = "1";
+            }
+
+            var isActive = findGetParameter("isActive");
+            if (isActive === "") {
+                isActive = "OFF";
+            } 
+
+            setForm();
+        </script>
+    </body>
+</html>
