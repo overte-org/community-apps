@@ -108,7 +108,7 @@
     }
     
     function onScreenChanged(type, url) {
-        if (type == "Web" && url.indexOf(APP_URL) != -1) {
+        if (type === "Web" && url.indexOf(APP_URL) !== -1) {
             appStatus = true;
         } else {
             appStatus = false;
