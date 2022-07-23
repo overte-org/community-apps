@@ -119,6 +119,15 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "lightBulb",
+            "name": "Light Bulb Generator",
+            "description": "Generate rapidly a visible glowing light source with its light beam.",
+            "jsfile": "lightBulb/app-lightBulb.js",
+            "icon": "lightBulb/icon_inactive.png",
+            "caption": "BULB"
+        },
+        {
+            "isActive": true,
             "directory": "aaswitcher",
             "name": "Anti-Aliasing Switcher",
             "description": "Allow different Anti-Aliasing configuration for HMD and Desktop. This application changes automatically the Anti-Aliasing configuration as you put on or remove your VR Headset.",
