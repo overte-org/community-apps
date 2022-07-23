@@ -125,6 +125,15 @@ var metadata = { "applications":
             "jsfile": "notes/app-notes.js",
             "icon": "notes/icon_inactive.png",
             "caption": "NOTES"
+        },
+        {
+            "isActive": true,
+            "directory": "home",
+            "name": "Home",
+            "description": "Add a shortcut on your tablet to teleport home.",
+            "jsfile": "home/app_home.js",
+            "icon": "home/appicon_i.png",
+            "caption": "HOME"
         }
     ]
 };
