@@ -125,6 +125,33 @@ var metadata = { "applications":
             "jsfile": "lightBulb/app-lightBulb.js",
             "icon": "lightBulb/icon_inactive.png",
             "caption": "BULB"
+        },
+        {
+            "isActive": true,
+            "directory": "aaswitcher",
+            "name": "Anti-Aliasing Switcher",
+            "description": "Allow different Anti-Aliasing configuration for HMD and Desktop. This application changes automatically the Anti-Aliasing configuration as you put on or remove your VR Headset.",
+            "jsfile": "aaswitcher/app-aaSwitcher.js",
+            "icon": "aaswitcher/icon_inactive.png",
+            "caption": "AA-SWITCH"
+        },
+        {
+            "isActive": true,
+            "directory": "notes",
+            "name": "Notes",
+            "description": "A simple notepad that can be used while you are in-world.",
+            "jsfile": "notes/app-notes.js",
+            "icon": "notes/icon_inactive.png",
+            "caption": "NOTES"
+        },
+        {
+            "isActive": true,
+            "directory": "home",
+            "name": "Home",
+            "description": "Add a shortcut on your tablet to teleport home.",
+            "jsfile": "home/app_home.js",
+            "icon": "home/appicon_i.png",
+            "caption": "HOME"
         }
     ]
 };
