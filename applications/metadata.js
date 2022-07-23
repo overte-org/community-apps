@@ -119,6 +119,15 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "aaswitcher",
+            "name": "Anti-Aliasing Switcher",
+            "description": "Allow different Anti-Aliasing configuration for HMD and Desktop. This application changes automatically the Anti-Aliasing configuration as you put on or remove your VR Headset.",
+            "jsfile": "aaswitcher/app-aaSwitcher.js",
+            "icon": "aaswitcher/icon_inactive.png",
+            "caption": "AA-SWITCH"
+        },
+        {
+            "isActive": true,
             "directory": "notes",
             "name": "Notes",
             "description": "A simple notepad that can be used while you are in-world.",
