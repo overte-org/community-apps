@@ -119,6 +119,15 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "notes",
+            "name": "Notes",
+            "description": "A simple notepad that can be used while you are in-world.",
+            "jsfile": "notes/app-notes.js",
+            "icon": "notes/icon_inactive.png",
+            "caption": "NOTES"
+        },
+        {
+            "isActive": true,
             "directory": "home",
             "name": "Home",
             "description": "Add a shortcut on your tablet to teleport home.",
