@@ -152,6 +152,15 @@ var metadata = { "applications":
             "jsfile": "home/app_home.js",
             "icon": "home/appicon_i.png",
             "caption": "HOME"
+        },
+        {
+            "isActive": true,
+            "directory": "BodyPaint4",
+            "name": "Body Paint",
+            "description": "Paint with your finger in VR, or with mouse in desktop mode.\n You can paint in free space, on yourself, or even on other avatars, it's the fastest way to put cat-ears on all your friends.",
+            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "icon": "BodyPaint4/content/appicons/body-paint-i.svg",
+            "caption": "BODY PAINT"
         }
     ]
 };
