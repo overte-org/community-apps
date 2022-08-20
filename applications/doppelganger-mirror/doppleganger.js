@@ -63,7 +63,6 @@ Doppleganger.getMirroredJointNames = function(jointNames) {
 // @param {bool}   [options.autoUpdate=true] - Automatically sync joint data.
 function Doppleganger(options) {
     options = options || {};
-    //this.avatar = options.avatar || MyAvatar;
     this.avatar = MyAvatar;
     this.mirrored = 'mirrored' in options ? options.mirrored : false;
     this.autoUpdate = 'autoUpdate' in options ? options.autoUpdate : true;
