@@ -22,11 +22,11 @@ The Tablet Cam app allows you to **easily take selfies and regular photos in Hig
 
 ### v2.4 (2022-08-22) by Alezia Kurdis  
 
-- Fixed a but in HMD where the rear-facing camera was pointed to the tablet instead of the scene.  
+- Fixed a bug in HMD where the rear-facing camera was pointed to the tablet instead of the scene.  
 - Replaced the camera model by a new one (nicer and less heavy, 198k instead of 576k, less but more optimal polygons, 1 PBR material.)  
-- Renamed the tool: Camera Snap-Pro  
+- Rebranded the tool: Camera Snap-Pro  
 - Replaced the icons for something more easy to identify as a device to take picture ("camera"), as an advance version of the "Snap" app.  
-- Add a notice in the settings page to informe the user about the trigger on the thumbstick of the right VR hand controller.
+- Added a notice in the settings page to informe the user about the trigger on the thumbstick of the right VR hand controller.
 
 ### v2.3 (2019-10-15)
 
