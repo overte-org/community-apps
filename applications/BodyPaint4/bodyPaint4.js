@@ -6,12 +6,16 @@
 // 
 //   !NOTE, fingerpaint.js is likely the base of this script, it is unknown which High Fidelity employee(s) turned it into the "bodypaint app", possibly "Simon"
 //
-//   Modifications made August 2022 by @SilverfishVR:
-//   Polylines created renamed to "bodypaint".
-//   App icons modified and moved to script directory.
-//   Some dead code removed.
-//   2 brushes added, "Paws" (https://freesvg.org/1553022565) and "keepOut" (https://freesvg.org/muga-barb-wire) both are licenced under https://creativecommons.org/licenses/publicdomain/
-//   Renamed to Bodypaint4 since it was previously distributed as Bodypaint 3
+//   Changelog:
+//
+//   4.00 August 2022 by @SilverfishVR:
+//      Polylines created renamed to "bodypaint".
+//      App icons modified and moved to script directory.
+//      Sort of fixed continous line mode, line width is still wrong on first point of a new segnment if continous line is enabled
+//      Increased max line width to 0.05 (was 0.036).
+//      Some dead code removed.
+//      2 brushes added, "Paws" (https://freesvg.org/1553022565) and "keepOut" (https://freesvg.org/muga-barb-wire) both are licenced under https://creativecommons.org/licenses/publicdomain/
+//      Renamed to Bodypaint4 since it was previously distributed as Bodypaint 3
 //   
 //   Distributed under the Apache License, Version 2.0.
 //   See the accompanying file LICENSE or http:// www.apache.org/licenses/LICENSE-2.0.html
@@ -27,7 +31,7 @@
         _isFingerPainting = false,
         _isTabletFocused = false,
         _shouldRestoreTablet = false,
-        MAX_LINE_WIDTH = 0.036,
+        MAX_LINE_WIDTH = 0.05,
         _leftHand = null,
         _rightHand = null,
         _leftBrush = null,
@@ -371,11 +375,14 @@
                 //  Nevertheless, continue on and start a new line.
             }
 
-            if (_shouldKeepDrawing) {
-                _strokePoints = [Vec3.distance(_basePosition, _strokePoints[_strokePoints.length - 1])];
-            } else {
-                _strokePoints = [Vec3.ZERO];
-            }
+            // this part made continous drawing not work, not sure what the intention was?
+            // if (_shouldKeepDrawing) {
+            //     _strokePoints = [Vec3.distance(_basePosition, _strokePoints[_strokePoints.length - 1])];
+            // } else {
+            //     _strokePoints = [Vec3.ZERO];
+            // }
+
+            _strokePoints = [Vec3.ZERO];
 
             _basePosition = position;
             _strokeNormals = [calculateStrokeNormal()];
@@ -462,6 +469,7 @@
             } else if (_isContinuousLine && _strokePoints.length >= MAX_POINTS_PER_LINE) {
                 finishLine(position, width);
                 _shouldKeepDrawing = true;
+                //print("_isContinuousLine is " + _isContinuousLine + " _shouldKeepDrawing is " + _shouldKeepDrawing);
                 startLine(_lastPosition, width);
             }
             _lastPosition = position;
@@ -485,7 +493,8 @@
                 });
             }
 
-            width = calculateLineWidth(width);
+            //no need I think
+            //width = calculateLineWidth(width);
 
             // clean up for next line
             _avatarID = null;
@@ -596,7 +605,7 @@
             TRIGGER_SMOOTH_RATIO = 0.1,
             TRIGGER_OFF = 0.05,
             TRIGGER_ON = 0.1,
-            TRIGGER_START_WIDTH_RAMP = 0.15,
+            TRIGGER_START_WIDTH_RAMP = 0.11,
             TRIGGER_FINISH_WIDTH_RAMP = 1.0,
             TRIGGER_RAMP_WIDTH = TRIGGER_FINISH_WIDTH_RAMP - TRIGGER_START_WIDTH_RAMP,
             MIN_LINE_WIDTH = 0.005,
