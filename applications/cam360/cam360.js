@@ -63,7 +63,7 @@
                 "gravity": cameraGravity,
                 "dynamic": true
             };
-            hostType = "local";
+            hostType = "avatar";
         } else {
             properties = {
                 "canCastShadow": false,
@@ -191,7 +191,7 @@
                     "name": CAMERA_NAME + "_Flash",
                     "type": "Light",
                     "parentID": camera
-                }, "local");
+                }, "avatar");
             }
             // Take the snapshot!
             maybeTake360Snapshot();
@@ -277,7 +277,7 @@
             // Play a sound at the current camera position
             Audio.playSound(SOUND_SNAPSHOT, {
                 "position": { "x": currentCameraPosition.x, "y": currentCameraPosition.y, "z": currentCameraPosition.z },
-                "localOnly": isThrowMode,
+                "localOnly": false,
                 "volume": 0.8
             });
             Window.takeSecondaryCamera360Snapshot(currentCameraPosition);

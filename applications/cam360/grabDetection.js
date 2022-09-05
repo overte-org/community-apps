@@ -38,7 +38,10 @@
 
         releaseGrab: function () {
             //print("I was released... entity:" + this.entityID);
-            Entities.editEntity(this.entityID, {"userData": "RELEASED"});
+            var ownerID = Entities.getEntityProperties( this.entityID, ["owningAvatarID"] ).owningAvatarID;
+            if ( ownerID === MyAvatar.sessionUUID) {
+                Entities.editEntity(this.entityID, {"userData": "RELEASED"});
+            }
         },
 
         preload: function(entityID) {
