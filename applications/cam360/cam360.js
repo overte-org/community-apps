@@ -349,7 +349,7 @@
     var APP_ICON_INACTIVE = ROOT + "resources/images/icons/cam360-i.svg";
     var APP_ICON_ACTIVE = ROOT + "resources/images/icons/cam360-a.svg";
     var appStatus = false;
-    var channel = "cam360.ak.overte.com";
+    var channel = "org.overte.applications.cam360";
 
     var timestamp = 0;
     var INTERCALL_DELAY = 200; //0.3 sec
