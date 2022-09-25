@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" type="text/css" href="../hifi/css/edit-style.css">
+<style type="text/css">
+    @font-face {
+    font-family: Font-Awesome;
+    src: url(../hifi/fonts/fontawesome-webfont.ttf),
+         url(../../../../resources/fonts/fontawesome-webfont.ttf),
+         url(../../../../fonts/fontawesome-webfont.ttf),
+         url(../../../../interface/resources/fonts/fontawesome-webfont.ttf);
+    }
+    .changeHandButton {
+        width: 216px;
+        height: 216px;
+        color: white !important;
+        background-color: #2e2e2e;
+        border: none;
+        float: left;
+        margin: 2px;
+        text-transform: uppercase;
+        font-size: 100px;
+        background-image: url("../content/tabicons/hand-icon.svg");
+        background-size: 60% 60%;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .deleteButton {
+        color: white;
+        background-color: #bf0b29;
+        border: black solid 1px;
+        font-size: 16px;
+        width: 200px;
+        /* font-weight: bold; */
+        height: 40px;
+        text-align: center;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .mt-mb-20 {
+        margin: 20 0 !important;
+        padding-top: 20px !important;
+    }
+    .pt-pb-20 {
+        padding-bottom: 20px !important;
+    }
+    .pt-20 {
+        padding-top: 20px !important;
+    }
+    .changeHandButton:first-child {
+        margin-left: 0px;
+    }
+    .changeHandButton:last-child {
+        margin-right: 0px;
+    }
+    #left {
+        transform: scale(-1, 1);
+    }
+    .selectedHand {
+        background-color: rgb(16, 128, 184);
+    }
+</style>
+    <div class="pt-pb-20">
+        <form>
+            <input type="radio" name="paintingOptions" onclick="choosePaintingOption('paint_world')" checked>Draw on World<br>
+            <input type="radio" name="paintingOptions" onclick="choosePaintingOption('paint_self')">Draw on Myself<br>
+            <input type="radio" name="paintingOptions" onclick="choosePaintingOption('paint_others')">Draw on Other People
+        </form> 
+    </div>
+    <div id="handButtonsContainer pt-pb-20" >
+        <button class="changeHandButton" id="left" onclick="chooseHand(0)"></button>
+        <button class="changeHandButton selectedHand" id="right" onclick="chooseHand(1)"></button>
+    </div>
+    <div class="pt-20">
+        <div class="pt-pb-20 mt-mb-20">
+            <button class="deleteButton btn" onclick="deleteAll()">Delete All</button>
+        </div>
+    </div>
+</html>
+
+<script type="text/javascript">
+    var currentHand = 1;
+    var EventBridge = parent.EventBridge;
+
+    function chooseHand(handIndex) {
+        handButtons = document.getElementById("handButtonsContainer").children;
+        handButtons[currentHand].classList.remove("selectedHand");
+        currentHand = handIndex;
+        handButtons[currentHand].classList.add("selectedHand");
+        var chooseHandEvent = {
+            "type"       : "changeBrushHand",
+            "DrawingHand": handButtons[handIndex].id
+        };
+        EventBridge.emitWebEvent(JSON.stringify(chooseHandEvent));
+    }
+
+    restoreCurrentDrawingHand(JSON.parse(decodeURIComponent(window.parent.location.search).substring(1)));
+    function restoreCurrentDrawingHand(handData) {
+        if (handData.currentDrawingHand) {
+            chooseHand(0);
+        } else {
+            chooseHand(1);
+        }         
+    }
+
+    function choosePaintingOption (optionName) {
+        var chooseOptionEvent = {
+            "type"      : "changePaintMode",
+            "option"    : optionName
+        };
+        EventBridge.emitWebEvent(JSON.stringify(chooseOptionEvent));
+        // options
+        // PAINT_WORLD = "paint_world",
+        // PAINT_SELF = "paint_self",
+        // PAINT_OTHERS = "paint_others",
+        // _paintMode = PAINT_WORLD,
+    }
+
+    function deleteAll () {
+        var chooseOptionEvent = {
+            "type"      : "deleteAll"
+        };
+        EventBridge.emitWebEvent(JSON.stringify(chooseOptionEvent));
+    }
+</script>

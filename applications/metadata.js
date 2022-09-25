@@ -155,6 +155,15 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "BodyPaint4",
+            "name": "Body Paint",
+            "description": "Paint with your finger in VR, or with mouse in desktop mode.<br> You can paint in free space, on yourself, or even on other avatars, it's the fastest way to put cat-ears on all your friends.",
+            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "icon": "BodyPaint4/content/appicons/body-paint-i.svg",
+            "caption": "BODY PAINT"
+        },
+        {
+            "isActive": true,
             "directory": "tabletCam",
             "name": "Camera Snap-Pro",
             "description": "The Camera 'Snap-Pro' allows you to take high quality in-world photos and selfies (Low, Normal, 4K, and 'EXTREME' resolution). It has two cameras on the tablet, front-facing/rear-facing, and one detachable to allow more flexibility. It supports different aspect ratio formats: 8x10, 2x3, 9x16 and 'Square'. It comes with an Optical Zoom, a trigger on the VR hand controller and other features.",
