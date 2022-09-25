@@ -161,6 +161,15 @@ var metadata = { "applications":
             "jsfile": "BodyPaint4/BodyPaint4.js",
             "icon": "BodyPaint4/content/appicons/body-paint-i.svg",
             "caption": "BODY PAINT"
+        },
+        {
+            "isActive": true,
+            "directory": "tabletCam",
+            "name": "Camera Snap-Pro",
+            "description": "The Camera 'Snap-Pro' allows you to take high quality in-world photos and selfies (Low, Normal, 4K, and 'EXTREME' resolution). It has two cameras on the tablet, front-facing/rear-facing, and one detachable to allow more flexibility. It supports different aspect ratio formats: 8x10, 2x3, 9x16 and 'Square'. It comes with an Optical Zoom, a trigger on the VR hand controller and other features.",
+            "jsfile": "tabletCam/tabletCam_app.js",
+            "icon": "tabletCam/appIcons/snap-pro-i.svg",
+            "caption": "SNAP-PRO"
         }
     ]
 };
