@@ -170,6 +170,15 @@ var metadata = { "applications":
             "jsfile": "tabletCam/tabletCam_app.js",
             "icon": "tabletCam/appIcons/snap-pro-i.svg",
             "caption": "SNAP-PRO"
+        },
+        {
+            "isActive": true,
+            "directory": "DANCE",
+            "name": "Dance App",
+            "description": "Dance Like nobody is watching.<br> You can que up different Dance animations and let Your Avatar do all the dancing while yoyu sit back and relax.",
+            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
+            "caption": "BODY DANCE"
         }
     ]
 };
