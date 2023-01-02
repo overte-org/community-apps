@@ -175,7 +175,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "DANCE",
             "name": "Dance App",
-            "description": "Dance Like nobody is watching.<br> You can Queue up different Dance animations and let Your Avatar do all the dancing while yoyu sit back and relax.",
+            "description": "Dance Like nobody is watching.<br>You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
             "jsfile": "BodyPaint4/BodyPaint4.js",
             "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
             "caption": "BODY DANCE"
