@@ -170,6 +170,15 @@ var metadata = { "applications":
             "jsfile": "tabletCam/tabletCam_app.js",
             "icon": "tabletCam/appIcons/snap-pro-i.svg",
             "caption": "SNAP-PRO"
+        },
+        {
+            "isActive": true,
+            "directory": "survivalKit",
+            "name": "Exploration Survival Kit",
+            "description": "Necessary tools for exploration: a COMPASS and a VR FLASHLIGHT.",
+            "jsfile": "survivalKit/app-survivalKit.js",
+            "icon": "survivalKit/icon_inactive.png",
+            "caption": "SURVIVAL"
         }
     ]
 };

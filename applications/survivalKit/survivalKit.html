@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<!--
+    survivalKit.html
+
+    Created by Alezia Kurdis, December 29th 2022.
+    Copyright 2022, Overte e.V.
+
+    Survival kit for virtual worlds exploration in Overte. UI.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script>
+            var channel = "org.overte.app.survivalKit";
+            var isFlashLightActive = false;
+            var flashLightFilter = "WHITE";
+            
+            function findGetParameter(parameterName) {
+                var result = null,
+                    tmp = [];
+                var items = location.search.substr(1).split("&");
+                for (var index = 0; index < items.length; index++) {
+                    tmp = items[index].split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                }
+                return result;
+            }
+
+            var flashlight = findGetParameter("flashlight");
+            if (flashlight === null) {
+                isFlashLightActive = false;
+            } else {
+                if (flashlight === "ON") {
+                    isFlashLightActive = true;   
+                } else {
+                    isFlashLightActive = false;
+                }
+            }
+
+            var filter = findGetParameter("filter");
+            if (filter === null) {
+                flashLightFilter = "WHITE";
+            } else {
+                if (filter === "WHITE" || filter === "AMBER" || filter === "RED" || filter === "BLUE") {
+                    flashLightFilter = filter;   
+                } else {
+                    flashLightFilter = "WHITE";
+                }
+            }
+            
+            var thisPageName = "survivalKit.html";        
+            var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            var ROOTPATH = currentPath.replace(thisPageName, ""); 
+
+            EventBridge.scriptEventReceived.connect(function(message){
+                var messageObj = JSON.parse(message);
+                if (messageObj.channel === channel) {
+                    if (messageObj.action === "UPDATE_AZIMUTH") {
+                        var azimuth = messageObj.azimuth;
+                        compassBox.style.objectPosition = "-" + azimuth + "px 0px";
+                    }
+                }
+
+            });
+
+            function activeFlashLight() {
+                isFlashLightActive = document.getElementById("vrFlashlightActivation").checked;
+                
+                var dataObj = {
+                    "channel": channel,
+                    "action": "UPDATE_FLASHLIGHT_ACTIVATION",
+                    "isActive": isFlashLightActive
+                };
+
+                EventBridge.emitWebEvent(JSON.stringify(dataObj));
+            }
+            
+            function setFlashLightFilter() {
+                var filters = document.getElementsByName('lightFilter');
+                for(var i = 0; i < filters.length; i++){
+                    if(filters[i].checked){
+                        flashLightFilter = filters[i].value;
+                    }
+                }
+                var dataObj = {
+                    "channel": channel,
+                    "action": "UPDATE_FLASHLIGHT_FILTER",
+                    "filter": flashLightFilter
+                };
+
+                EventBridge.emitWebEvent(JSON.stringify(dataObj));
+            }
+        </script>
+        <style>
+            @font-face {
+                font-family: FiraSans-SemiBold;
+                src: url(FiraSans-SemiBold.ttf);
+            }
+            body {
+                background: #4f5161;
+                font-family: FiraSans-SemiBold;
+                font-size: 14px;
+                color: #FFFFFF;
+                font-weight: 600;
+                text-decoration: none;
+                font-style: normal;
+                font-variant: normal;
+                text-transform: none;
+            }
+            
+            #compass {
+                width: 400px;
+                height: 60px;
+                overflow:hidden;
+                border-style: inset;
+                border-color: #75788f;
+                object-fit: none;
+                object-position: 0px 0px;
+            }
+            div.compassControl {
+                width: 100%;
+                text-align: center;
+                padding: 0px;
+            }
+            div.compassPointer {
+                width: 100%;
+                text-align: center;
+                font-family: FiraSans-SemiBold;
+                font-size: 24px;
+                color: #660000;
+                padding: 0px;
+            }
+            h1 {
+                font-family: FiraSans-SemiBold;
+                font-size: 24px;
+                color: #e8d8b0;            
+            }
+            
+            .switch {
+              position: relative;
+              display: inline-block;
+              width: 60px;
+              height: 34px;
+            }
+
+            .switch input {
+              opacity: 0;
+              width: 0;
+              height: 0;
+            }
+
+            .slider {
+              position: absolute;
+              cursor: pointer;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: #363636;
+              transition: .4s;
+            }
+
+            .slider:before {
+              position: absolute;
+              content: "";
+              height: 26px;
+              width: 26px;
+              left: 4px;
+              bottom: 4px;
+              background-color: white;
+              transition: .4s;
+            }
+
+            input:checked + .slider {
+              background-color: #0ee32a;
+            }
+
+            input:focus + .slider {
+              box-shadow: 0 0 0px #0ee32a;
+            }
+
+            input:checked + .slider:before {
+              transform: translateX(26px);
+            }
+
+            .slider.round {
+              border-radius: 34px;
+            }
+
+            .slider.round:before {
+              border-radius: 50%;
+            }             
+            
+            table {
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>COMPASS:</h1>
+        <div class = "compassControl">
+            <div class = "compassPointer">&#9660;</div>
+            <img id="compass">
+            <div class = "compassPointer">&#9650;</div>
+        </div>
+        <hr>
+        
+        <h1>VR FLASHLIGHT:</h1>
+        <table><tr><td style="text-align: center;">
+        <label class="switch">
+          <input id="vrFlashlightActivation" type="checkbox" onClick="activeFlashLight();">
+          <span class="slider round"></span>
+        </label>
+        </td><td style="text-align: center;">
+        <img src = "flashlight.png" style = "width: 300px;">
+        </td></tr></table>
+        <div style="margin-left: 60px;">
+            <input type="radio" id="lightFilter_white" name="lightFilter" value="WHITE" onClick="setFlashLightFilter();">
+            <label for="WHITE"><font style="color:#FFFFFF;">White</font></label><br>
+            <input type="radio" id="lightFilter_amber" name="lightFilter" value="AMBER" onClick="setFlashLightFilter();">
+            <label for="AMBER"><font style="color:#ffa42e;">Amber</font></label><br>
+            <input type="radio" id="lightFilter_red" name="lightFilter" value="RED" onClick="setFlashLightFilter();">
+            <label for="RED"><font style="color:#ff2121;">Red</font></label><br>
+            <input type="radio" id="lightFilter_blue" name="lightFilter" value="BLUE" onClick="setFlashLightFilter();">
+            <label for="BLUE"><font style="color:#3094ff;">Ultra Blue</font></label>            
+        </div>
+        <script>
+            var compassBox = document.getElementById("compass");
+            compassBox.style.objectPosition = "0px 0px";
+            compassBox.src = ROOTPATH + "compassStrip.jpg";
+
+            document.getElementById("vrFlashlightActivation").checked = isFlashLightActive;
+            
+            switch(flashLightFilter) {
+                case "WHITE":
+                    document.getElementById("lightFilter_white").checked = true;
+                    break;
+                case "AMBER":
+                    document.getElementById("lightFilter_amber").checked = true;
+                    break;
+                case "RED":
+                    document.getElementById("lightFilter_red").checked = true;
+                    break;
+                case "BLUE":
+                    document.getElementById("lightFilter_blue").checked = true;
+                    break;                    
+            } 
+        </script>
+    </body>
+</html>
