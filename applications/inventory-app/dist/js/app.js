@@ -87,8 +87,8 @@
         inventory = data;
         refreshInventoryView();
         //newItem("cool test item", "UNKNOWN", "https://example.social/yourface.jpg", ["recursiontest", "recursion2", "recursion3"]);
-        newFolder(["recursiontest", "recursion2", "recursion3.1", "recursion4"]);
-        newFolder(["new folder"]);
+        //newFolder(["recursiontest", "recursion2", "recursion3.1", "recursion4"]);
+        //newFolder(["new folder"]);
     }
 
     EventBridge.scriptEventReceived.connect(function(message) {
