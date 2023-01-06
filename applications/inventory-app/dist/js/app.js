@@ -5,6 +5,12 @@
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
+    function sendEvent(command, data) {
+        EventBridge.emitWebEvent(JSON.stringify({app:"inventory",command:command,data:data}));
+    }
+
+    var inventory = [];
+
     function createItemDiv(itemData) {
         return '<div class="item">'
         + "<p>" + sanitize(itemData["name"]) + "</p>"
@@ -26,8 +32,63 @@
         return html;
     }
 
+    function refreshInventoryView() {
+        document.getElementById("app").innerHTML = createFolderDiv("Inventory", inventory);
+    }
+
+    function newItem(name, type, url, folderPath) {
+        var currentFolder = inventory;
+        depthLoop:
+        for (var depth = 0; depth < folderPath.length; depth++) {
+            for (var subfolder = 0; subfolder < currentFolder.length; subfolder++) {
+                if (currentFolder[subfolder]["name"] === folderPath[depth] && "items" in currentFolder[subfolder]) {
+                    currentFolder = currentFolder[subfolder]["items"];
+                    continue depthLoop;
+                }
+            }
+            alert("folder not found!");
+            return;
+        }
+        for (var folderItem = 0; folderItem < currentFolder.length; i++) {
+            if (currentFolder[folderItem]["name"] === name) {
+                alert("item with this name already exists!");
+                return;
+            }
+        }
+        currentFolder.push({name:name,type:type,url:url});
+        sendEvent("web-to-script-inventory", inventory);
+        refreshInventoryView();
+    }
+
+    function newFolder(path) {
+        var currentFolder = inventory;
+        depthLoop:
+        for (var depth = 0; depth < path.length; depth++) {
+            for (var subfolder = 0; subfolder < currentFolder.length; subfolder++) {
+                if (currentFolder[subfolder]["name"] === path[depth]) {
+                    if ("items" in currentFolder[subfolder]) {
+                        currentFolder = currentFolder[subfolder]["items"];
+                        continue depthLoop;
+                    } else {
+                        alert("item with desired folder name already exists!");
+                        return;
+                    }
+                }
+            }
+            // folder not found in inner loop, make new one
+            currentFolder.push({name:path[depth],items:[]});
+            currentFolder = currentFolder[currentFolder.length - 1]["items"];
+        }
+        sendEvent("web-to-script-inventory", inventory);
+        refreshInventoryView();
+    }
+
     function scriptToWebInventory(data) {
-        document.getElementById("app").innerHTML = createFolderDiv("Inventory", data);
+        inventory = data;
+        refreshInventoryView();
+        //newItem("cool test item", "UNKNOWN", "https://example.social/yourface.jpg", ["recursiontest", "recursion2", "recursion3"]);
+        newFolder(["recursiontest", "recursion2", "recursion3.1", "recursion4"]);
+        newFolder(["new folder"]);
     }
 
     EventBridge.scriptEventReceived.connect(function(message) {
@@ -43,6 +104,5 @@
         }
     });
 
-    const ready = JSON.stringify({app:"inventory",command:"ready",data:""});
-    EventBridge.emitWebEvent(ready);
+    sendEvent("ready", "");
 }());
