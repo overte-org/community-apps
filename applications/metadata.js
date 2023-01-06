@@ -4,7 +4,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "inventory-app",
             "name": "Inventory App",
-            "description": "The inventory app allows you to store, use, and share items in Vircadia.",
+            "description": "The inventory app allows you to store, use, and share items in Overte.",
             "jsfile": "inventory-app/dist/inventory.js",
             "icon": "inventory-app/dist/inventory-i.svg",
             "caption": "INVENTORY"
