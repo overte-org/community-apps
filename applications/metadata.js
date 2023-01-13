@@ -170,6 +170,15 @@ var metadata = { "applications":
             "jsfile": "tabletCam/tabletCam_app.js",
             "icon": "tabletCam/appIcons/snap-pro-i.svg",
             "caption": "SNAP-PRO"
+        },
+        {
+            "isActive": true,
+            "directory": "cameras",
+            "name": "cameras",
+            "description": "Setup 12 cameras in desktop mode and switch viewpoints using F1 to F12 keys",
+            "jsfile": "cameras/CameraPositions.js",
+            "icon": "cameras/CameraPos-inactive.svg",
+            "caption": "CAMERAS"
         }
     ]
 };
