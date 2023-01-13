@@ -1,0 +1,86 @@
+<html>
+    <head>
+        <title>Cameras</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,600,700" rel="stylesheet">
+        <style>
+            body {                
+                width: 440px;
+                font-family: 'Raleway', sans-serif;
+                font-size: 16px;
+                display: flex;
+                align-items: center;                
+                color: rgb(255, 255, 255);
+                background: linear-gradient(#2b2b2b, #285c81);
+            }
+            h1 {                
+                width: 440px;
+                font-family: 'Raleway', sans-serif;
+                font-size: 20px;
+                display: flex;
+                align-items: center;                
+                color: rgb(167, 223, 255);
+                
+            }
+            h2 {                
+                width: 440px;
+                font-family: 'Raleway', sans-serif;
+                font-size: 16px;
+                display: flex;
+                align-items: center;                
+                color: rgb(255, 255, 255);                
+            }
+    
+            .top-bar {
+                height: 90px;
+                color: rgb(0, 153, 255);
+                font-size: 40px;
+                background: linear-gradient(#1d1c2e, #1e1e1e);
+                font-weight: bold;
+                display: flex;
+                align-items: center;    
+                padding-left: 30px;
+                padding-right: 30px;                
+                position: fixed;
+                width: 480px;
+                top: 0;
+                z-index: 1;
+            }
+    
+            .content {
+                margin-top: 100px;                
+                padding: 2px 2px;
+                font-weight: normal;                            
+                position: fixed;                              
+                top: 0;
+                z-index: 1;               
+            }
+        </style>
+    </head>
+    <body >
+        <div class="top-bar">
+            <h4>Camera position app</h4>
+        </div>        
+        <div class="content">            
+                <p> This app is used to setup camera positions for streaming or recording. With it you can capture the position of the overte camera </p>                
+                <p> Keyboard shortcuts: <br />                    
+                    <h1>F1 to F12:</h1>
+                    <h2>go into camera mode, fullscreen, no overlays</h2>                    
+                    <h1>Shift + F1 to F12:</h1>
+                    <h2>add camera at current viewpoint</h2>
+                    <h2>using Shift + F1 to F12 on existing camera removes it</h2>
+                    <h1>c:</h1>
+                    <h2>change audio mode: avatar - camera</h2>
+                    <h1>n:</h1>
+                    <h2>get out of camera mode</h2>
+                    <h1>l:</h1>
+                    <h2>toggles visibity of the camera entities</h2>
+                    <h1>m:</h1>
+                    <h2>gather cameras on the domain when you loose them</h2>
+                    <h1>4,6:</h1>
+                    <h2>in camera mode, rotate around y-axis</h2>
+                    <h1>8,5:</h1>
+                    <h2>in camera mode, rotate around x-axis</h2>
+    </body>
+</html>
