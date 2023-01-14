@@ -114,7 +114,9 @@
             Script.update.connect(myTimer);
         } else {
             appStatus = false;
-            Script.update.disconnect(myTimer);
+            if (url.indexOf(APP_URL) !== -1) {
+                Script.update.disconnect(myTimer);
+            }
         }
         
         if (flashLightID === Uuid.NULL) {
