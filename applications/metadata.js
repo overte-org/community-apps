@@ -179,6 +179,15 @@ var metadata = { "applications":
             "jsfile": "cam360/cam360.js",
             "icon": "cam360/resources/images/icons/cam360-i.svg",
             "caption": "CAM360"
+        },
+        {
+            "isActive": true,
+            "directory": "DANCE",
+            "name": "Dance App",
+            "description": "Dance Like nobody is watching.<br>You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
+            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
+            "caption": "BODY DANCE"
         }
     ]
 };
