@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!--
+    cam360.html
+
+    Created by Alezia Kurdis, August 27th 2022.
+    Copyright 2022, Overte e.V.
+
+    UI for an application to take 360 degrees photo by throwing a camera in the air.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script src="resources/marzipano/marzipano.js" ></script>
+        <script>
+
+            //Paths
+            var thisPageName = "cam360.html";        
+            var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            var ROOTPATH = currentPath.replace(thisPageName, ""); 
+            var channel = "org.overte.applications.cam360";
+            
+            var last360photo = "";
+            var isCameraActive = false;
+            var isPhotoProcessing = false;
+            var useFlash = false;
+            var isThrowMode = true;
+            var DEG_TO_RAD = Math.PI/180;
+            
+            //LISTENER FROM JS FILE:
+            EventBridge.scriptEventReceived.connect(function (message) {
+                var messageObj = JSON.parse(message);
+                if (messageObj.channel === channel && messageObj.method === "last360ThumbnailURL") {
+                    last360photo = messageObj.last360ThumbnailURL;
+                    renderPreview();
+                } else if (messageObj.channel === channel && messageObj.method === "initializeUI") {
+                    isCameraActive = messageObj.masterSwitchOn;
+                    last360photo = messageObj.last360ThumbnailURL;
+                    isPhotoProcessing = messageObj.processing360Snapshot;
+                    useFlash = messageObj.useFlash;
+                    isThrowMode = messageObj.isThrowMode;
+                    renderCameraStatus();
+                    setFlashButton();
+                    renderPreview();
+                    renderMode();
+                    
+                } else if (messageObj.channel === channel && messageObj.method === "finishedProcessing360Snapshot") {
+                    document.getElementById("processing").innerHTML = "";
+                } else if (messageObj.channel === channel && messageObj.method === "startedProcessing360Snapshot") {
+                    document.getElementById("processing").innerHTML = "<img src='resources/images/processing.gif'>";
+                } else if (messageObj.channel === channel && messageObj.method === "yawPitchRoll") {
+                    setView(messageObj.yaw, messageObj.pitch, messageObj.roll);
+                }
+            });
+            
+            function setFlashButton() {
+                if (useFlash) {
+                    document.getElementById("flashOnOff").className = "flashBtnOn";
+                } else {
+                    document.getElementById("flashOnOff").className = "flashBtnOff";
+                }
+            }
+            
+            function toggleFlash() {
+                var messageToSend;
+                if (useFlash) {
+                    useFlash = false;
+                    messageToSend = {
+                        "channel": channel,
+                        "method": "disableFlash"
+                    };                    
+                } else {
+                    useFlash = true;
+                    messageToSend = {
+                        "channel": channel,
+                        "method": "enableFlash"
+                    };                       
+                }
+                setFlashButton();
+                EventBridge.emitWebEvent(JSON.stringify(messageToSend));
+            }
+            
+            function openSetting() {
+                var messageToSend = {
+                        "channel": channel,
+                        "method": "openSettings"
+                    };                       
+                EventBridge.emitWebEvent(JSON.stringify(messageToSend));
+            }
+            
+            function renderPreview() {
+                if (last360photo === "") {
+                    setScene("resources/images/default.jpg"); 
+                } else {
+                    setScene(last360photo);
+                }
+            }
+
+            function activateRpo360() {
+                var messageToSend;
+                if (isCameraActive) {
+                    messageToSend = {
+                        "channel": channel,
+                        "method": "rpo360Off"
+                    };
+                    isCameraActive = false;
+                } else {
+                    messageToSend = {
+                        "channel": channel,
+                        "method": "rpo360On"
+                    };
+                    isCameraActive = true;
+                }
+                EventBridge.emitWebEvent(JSON.stringify(messageToSend));
+                renderCameraStatus();
+            }
+            
+            function renderCameraStatus() {
+                if (isCameraActive) {
+                    document.getElementById("cameraIndicator").src = "resources/images/on.png";
+                    document.getElementById("cameraOnOff").innerHTML = "STOP CAMERA";
+                } else {
+                    document.getElementById("cameraIndicator").src = "resources/images/off.png";
+                    document.getElementById("cameraOnOff").innerHTML = "START CAMERA";
+                }
+            }
+            
+            function setMode(mode) {
+                var messageToSend;
+                if (isThrowMode) {
+                    messageToSend = {
+                        "channel": channel,
+                        "method": "PositionMode"
+                    };
+                    isThrowMode = false;
+                } else {
+                    messageToSend = {
+                        "channel": channel,
+                        "method": "ThrowMode"
+                    };
+                    isThrowMode = true;
+                }
+                EventBridge.emitWebEvent(JSON.stringify(messageToSend));                
+                renderMode();
+            }
+            
+            function renderMode() {
+                if (isThrowMode) {
+                    document.getElementById("modeThrow").className = "modeBtnOn";
+                    document.getElementById("modePosition").className = "modeBtnOff";
+                    document.getElementById("throwModeControls").style.display = "block";
+                    document.getElementById("positionModeControls").style.display = "none";
+                } else {
+                    document.getElementById("modeThrow").className = "modeBtnOff";
+                    document.getElementById("modePosition").className = "modeBtnOn";
+                    document.getElementById("throwModeControls").style.display = "none";
+                    document.getElementById("positionModeControls").style.display = "flex";                    
+                }
+            }
+            
+            function capture() {
+                var messageToSend= {
+                    "channel": channel,
+                    "method": "Capture"
+                };
+                EventBridge.emitWebEvent(JSON.stringify(messageToSend));
+            }
+        </script>
+        <style>
+            @font-face {
+                font-family: FiraSans-SemiBold;
+                src: url(resources/fonts/FiraSans-SemiBold.ttf);
+            }
+            html {
+                width: 100%;
+                height: 100%;
+            }
+            
+            body {
+                background-color: #21293d;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                color: #FFFFFF;
+                font-weight: 600;
+                text-decoration: none;
+                font-style: normal;
+                font-variant: normal;
+                text-transform: none;
+                width: 100%;
+                height: 100%;
+                min-height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            h1 {
+                padding: 0px 10px 0px 10px;
+                font-size: 18px;
+            }
+            #cameraOnOff{
+                border: 1px solid #4f659c;
+                color: #7d9ae3;
+                background-color: #36415e;
+                font-family: FiraSans-SemiBold;
+                font-size: 14px;
+                padding: 6px 10px 6px 10px;
+                min-width: 120px;
+                margin: 2px;
+                border-radius: 6px;
+            }
+            #pano {
+              position: relative;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+            }
+            #previewContainer {
+                width: 100%;
+                height: 550px;
+            }
+            #cameraIndicator {
+                margin: 2px 5px 2px 5px;
+                vertical-align: middle;
+            }
+            .flashBtnOn {
+                border: 1px solid #ffe657;
+                color: #ffe657;
+                background-color: #8f8029;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                padding: 2px 7px 2px 7px;
+                min-width: 90px;
+                margin: 2px;                
+            }
+            .flashBtnOff {
+                border: 1px solid #444444;
+                color: #444444;
+                background-color: #222222;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                padding: 2px 7px 2px 7px;
+                min-width: 90px;
+                margin: 2px;                
+            }
+            .folderSetting {
+                border: 1px solid #4f659c;
+                color: #7d9ae3;
+                background-color: #36415e;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                padding: 2px 7px 2px 7px;
+                min-width: 90px;
+                margin: 2px;
+                border-radius: 6px;
+            }
+            *:focus {
+                outline: none;
+            }
+            .modeBtnOn {
+                border: 1px solid #ffe657;
+                color: #ffe657;
+                background-color: #8f8029;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                padding: 2px 7px 2px 7px;
+                min-width: 110px;
+                margin: 2px;
+            }
+            .modeBtnOff {
+                border: 1px solid #444444;
+                color: #444444;
+                background-color: #222222;
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                padding: 2px 7px 2px 7px;
+                min-width: 110px;
+                margin: 2px;
+            }
+            #throwModeControls {
+                display: block;
+                width: 100%;
+                padding: 10px;
+            }
+            #positionModeControls {
+                display: none;
+                 vertical-align: middle;
+                 width: 100%;
+            }
+            #capture {
+                border: 1px solid #ff5429;
+                color: #ff5429;
+                background-color: #9c290c;
+                font-family: FiraSans-SemiBold;
+                font-size: 16px;
+                padding: 10px 5px 10px 5px;
+                min-width: 110px;
+                margin: 6px;
+                border-radius: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <table style = "width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style = "width: 40%;">
+                    <h1>CAM360 v2.0</h1>
+                </td>
+                <td style = "width: 60%;">
+                    <div id="processing"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan = '2' style = "width: 100%;">
+                    <div id= "previewContainer">
+                        <div id="pano"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style = "width: 40%; vertical-align: middle;">
+                    <img id = "cameraIndicator" src="resources/images/off.png">&nbsp;<button id="cameraOnOff" onClick='activateRpo360();'>OFF</button>
+                </td>                
+                <td style = "width: 60%; vertical-align: middle; text-align: right;">
+                    <div style="width: 100%; text-align: right;">
+                        <button id="modeThrow" class="modeBtnOn" onClick='setMode("throw");'>THROW MODE</button>
+                        <button id="modePosition" class="modeBtnOff" onClick='setMode("position");'>POSITION MODE</button>&nbsp;
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <table style = "width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style = "width: 75%; padding: 5px; text-align: left;">
+                    <div id="throwModeControls">
+                        Throw the camera in the air to take a 360 degrees snapshot!
+                    </div>
+                    <div id="positionModeControls">
+                        <div>&nbsp;&nbsp;</div>
+                        <div><button id="capture" onClick='capture();'>CAPTURE</button></div>
+                        <div>&nbsp;&nbsp;</div>
+                        <div><i><br>You can also click on the thumbstick<br>on your right controller.</i></div>
+                    </div>                    
+                </td>
+                <td style = "width: 25%; padding: 5px; text-align: right;">
+                    <button id="flashOnOff" class="flashBtnOff" onClick='toggleFlash();'>FLASH &#128498;</button><br>
+                    <button id="folderSetting" class="folderSetting" onClick='openSetting();'>SETTINGS &#128447;</button>
+                </td>
+            </tr>
+        </table>
+        <script>
+            EventBridge.emitWebEvent(JSON.stringify({
+                "channel": channel,
+                "method": "uiReady"
+            }));
+            
+            //Panoramic preview related code:
+            // Create viewer.
+                var panoElement = document.getElementById('pano');
+                var viewerOpts = {
+                  controls: {
+                    mouseViewMode: 'drag'    // drag|qtvr
+                  }
+                };
+                var viewer = new Marzipano.Viewer(panoElement, viewerOpts);
+
+                // Create source.
+                var source = Marzipano.ImageUrlSource.fromString("resources/images/blank.jpg");
+
+                // Create geometry.
+                var geometry = new Marzipano.EquirectGeometry([{ width: 4000 }]);
+
+                // Create view.
+                var limiter = Marzipano.RectilinearView.limit.traditional(1024, 100*Math.PI/180);
+                var view = new Marzipano.RectilinearView({ yaw: Math.PI }, limiter);
+
+                var scene;
+
+                // Create scene.
+                function setScene(photoUrl) {
+                    source = Marzipano.ImageUrlSource.fromString(photoUrl);
+                
+                    scene = viewer.createScene({
+                        source: source,
+                        geometry: geometry,
+                        view: view,
+                        pinFirstLevel: true
+                    });
+
+                    // Display scene.
+                    scene.switchTo({transitionDuration: 1000});
+                }
+
+                function setView(targetYaw, targetPitch, targetRoll){
+                    
+                    view.setYaw(targetYaw * DEG_TO_RAD);
+                    view.setPitch(targetPitch* DEG_TO_RAD);
+                    view.setRoll(targetRoll* DEG_TO_RAD);
+
+                }
+
+        </script>
+    </body>
+</html>
