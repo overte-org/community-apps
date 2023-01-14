@@ -182,12 +182,21 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "DANCE",
+            "name": "Dance App",
+            "description": "Dance Like nobody is watching.<br>You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
+            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
+            "caption": "BODY DANCE"
+        },
+        {
+            "isActive": true,
             "directory": "cameras",
             "name": "cameras",
             "description": "Setup 12 cameras in desktop mode and switch viewpoints using F1 to F12 keys",
             "jsfile": "cameras/CameraPositions.js",
             "icon": "cameras/CameraPos-inactive.svg",
             "caption": "CAMERAS"
-        }
+        }        
     ]
 };
