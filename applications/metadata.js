@@ -158,7 +158,7 @@ var metadata = { "applications":
             "directory": "BodyPaint4",
             "name": "Body Paint",
             "description": "Paint with your finger in VR, or with mouse in desktop mode.<br> You can paint in free space, on yourself, or even on other avatars, it's the fastest way to put cat-ears on all your friends.",
-            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "jsfile": "BodyPaint4/bodyPaint4.js",
             "icon": "BodyPaint4/content/appicons/body-paint-i.svg",
             "caption": "BODY PAINT"
         },
@@ -170,6 +170,15 @@ var metadata = { "applications":
             "jsfile": "tabletCam/tabletCam_app.js",
             "icon": "tabletCam/appIcons/snap-pro-i.svg",
             "caption": "SNAP-PRO"
+        },
+        {
+            "isActive": true,
+            "directory": "cam360",
+            "name": "Camera 360",
+            "description": "This camera takes spherical snapshots. It has two capture modes:<br>- The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event.<br>- The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene.<br>This includes a 360&deg; media viewer.",
+            "jsfile": "cam360/cam360.js",
+            "icon": "cam360/resources/images/icons/cam360-i.svg",
+            "caption": "CAM360"
         },
         {
             "isActive": true,
