@@ -1,0 +1,17 @@
+{
+  "materialVersion": 1,
+  "materials": [
+    {
+      "name": "ac:None1",
+      "albedo": [
+        0.10196078431372549,
+        0.10196078431372549,
+        0.10196078431372549
+      ],
+      "metallic": 0.006,
+      "roughness": 0.386,
+      "cullFaceMode": "CULL_BACK",
+      "defaultFallthrough": true
+    }
+  ]
+}

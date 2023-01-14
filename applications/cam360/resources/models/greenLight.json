@@ -1,0 +1,21 @@
+{
+  "materialVersion": 1,
+  "materials": [
+    {
+      "name": "Material.001",
+      "albedo": [
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.001,
+      "roughness": 1,
+      "emissive": [
+        0.16235294117647056,
+        2.3,
+        0.4149019607843137
+      ],
+      "cullFaceMode": "CULL_BACK"
+    }
+  ]
+}
