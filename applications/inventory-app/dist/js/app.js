@@ -11,31 +11,6 @@
 
     var inventory = [];
 
-    function createItemDiv(itemData) {
-        return '<div class="item">'
-        + "<p>" + sanitize(itemData["name"]) + "</p>"
-        + "<p>" + sanitize(itemData["type"]) + "</p>"
-        + "<p>" + sanitize(itemData["url"]) + "</p>"
-        + "</div>";
-    }
-
-    function createFolderDiv(name, itemList) {
-        var html = '<div class="folder"><p>' + sanitize(name) + "</p>";
-        for (var i = 0; i < itemList.length; i++) {
-            if ("items" in itemList[i]) {
-                html += createFolderDiv(itemList[i]["name"], itemList[i]["items"]);
-            } else {
-                html += createItemDiv(itemList[i]);
-            }
-        }
-        html += "</div>";
-        return html;
-    }
-
-    function refreshInventoryView() {
-        document.getElementById("app").innerHTML = createFolderDiv("Inventory", inventory);
-    }
-
     function getFolder(path) {
         var currentFolder = inventory;
         depthLoop:
@@ -116,6 +91,49 @@
         if (Object.keys(item).length > 0) {
             sendEvent("use-item", item);
         }
+    }
+
+    function createItemDiv(itemData, path) {
+        const div = document.createElement("div");
+        div.className = "item";
+        var child = document.createElement("p");
+        child.appendChild(document.createTextNode(sanitize(itemData["name"])));
+        div.appendChild(child);
+        child = document.createElement("p");
+        child.appendChild(document.createTextNode(sanitize(itemData["type"])));
+        div.appendChild(child);
+        child = document.createElement("p");
+        child.appendChild(document.createTextNode(sanitize(itemData["url"])));
+        div.appendChild(child);
+        child = document.createElement("button");
+        child.appendChild(document.createTextNode("use"));
+        child.onclick = function() {useItem(path);};
+        div.appendChild(child);
+        return div;
+    }
+
+    function createFolderDiv(name, itemList, path) {
+        const div = document.createElement("div");
+        const p = document.createElement("p");
+        p.appendChild(document.createTextNode(sanitize(name)));
+        div.appendChild(p);
+        div.className = "folder";
+        for (var i = 0; i < itemList.length; i++) {
+            var pathClone = path.slice(0);
+            pathClone.push(itemList[i]["name"]);
+            if ("items" in itemList[i]) {
+                div.appendChild(createFolderDiv(itemList[i]["name"], itemList[i]["items"], pathClone));
+            } else {
+                div.appendChild(createItemDiv(itemList[i], pathClone));
+            }
+        }
+        return div;
+    }
+
+    function refreshInventoryView() {
+        const app = document.getElementById("app");
+        app.innerHTML = "";
+        app.appendChild(createFolderDiv("Inventory", inventory, []));
     }
 
     function scriptToWebInventory(data) {
