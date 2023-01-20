@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html lang=en>
     <head>
-        <meta charset=utf-8 />
-        <meta http-equiv=X-UA-Compatible content="IE=edge" />
-        <meta name=viewport content="width=device-width,initial-scale=1" />
-        <link rel=icon href=favicon.ico />
         <title>Inventory</title>
         <style type="text/css">
-            #confirm-overlay {
+            .overlay {
                 display:none;
                 position:absolute;
                 top:0;
@@ -17,7 +13,7 @@
                 background:rgba(0, 0, 0, 0.5);
                 z-index:1;
             }
-            #confirm-box {
+            .dialog {
                 position:absolute;
                 width:50%;
                 top:25%;
@@ -41,12 +37,18 @@
         <script src="js/app.js"></script>
     </head>
     <body>
-        <noscript><strong>We're sorry but Inventory doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript>
-        <div id="app"></div>
-        <div id="confirm-overlay">
-            <div id="confirm-box">
+        <div id="view" class="folder"></div>
+        <div id="confirm-overlay" class="overlay">
+            <div class="dialog">
                 <p>Are you sure?</p>
                 <button id="confirm-button">yes</button><button onclick="hideDeleteConfirm();">no</button>
+            </div>
+        </div>
+        <div id="new-folder-overlay" class="overlay">
+            <div class="dialog">
+                <p>Create new folder</p>
+                <input type="text" id="new-folder-name" />
+                <button id="new-folder-button">Create</button><button onclick="hideNewFolder();">Cancel</button>
             </div>
         </div>
     </body>

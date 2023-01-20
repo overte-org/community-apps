@@ -119,6 +119,24 @@ function showDeleteConfirm(path) {
     document.getElementById("confirm-overlay").style.display = "block";
 }
 
+function hideNewFolder() {
+    document.getElementById("new-folder-overlay").style.display = "none";
+    document.getElementById("new-folder-button").onclick = function(){};
+    document.getElementById("new-folder-name").value = "";
+}
+
+function showNewFolder(path) {
+    document.getElementById("new-folder-button").onclick = function() {
+        const name = document.getElementById("new-folder-name").value;
+        const pathClone = path.slice(0);
+        pathClone.push(name);
+        hideNewFolder();
+        newFolder(pathClone);
+    };
+    document.getElementById("new-folder-overlay").style.display = "block";
+    document.getElementById("new-folder-name").focus();
+}
+
 function createItemDiv(itemData, path) {
     const div = document.createElement("div");
     div.className = "item";
@@ -149,6 +167,10 @@ function createFolderDiv(name, itemList, path) {
     child.appendChild(document.createTextNode(sanitize(name)));
     div.appendChild(child);
     child = document.createElement("button");
+    child.appendChild(document.createTextNode("new folder"));
+    child.onclick = function(){showNewFolder(path)};
+    div.appendChild(child);
+    child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
     child.onclick = function() {showDeleteConfirm(path);};
     div.appendChild(child);
@@ -165,13 +187,17 @@ function createFolderDiv(name, itemList, path) {
 }
 
 function refreshInventoryView() {
-    const app = document.getElementById("app");
-    app.innerHTML = "";
+    const view = document.getElementById("view");
+    view.innerHTML = "";
+    var child = document.createElement("button");
+    child.appendChild(document.createTextNode("new folder"));
+    child.onclick = function(){showNewFolder([])};
+    view.appendChild(child);
     for (var i = 0; i < inventory.length; i++) {
         if ("items" in inventory[i]) {
-            app.appendChild(createFolderDiv(inventory[i]["name"], inventory[i]["items"], [inventory[i]["name"]]));
+            view.appendChild(createFolderDiv(inventory[i]["name"], inventory[i]["items"], [inventory[i]["name"]]));
         } else {
-            app.appendChild(createItemDiv(inventory[i], [inventory[i]["name"]]));
+            view.appendChild(createItemDiv(inventory[i], [inventory[i]["name"]]));
         }
     }
 }
@@ -180,9 +206,6 @@ function scriptToWebInventory(data) {
     inventory = data;
     refreshInventoryView();
     //newItem(["recursiontest", "recursion2", "recursion3", "cool test item"], "UNKNOWN", "https://example.social/yourface.jpg");
-    //newFolder(["recursiontest", "recursion2", "recursion3.1", "recursion4"]);
-    //newFolder(["new folder"]);
-    //newFolder(["woody"]);
     //newItem(["hello"], "UNKNOWN", "example.hello");
     //newItem(["recursiontest", "hello again"], "UNKNOWN", "example.again");
     //newItem(["woody", "avatar"], "AVATAR", "https://cdn-1.vircadia.com/us-e-1/Bazaar/Avatars/Woody/mannequin.fst");
@@ -202,11 +225,14 @@ EventBridge.scriptEventReceived.connect(function(message) {
 });
 
 window.onscroll = function() {
-    // have the confirm box follow the view point instead of staying up top always
-    const style = document.getElementById("confirm-overlay").style;
+    // have the dialog boxes follow the view point instead of staying up top always
+    const overlays = document.getElementsByClassName("overlay");
     const scrollAmount = window.pageYOffset + "px";
-    style.top = scrollAmount;
-    style.bottom = "-" + scrollAmount;
+    for (var i = 0; i < overlays.length; i++) {
+        const style = overlays[i].style;
+        style.top = scrollAmount;
+        style.bottom = "-" + scrollAmount;
+    }
 };
 
 window.onload = function() {sendEvent("ready", {});}
