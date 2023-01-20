@@ -167,7 +167,6 @@ function createFolderDiv(name, itemList, path) {
 function refreshInventoryView() {
     const app = document.getElementById("app");
     app.innerHTML = "";
-    //app.appendChild(createFolderDiv("Inventory", inventory, []));
     for (var i = 0; i < inventory.length; i++) {
         if ("items" in inventory[i]) {
             app.appendChild(createFolderDiv(inventory[i]["name"], inventory[i]["items"], [inventory[i]["name"]]));
@@ -175,7 +174,6 @@ function refreshInventoryView() {
             app.appendChild(createItemDiv(inventory[i], [inventory[i]["name"]]));
         }
     }
-    app.appendChild();
 }
 
 function scriptToWebInventory(data) {
