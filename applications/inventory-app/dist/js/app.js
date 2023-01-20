@@ -144,10 +144,14 @@ function createItemDiv(itemData, path) {
 
 function createFolderDiv(name, itemList, path) {
     const div = document.createElement("div");
+    div.className = "folder";
     var child = document.createElement("p");
     child.appendChild(document.createTextNode(sanitize(name)));
     div.appendChild(child);
-    div.className = "folder";
+    child = document.createElement("button");
+    child.appendChild(document.createTextNode("delete"));
+    child.onclick = function() {showDeleteConfirm(path);};
+    div.appendChild(child);
     for (var i = 0; i < itemList.length; i++) {
         var pathClone = path.slice(0);
         pathClone.push(itemList[i]["name"]);
@@ -157,17 +161,21 @@ function createFolderDiv(name, itemList, path) {
             div.appendChild(createItemDiv(itemList[i], pathClone));
         }
     }
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("delete"));
-    child.onclick = function() {showDeleteConfirm(path);};
-    div.appendChild(child);
     return div;
 }
 
 function refreshInventoryView() {
     const app = document.getElementById("app");
     app.innerHTML = "";
-    app.appendChild(createFolderDiv("Inventory", inventory, []));
+    //app.appendChild(createFolderDiv("Inventory", inventory, []));
+    for (var i = 0; i < inventory.length; i++) {
+        if ("items" in inventory[i]) {
+            app.appendChild(createFolderDiv(inventory[i]["name"], inventory[i]["items"], [inventory[i]["name"]]));
+        } else {
+            app.appendChild(createItemDiv(inventory[i], [inventory[i]["name"]]));
+        }
+    }
+    app.appendChild();
 }
 
 function scriptToWebInventory(data) {
