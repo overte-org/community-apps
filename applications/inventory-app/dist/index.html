@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang=en>
+<html>
     <head>
         <title>Inventory</title>
         <style type="text/css">
@@ -38,10 +38,10 @@
     </head>
     <body>
         <div id="view" class="folder"></div>
-        <div id="confirm-overlay" class="overlay">
+        <div id="delete-overlay" class="overlay">
             <div class="dialog">
-                <p>Are you sure?</p>
-                <button id="confirm-button">yes</button><button onclick="hideDeleteConfirm();">no</button>
+                <p>Delete item?</p>
+                <button id="delete-button">yes</button><button onclick="hideDeleteConfirm();">no</button>
             </div>
         </div>
         <div id="new-folder-overlay" class="overlay">
@@ -49,6 +49,22 @@
                 <p>Create new folder</p>
                 <input type="text" id="new-folder-name" />
                 <button id="new-folder-button">Create</button><button onclick="hideNewFolder();">Cancel</button>
+            </div>
+        </div>
+        <div id="new-item-overlay" class="overlay">
+            <div class="dialog">
+                <p>Create new item</p>
+                <input type="text" id="new-item-name" />
+                <select name="new-item-type" id="new-item-type">
+                    <option>SCRIPT</option>
+                    <option>MODEL</option>
+                    <option>AVATAR</option>
+                    <option>PLACE</option>
+                    <option>JSON</option>
+                    <option>UNKNOWN</option>
+                </select>
+                <input type="text" id="new-item-url" />
+                <button id="new-item-button">Create</button><button onclick="hideNewItem();">Cancel</button>
             </div>
         </div>
     </body>
