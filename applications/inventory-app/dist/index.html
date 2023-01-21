@@ -41,30 +41,30 @@
         <div id="delete-overlay" class="overlay">
             <div class="dialog">
                 <p>Delete item?</p>
-                <button id="delete-button">yes</button><button onclick="hideDeleteConfirm();">no</button>
+                <button type="button" id="delete-button">yes</button><button type="button" onclick="hideDeleteConfirm();">no</button>
             </div>
         </div>
         <div id="new-folder-overlay" class="overlay">
             <div class="dialog">
                 <p>Create new folder</p>
-                <input type="text" id="new-folder-name" />
-                <button id="new-folder-button">Create</button><button onclick="hideNewFolder();">Cancel</button>
+                <label for="new-folder-name">Name</label><input type="text" id="new-folder-name" />
+                <button type="button" id="new-folder-button">Create</button><button type="button" onclick="hideNewFolder();">Cancel</button>
             </div>
         </div>
         <div id="new-item-overlay" class="overlay">
             <div class="dialog">
                 <p>Create new item</p>
-                <input type="text" id="new-item-name" />
-                <select name="new-item-type" id="new-item-type">
+                <label for="new-item-name">Name</label><input type="text" id="new-item-name" /><br />
+                <label for="new-item-type">Type</label><select name="new-item-type" id="new-item-type">
                     <option>SCRIPT</option>
                     <option>MODEL</option>
                     <option>AVATAR</option>
                     <option>PLACE</option>
                     <option>JSON</option>
                     <option>UNKNOWN</option>
-                </select>
-                <input type="text" id="new-item-url" />
-                <button id="new-item-button">Create</button><button onclick="hideNewItem();">Cancel</button>
+                </select><br />
+                <label for="new-item-url">URL</label><input type="text" id="new-item-url" />
+                <button type="button" id="new-item-button">Create</button><button type="button" onclick="hideNewItem();">Cancel</button>
             </div>
         </div>
     </body>
