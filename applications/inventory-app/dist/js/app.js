@@ -87,6 +87,8 @@ function hideNewItem() {
 }
 
 function showNewItem(currentFolder) {
+    document.getElementById("new-item-prompt").innerHTML = "Create new item";
+    document.getElementById("new-item-button").innerHTML = "Create";
     document.getElementById("new-item-button").onclick = function() {
         const name = document.getElementById("new-item-name").value;
         if (name !== "") {
@@ -99,6 +101,33 @@ function showNewItem(currentFolder) {
             const type = typeList.options[typeList.selectedIndex].text;
             const url = document.getElementById("new-item-url").value
             hideNewItem();
+            newItem(currentFolder, name, type, url);
+        }
+    };
+    document.getElementById("new-item-overlay").style.display = "block";
+    document.getElementById("new-item-name").focus();
+}
+
+function showEditItem(currentFolder, item) {
+    document.getElementById("new-item-prompt").innerHTML = "Edit item";
+    document.getElementById("new-item-button").innerHTML = "Save";
+    document.getElementById("new-item-name").value = item["name"];
+    document.getElementById("new-item-url").value = item["url"];
+    const typeList = document.getElementById("new-item-type");
+    typeList.selectedIndex = typeList.options.length - 1;
+    for (var type = 0; type < typeList.options.length; type++) {
+        if (item["type"] === typeList.options[type].text) {
+            typeList.selectedIndex = type;
+            break;
+        }
+    }
+    document.getElementById("new-item-button").onclick = function() {
+        const name = document.getElementById("new-item-name").value;
+        if (name !== "") {
+            const type = typeList.options[typeList.selectedIndex].text;
+            const url = document.getElementById("new-item-url").value
+            hideNewItem();
+            removeItemOrFolder(currentFolder, item["name"]);
             newItem(currentFolder, name, type, url);
         }
     };
@@ -121,6 +150,10 @@ function createItemDiv(itemData, folder) {
     child = document.createElement("button");
     child.appendChild(document.createTextNode("use"));
     child.onclick = function() {sendEvent("use-item", itemData);};
+    div.appendChild(child);
+    child = document.createElement("button");
+    child.appendChild(document.createTextNode("edit"));
+    child.onclick = function() {showEditItem(folder, itemData);};
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
