@@ -1,23 +1,29 @@
 "use strict";
 
-function sanitize(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 function sendEvent(command, data) {
     EventBridge.emitWebEvent(JSON.stringify({app:"inventory",command:command,data:data}));
+}
+
+function folderSorter(a, b) {
+    var aIsFolder = ("items" in a);
+    var bIsFolder = ("items" in b);
+    if (aIsFolder && !bIsFolder) return -1;
+    if (!aIsFolder && bIsFolder) return 1;
+    return a["name"].localeCompare(b["name"]);
 }
 
 var inventory = [];
 
 function newItem(folder, name, type, url) {
     folder.push({name:name,type:type,url:url});
+    folder.sort(folderSorter);
     sendEvent("web-to-script-inventory", inventory);
     refreshInventoryView();
 }
 
 function newFolder(folder, name) {
     folder.push({name:name,items:[]});
+    folder.sort(folderSorter);
     sendEvent("web-to-script-inventory", inventory);
     refreshInventoryView();
 }
@@ -104,13 +110,13 @@ function createItemDiv(itemData, folder) {
     const div = document.createElement("div");
     div.className = "item";
     var child = document.createElement("p");
-    child.appendChild(document.createTextNode(sanitize(itemData["name"])));
+    child.appendChild(document.createTextNode(itemData["name"]));
     div.appendChild(child);
     child = document.createElement("p");
-    child.appendChild(document.createTextNode(sanitize(itemData["type"])));
+    child.appendChild(document.createTextNode(itemData["type"]));
     div.appendChild(child);
     child = document.createElement("p");
-    child.appendChild(document.createTextNode(sanitize(itemData["url"])));
+    child.appendChild(document.createTextNode(itemData["url"]));
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("use"));
@@ -129,7 +135,7 @@ function createFolderDiv(name, itemList, parentFolder) {
     const contents = document.createElement("div");
     contents.style.display = "block";
     const p = document.createElement("p");
-    p.appendChild(document.createTextNode(sanitize(name)));
+    p.appendChild(document.createTextNode(name));
     p.onclick = function() {
         contents.style.display = contents.style.display === "block" ? "none" : "block";
     };
