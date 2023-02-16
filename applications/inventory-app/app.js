@@ -42,6 +42,16 @@ function removeItemOrFolder(folder, name) {
     }
 }
 
+function hideAlert() {
+    document.getElementById("alert-overlay").style.display = "none";
+    document.getElementById("alert-message").innerHTML = "";
+}
+
+function showAlert(text) {
+    document.getElementById("alert-message").appendChild(document.createTextNode(text));
+    document.getElementById("alert-overlay").style.display = "block";
+}
+
 function hideDeleteConfirm() {
     document.getElementById("delete-overlay").style.display = "none";
     document.getElementById("delete-button").onclick = function(){};
@@ -67,6 +77,7 @@ function showNewFolder(currentFolder) {
         if (name !== "") {
             for (var item = 0; item < currentFolder.length; item++) {
                 if (currentFolder[item]["name"] === name) {
+                    showAlert("Item or folder with name " + name + " already exists!");
                     return;
                 }
             }
@@ -94,6 +105,7 @@ function showNewItem(currentFolder) {
         if (name !== "") {
             for (var item = 0; item < currentFolder.length; item++) {
                 if (currentFolder[item]["name"] === name) {
+                    showAlert("Item or folder with name " + name + " already exists!");
                     return;
                 }
             }
@@ -127,6 +139,7 @@ function showEditItem(currentFolder, item) {
             if (name !== item["name"]) {
                 for (var i = 0; i < currentFolder.length; i++) {
                     if (currentFolder[i]["name"] === name) {
+                        showAlert("Item or folder with name " + name + " already exists!");
                         return;
                     }
                 }
