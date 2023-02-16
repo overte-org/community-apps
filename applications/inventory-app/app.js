@@ -124,6 +124,13 @@ function showEditItem(currentFolder, item) {
     document.getElementById("new-item-button").onclick = function() {
         const name = document.getElementById("new-item-name").value;
         if (name !== "") {
+            if (name !== item["name"]) {
+                for (var i = 0; i < currentFolder.length; i++) {
+                    if (currentFolder[i]["name"] === name) {
+                        return;
+                    }
+                }
+            }
             const type = typeList.options[typeList.selectedIndex].text;
             const url = document.getElementById("new-item-url").value
             hideNewItem();
