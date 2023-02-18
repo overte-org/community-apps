@@ -104,19 +104,21 @@ function showNewItem(folder) {
     document.getElementById("new-item-button").innerHTML = "Create";
     document.getElementById("new-item-button").onclick = function() {
         const name = document.getElementById("new-item-name").value;
-        if (name !== "") {
-            for (var item = 0; item < folder.length; item++) {
-                if (folder[item]["name"] === name) {
-                    showAlert("Item or folder with name " + name + " already exists!");
-                    return;
-                }
-            }
-            const typeList = document.getElementById("new-item-type");
-            const type = typeList.options[typeList.selectedIndex].text;
-            const url = document.getElementById("new-item-url").value
-            hideNewItem();
-            newItem(folder, name, type, url);
+        if (name === "") {
+            showAlert("Item requires a name.");
+            return;
         }
+        for (var item = 0; item < folder.length; item++) {
+            if (folder[item]["name"] === name) {
+                showAlert("Item or folder with name " + name + " already exists!");
+                return;
+            }
+        }
+        const typeList = document.getElementById("new-item-type");
+        const type = typeList.options[typeList.selectedIndex].text;
+        const url = document.getElementById("new-item-url").value
+        hideNewItem();
+        newItem(folder, name, type, url);
     };
     document.getElementById("new-item-overlay").style.display = "block";
     document.getElementById("new-item-name").focus();
@@ -138,21 +140,23 @@ function showEditItem(folder, index) {
     }
     document.getElementById("new-item-button").onclick = function() {
         const name = document.getElementById("new-item-name").value;
-        if (name !== "") {
-            if (name !== item["name"]) {
-                for (var i = 0; i < folder.length; i++) {
-                    if (folder[i]["name"] === name) {
-                        showAlert("Item or folder with name " + name + " already exists!");
-                        return;
-                    }
+        if (name === "") {
+            showAlert("Item requires a name.");
+            return;
+        }
+        if (name !== item["name"]) {
+            for (var i = 0; i < folder.length; i++) {
+                if (folder[i]["name"] === name) {
+                    showAlert("Item or folder with name " + name + " already exists!");
+                    return;
                 }
             }
-            const type = typeList.options[typeList.selectedIndex].text;
-            const url = document.getElementById("new-item-url").value
-            hideNewItem();
-            removeItemOrFolder(folder, index);
-            newItem(folder, name, type, url);
         }
+        const type = typeList.options[typeList.selectedIndex].text;
+        const url = document.getElementById("new-item-url").value
+        hideNewItem();
+        removeItemOrFolder(folder, index);
+        newItem(folder, name, type, url);
     };
     document.getElementById("new-item-overlay").style.display = "block";
     document.getElementById("new-item-name").focus();
