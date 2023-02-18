@@ -13,6 +13,7 @@ function folderSorter(a, b) {
 }
 
 var inventory = [];
+var allFolders = [];
 var inbox = [];
 
 function newItem(folder, name, type, url) {
@@ -198,19 +199,7 @@ function createItemDiv(folder, index) {
     child = document.createElement("button");
     child.appendChild(document.createTextNode("move"));
     child.onclick = function() {showFolderSelect("Move to:", function() {
-        const folderList = document.getElementById("folder-select-list");
-        const path = folderList.options[folderList.selectedIndex].text.split("/");
-        path.shift(); // remove first and last elements
-        path.pop(); // since they'll always be empty
-        var toFolder = inventory;
-        for (var depth = 0; depth < path.length; depth++) {
-            for (var folderIndex = 0; folderIndex < toFolder.length; folderIndex++) {
-                if (toFolder[folderIndex]["name"] === path[depth]) {
-                    toFolder = toFolder[folderIndex]["items"];
-                    break;
-                }
-            }
-        }
+        const toFolder = allFolders[document.getElementById("folder-select-list").selectedIndex];
         hideFolderSelect();
         removeItemOrFolder(folder, index);
         newItem(toFolder, item["name"], item["type"], item["url"]);
@@ -230,6 +219,7 @@ function createItemDiv(folder, index) {
 
 function createFolderDiv(parentFolder, index, path) {
     const itemList = parentFolder[index]["items"];
+    allFolders.push(itemList);
     const name = parentFolder[index]["name"];
     const div = document.createElement("div");
     div.className = "folder";
@@ -273,6 +263,7 @@ function createFolderDiv(parentFolder, index, path) {
 }
 
 function refreshInventoryView() {
+    allFolders = [inventory];
     const folderList = document.getElementById("folder-select-list");
     folderList.innerHTML = "";
     var child = document.createElement("option");
@@ -327,19 +318,7 @@ function createInboxItem(index) {
     child = document.createElement("button");
     child.appendChild(document.createTextNode("accept"));
     child.onclick = function() {showFolderSelect("Put it where?", function() {
-        const folderList = document.getElementById("folder-select-list");
-        const path = folderList.options[folderList.selectedIndex].text.split("/");
-        path.shift(); // remove first and last elements
-        path.pop(); // since they'll always be empty
-        var toFolder = inventory;
-        for (var depth = 0; depth < path.length; depth++) {
-            for (var folderIndex = 0; folderIndex < toFolder.length; folderIndex++) {
-                if (toFolder[folderIndex]["name"] === path[depth]) {
-                    toFolder = toFolder[folderIndex]["items"];
-                    break;
-                }
-            }
-        }
+        var toFolder = allFolders[document.getElementById("folder-select-list").selectedIndex];
         for (var itemIndex = 0; itemIndex < toFolder.length; itemIndex++) {
             if (toFolder[itemIndex]["name"] === data["name"]) {
                 showAlert("Folder already has an item named " + data["name"] + ".  Choose a different folder or rename the other item.");
