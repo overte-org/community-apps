@@ -56,7 +56,7 @@ function hideConfirm() {
 }
 
 function showConfirm(text, func) {
-    document.getElementById("confirm-prompt").appendChild(createTextNode(text));
+    document.getElementById("confirm-prompt").appendChild(document.createTextNode(text));
     document.getElementById("confirm-button").onclick = func;
     document.getElementById("confirm-overlay").style.display = "block";
 }
@@ -322,7 +322,30 @@ function createInboxItem(index) {
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("accept"));
-    child.onclick = function() {showAlert("TODO");};
+    child.onclick = function() {showFolderSelect("Put it where?", function() {
+        const folderList = document.getElementById("folder-select-list");
+        const path = folderList.options[folderList.selectedIndex].text.split("/");
+        path.shift(); // remove first and last elements
+        path.pop(); // since they'll always be empty
+        var toFolder = inventory;
+        for (var depth = 0; depth < path.length; depth++) {
+            for (var folderIndex = 0; folderIndex < toFolder.length; folderIndex++) {
+                if (toFolder[folderIndex]["name"] === path[depth]) {
+                    toFolder = toFolder[folderIndex]["items"];
+                    break;
+                }
+            }
+        }
+        for (var itemIndex = 0; itemIndex < toFolder.length; itemIndex++) {
+            if (toFolder[itemIndex]["name"] === data["name"]) {
+                showAlert("Folder already has an item named " + data["name"] + ".  Choose a different folder or rename the other item.");
+                return;
+            }
+        }
+        hideFolderSelect();
+        deleteInboxItem(index);
+        newItem(toFolder, data["name"], data["type"], data["url"]);
+    });};
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
