@@ -37,11 +37,12 @@
         <script src="app.js"></script>
     </head>
     <body>
+        <div id="inbox" class="folder"></div>
         <div id="view" class="folder"></div>
-        <div id="delete-overlay" class="overlay">
+        <div id="confirm-overlay" class="overlay">
             <div class="dialog">
-                <p>Delete item?</p>
-                <button type="button" id="delete-button">yes</button><button type="button" onclick="hideDeleteConfirm();">no</button>
+                <p id="confirm-prompt"></p>
+                <button type="button" id="confirm-button">yes</button><button type="button" onclick="hideConfirm();">no</button>
             </div>
         </div>
         <div id="new-folder-overlay" class="overlay">
@@ -53,7 +54,7 @@
         </div>
         <div id="new-item-overlay" class="overlay">
             <div class="dialog">
-                <p id="new-item-prompt">Create new item</p>
+                <p id="new-item-prompt"></p>
                 <label for="new-item-name">Name</label><input type="text" id="new-item-name" /><br />
                 <label for="new-item-type">Type</label><select name="new-item-type" id="new-item-type">
                     <option>SCRIPT</option>

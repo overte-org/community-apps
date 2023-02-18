@@ -13,6 +13,7 @@ function folderSorter(a, b) {
 }
 
 var inventory = [];
+var inbox = [];
 
 function newItem(folder, name, type, url) {
     folder.push({name:name,type:type,url:url});
@@ -52,17 +53,15 @@ function showAlert(text) {
     document.getElementById("alert-overlay").style.display = "block";
 }
 
-function hideDeleteConfirm() {
-    document.getElementById("delete-overlay").style.display = "none";
-    document.getElementById("delete-button").onclick = function(){};
+function hideConfirm() {
+    document.getElementById("confirm-overlay").style.display = "none";
+    document.getElementById("confirm-button").onclick = function(){};
 }
 
-function showDeleteConfirm(folder, name) {
-    document.getElementById("delete-button").onclick = function() {
-        removeItemOrFolder(folder, name);
-        hideDeleteConfirm();
-    };
-    document.getElementById("delete-overlay").style.display = "block";
+function showConfirm(text, func) {
+    document.getElementById("confirm-prompt").innerHTML = text;
+    document.getElementById("confirm-button").onclick = func;
+    document.getElementById("confirm-overlay").style.display = "block";
 }
 
 function hideNewFolder() {
@@ -177,7 +176,12 @@ function createItemDiv(itemData, folder) {
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
-    child.onclick = function() {showDeleteConfirm(folder, itemData["name"]);};
+    child.onclick = function() {
+        showConfirm("Delete item " + itemData["name"] + "?", function() {
+            removeItemOrFolder(folder, itemData["name"]);
+            hideConfirm();
+        });
+    };
     div.appendChild(child);
     return div;
 }
@@ -186,7 +190,7 @@ function createFolderDiv(name, itemList, parentFolder) {
     const div = document.createElement("div");
     div.className = "folder";
     const contents = document.createElement("div");
-    contents.style.display = "block";
+    contents.style.display = "none";
     const p = document.createElement("p");
     p.appendChild(document.createTextNode(name));
     p.onclick = function() {
@@ -236,9 +240,69 @@ function refreshInventoryView() {
     }
 }
 
-function scriptToWebInventory(data) {
-    inventory = data;
-    refreshInventoryView();
+function deleteInboxItem(index) {
+    for (var itemToShift = index + 1; itemToShift < inbox.length; itemToShift++) {
+        inbox[itemToShift - 1] = inbox[itemToShift];
+    }
+    inbox.pop();
+    sendEvent("web-to-script-update-receiving-item-queue", inbox);
+    refreshInboxView();
+    return;
+}
+
+function createInboxItem(index) {
+    const item = inbox[index];
+    const data = item["data"];
+    const div = document.createElement("div");
+    div.className = "item";
+    child = document.createElement("p");
+    child.appendChild(document.createTextNode("from " + item["senderName"] + " " + item["senderUUID"]));
+    div.appendChild(child);
+    var child = document.createElement("p");
+    child.appendChild(document.createTextNode(data["name"]));
+    div.appendChild(child);
+    child = document.createElement("p");
+    child.appendChild(document.createTextNode(data["type"]));
+    div.appendChild(child);
+    child = document.createElement("p");
+    child.appendChild(document.createTextNode(data["url"]));
+    div.appendChild(child);
+    child = document.createElement("button");
+    child.appendChild(document.createTextNode("accept"));
+    child.onclick = function() {showAlert("TODO");};
+    div.appendChild(child);
+    child = document.createElement("button");
+    child.appendChild(document.createTextNode("delete"));
+    child.onclick = function() {
+        showConfirm("delete inbox item " + data["name"] + "?", function() {
+            deleteInboxItem(index);
+            hideConfirm();
+        });
+    };
+    div.appendChild(child);
+    return div;
+}
+
+function refreshInboxView() {
+    const inboxDiv = document.getElementById("inbox");
+    inboxDiv.innerHTML = "";
+    if (inbox.length > 0) {
+        const contents = document.createElement("div");
+        contents.style.display = "none";
+        var child = document.createElement("p");
+        child.appendChild(document.createTextNode(inbox.length + " item(s) in inbox"));
+        inboxDiv.appendChild(child);
+        child = document.createElement("button");
+        child.appendChild(document.createTextNode("show/hide"));
+        child.onclick = function() {
+            contents.style.display = contents.style.display === "block" ? "none" : "block";
+        };
+        inboxDiv.appendChild(child);
+        for (var index = 0; index < inbox.length; index++) {
+            contents.appendChild(createInboxItem(index));
+        }
+        inboxDiv.appendChild(contents);
+    }
 }
 
 EventBridge.scriptEventReceived.connect(function(message) {
@@ -246,10 +310,15 @@ EventBridge.scriptEventReceived.connect(function(message) {
     if (parsed_message["app"] === "inventory") {
         switch (parsed_message["command"]) {
             case "script-to-web-inventory":
-                scriptToWebInventory(parsed_message["data"]);
+                inventory = parsed_message["data"];
+                refreshInventoryView();
                 break;
-            default:
-                alert(message);
+            case "script-to-web-receiving-item-queue":
+                inbox = parsed_message["data"];
+                refreshInboxView();
+                break;
+            //default:
+                //alert(message);
         }
     }
 });
