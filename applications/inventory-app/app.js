@@ -52,10 +52,11 @@ function showAlert(text) {
 function hideConfirm() {
     document.getElementById("confirm-overlay").style.display = "none";
     document.getElementById("confirm-button").onclick = function(){};
+    document.getElementById("confirm-prompt").innerHTML = "";
 }
 
 function showConfirm(text, func) {
-    document.getElementById("confirm-prompt").innerHTML = text;
+    document.getElementById("confirm-prompt").appendChild(createTextNode(text));
     document.getElementById("confirm-button").onclick = func;
     document.getElementById("confirm-overlay").style.display = "block";
 }
@@ -69,16 +70,22 @@ function hideNewFolder() {
 function showNewFolder(folder) {
     document.getElementById("new-folder-button").onclick = function() {
         const name = document.getElementById("new-folder-name").value;
-        if (name !== "") {
-            for (var item = 0; item < folder.length; item++) {
-                if (folder[item]["name"] === name) {
-                    showAlert("Item or folder with name " + name + " already exists!");
-                    return;
-                }
-            }
-            hideNewFolder();
-            newFolder(folder, name);
+        if (name === "") {
+            showAlert("Folder requires a name.");
+            return;
         }
+        if (name.includes("/")) {
+            showAlert("Folder name may not include /");
+            return;
+        }
+        for (var item = 0; item < folder.length; item++) {
+            if (folder[item]["name"] === name) {
+                showAlert("Item or folder with name " + name + " already exists!");
+                return;
+            }
+        }
+        hideNewFolder();
+        newFolder(folder, name);
     };
     document.getElementById("new-folder-overlay").style.display = "block";
     document.getElementById("new-folder-name").focus();
@@ -151,6 +158,18 @@ function showEditItem(folder, index) {
     document.getElementById("new-item-name").focus();
 }
 
+function hideFolderSelect() {
+    document.getElementById("folder-select-overlay").style.display = "none";
+    document.getElementById("folder-select-list").selectedIndex = 0;
+    document.getElementById("folder-select-prompt").innerHTML = "";
+}
+
+function showFolderSelect(text, func) {
+    document.getElementById("folder-select-prompt").appendChild(document.createTextNode(text));
+    document.getElementById("folder-select-button").onclick = func;
+    document.getElementById("folder-select-overlay").style.display = "block";
+}
+
 function createItemDiv(folder, index) {
     const item = folder[index];
     const div = document.createElement("div");
@@ -173,6 +192,27 @@ function createItemDiv(folder, index) {
     child.onclick = function() {showEditItem(folder, index);};
     div.appendChild(child);
     child = document.createElement("button");
+    child.appendChild(document.createTextNode("move"));
+    child.onclick = function() {showFolderSelect("Move to:", function() {
+        const folderList = document.getElementById("folder-select-list");
+        const path = folderList.options[folderList.selectedIndex].text.split("/");
+        path.shift(); // remove first and last elements
+        path.pop(); // since they'll always be empty
+        var toFolder = inventory;
+        for (var depth = 0; depth < path.length; depth++) {
+            for (var folderIndex = 0; folderIndex < toFolder.length; folderIndex++) {
+                if (toFolder[folderIndex]["name"] === path[depth]) {
+                    toFolder = toFolder[folderIndex]["items"];
+                    break;
+                }
+            }
+        }
+        hideFolderSelect();
+        removeItemOrFolder(folder, index);
+        newItem(toFolder, item["name"], item["type"], item["url"]);
+    });};
+    div.appendChild(child);
+    child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
     child.onclick = function() {
         showConfirm("Delete item " + item["name"] + "?", function() {
@@ -184,7 +224,7 @@ function createItemDiv(folder, index) {
     return div;
 }
 
-function createFolderDiv(parentFolder, index) {
+function createFolderDiv(parentFolder, index, path) {
     const itemList = parentFolder[index]["items"];
     const name = parentFolder[index]["name"];
     const div = document.createElement("div");
@@ -212,12 +252,14 @@ function createFolderDiv(parentFolder, index) {
             removeItemOrFolder(parentFolder, index);
             hideConfirm();
         });
-
     };
     contents.appendChild(child);
+    child = document.createElement("option");
+    child.appendChild(document.createTextNode(path));
+    document.getElementById("folder-select-list").appendChild(child);
     for (var i = 0; i < itemList.length; i++) {
         if ("items" in itemList[i]) {
-            contents.appendChild(createFolderDiv(itemList, i));
+            contents.appendChild(createFolderDiv(itemList, i, path + itemList[i]["name"] + "/"));
         } else {
             contents.appendChild(createItemDiv(itemList, i));
         }
@@ -227,9 +269,14 @@ function createFolderDiv(parentFolder, index) {
 }
 
 function refreshInventoryView() {
+    const folderList = document.getElementById("folder-select-list");
+    folderList.innerHTML = "";
+    var child = document.createElement("option");
+    child.appendChild(document.createTextNode("/"));
+    folderList.appendChild(child);
     const view = document.getElementById("view");
     view.innerHTML = "";
-    var child = document.createElement("button");
+    child = document.createElement("button");
     child.appendChild(document.createTextNode("new folder"));
     child.onclick = function(){showNewFolder(inventory)};
     view.appendChild(child);
@@ -239,7 +286,7 @@ function refreshInventoryView() {
     view.appendChild(child);
     for (var i = 0; i < inventory.length; i++) {
         if ("items" in inventory[i]) {
-            view.appendChild(createFolderDiv(inventory, i));
+            view.appendChild(createFolderDiv(inventory, i, "/" + inventory[i]["name"] + "/"));
         } else {
             view.appendChild(createItemDiv(inventory, i));
         }

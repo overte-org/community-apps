@@ -48,7 +48,7 @@
         <div id="new-folder-overlay" class="overlay">
             <div class="dialog">
                 <p>Create new folder</p>
-                <label for="new-folder-name">Name</label><input type="text" id="new-folder-name" />
+                <label for="new-folder-name">Name</label><input type="text" id="new-folder-name" /><br />
                 <button type="button" id="new-folder-button">Create</button><button type="button" onclick="hideNewFolder();">Cancel</button>
             </div>
         </div>
@@ -64,7 +64,7 @@
                     <option>JSON</option>
                     <option>UNKNOWN</option>
                 </select><br />
-                <label for="new-item-url">URL</label><input type="text" id="new-item-url" />
+                <label for="new-item-url">URL</label><input type="text" id="new-item-url" /><br />
                 <button type="button" id="new-item-button">Create</button><button type="button" onclick="hideNewItem();">Cancel</button>
             </div>
         </div>
@@ -72,6 +72,13 @@
             <div class="dialog">
                 <p id="alert-message"></p>
                 <button type="button" onclick="hideAlert();">Ok</button>
+            </div>
+        </div>
+        <div id="folder-select-overlay" class="overlay">
+            <div class="dialog">
+                <p id="folder-select-prompt"></p>
+                <label for="folder-select-list">Folder</label><select name="folder-select-list" id="folder-select-list"></select><br />
+                <button type="button" id="folder-select-button">Select</button><button type="button" onclick="hideFolderSelect();">Cancel</button>
             </div>
         </div>
     </body>
