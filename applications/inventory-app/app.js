@@ -200,6 +200,12 @@ function createItemDiv(folder, index) {
     child.appendChild(document.createTextNode("move"));
     child.onclick = function() {showFolderSelect("Move to:", function() {
         const toFolder = allFolders[document.getElementById("folder-select-list").selectedIndex];
+        for (var itemIndex = 0; itemIndex < toFolder.length; itemIndex++) {
+            if (toFolder[itemIndex]["name"] === item["name"]) {
+                showAlert("Folder already has an item named " + item["name"] + ".  Choose a different folder or rename the other item.");
+                return;
+            }
+        }
         hideFolderSelect();
         removeItemOrFolder(folder, index);
         newItem(toFolder, item["name"], item["type"], item["url"]);
