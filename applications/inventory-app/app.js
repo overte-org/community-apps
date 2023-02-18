@@ -29,18 +29,14 @@ function newFolder(folder, name) {
     refreshInventoryView();
 }
 
-function removeItemOrFolder(folder, name) {
-    for (var folderItem = 0; folderItem < folder.length; folderItem++) {
-        if (folder[folderItem]["name"] === name) {
-            for (var itemToShift = folderItem + 1; itemToShift < folder.length; itemToShift++) {
-                folder[itemToShift - 1] = folder[itemToShift];
-            }
-            folder.pop();
-            sendEvent("web-to-script-inventory", inventory);
-            refreshInventoryView();
-            return;
-        }
+function removeItemOrFolder(folder, index) {
+    for (var itemToShift = index + 1; itemToShift < folder.length; itemToShift++) {
+        folder[itemToShift - 1] = folder[itemToShift];
     }
+    folder.pop();
+    sendEvent("web-to-script-inventory", inventory);
+    refreshInventoryView();
+    return;
 }
 
 function hideAlert() {
@@ -70,18 +66,18 @@ function hideNewFolder() {
     document.getElementById("new-folder-name").value = "";
 }
 
-function showNewFolder(currentFolder) {
+function showNewFolder(folder) {
     document.getElementById("new-folder-button").onclick = function() {
         const name = document.getElementById("new-folder-name").value;
         if (name !== "") {
-            for (var item = 0; item < currentFolder.length; item++) {
-                if (currentFolder[item]["name"] === name) {
+            for (var item = 0; item < folder.length; item++) {
+                if (folder[item]["name"] === name) {
                     showAlert("Item or folder with name " + name + " already exists!");
                     return;
                 }
             }
             hideNewFolder();
-            newFolder(currentFolder, name);
+            newFolder(folder, name);
         }
     };
     document.getElementById("new-folder-overlay").style.display = "block";
@@ -96,14 +92,14 @@ function hideNewItem() {
     document.getElementById("new-item-type").selectedIndex = 0;
 }
 
-function showNewItem(currentFolder) {
+function showNewItem(folder) {
     document.getElementById("new-item-prompt").innerHTML = "Create new item";
     document.getElementById("new-item-button").innerHTML = "Create";
     document.getElementById("new-item-button").onclick = function() {
         const name = document.getElementById("new-item-name").value;
         if (name !== "") {
-            for (var item = 0; item < currentFolder.length; item++) {
-                if (currentFolder[item]["name"] === name) {
+            for (var item = 0; item < folder.length; item++) {
+                if (folder[item]["name"] === name) {
                     showAlert("Item or folder with name " + name + " already exists!");
                     return;
                 }
@@ -112,14 +108,15 @@ function showNewItem(currentFolder) {
             const type = typeList.options[typeList.selectedIndex].text;
             const url = document.getElementById("new-item-url").value
             hideNewItem();
-            newItem(currentFolder, name, type, url);
+            newItem(folder, name, type, url);
         }
     };
     document.getElementById("new-item-overlay").style.display = "block";
     document.getElementById("new-item-name").focus();
 }
 
-function showEditItem(currentFolder, item) {
+function showEditItem(folder, index) {
+    const item = folder[index];
     document.getElementById("new-item-prompt").innerHTML = "Edit item";
     document.getElementById("new-item-button").innerHTML = "Save";
     document.getElementById("new-item-name").value = item["name"];
@@ -136,8 +133,8 @@ function showEditItem(currentFolder, item) {
         const name = document.getElementById("new-item-name").value;
         if (name !== "") {
             if (name !== item["name"]) {
-                for (var i = 0; i < currentFolder.length; i++) {
-                    if (currentFolder[i]["name"] === name) {
+                for (var i = 0; i < folder.length; i++) {
+                    if (folder[i]["name"] === name) {
                         showAlert("Item or folder with name " + name + " already exists!");
                         return;
                     }
@@ -146,39 +143,40 @@ function showEditItem(currentFolder, item) {
             const type = typeList.options[typeList.selectedIndex].text;
             const url = document.getElementById("new-item-url").value
             hideNewItem();
-            removeItemOrFolder(currentFolder, item["name"]);
-            newItem(currentFolder, name, type, url);
+            removeItemOrFolder(folder, index);
+            newItem(folder, name, type, url);
         }
     };
     document.getElementById("new-item-overlay").style.display = "block";
     document.getElementById("new-item-name").focus();
 }
 
-function createItemDiv(itemData, folder) {
+function createItemDiv(folder, index) {
+    const item = folder[index];
     const div = document.createElement("div");
     div.className = "item";
     var child = document.createElement("p");
-    child.appendChild(document.createTextNode(itemData["name"]));
+    child.appendChild(document.createTextNode(item["name"]));
     div.appendChild(child);
     child = document.createElement("p");
-    child.appendChild(document.createTextNode(itemData["type"]));
+    child.appendChild(document.createTextNode(item["type"]));
     div.appendChild(child);
     child = document.createElement("p");
-    child.appendChild(document.createTextNode(itemData["url"]));
+    child.appendChild(document.createTextNode(item["url"]));
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("use"));
-    child.onclick = function() {sendEvent("use-item", itemData);};
+    child.onclick = function() {sendEvent("use-item", item);};
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("edit"));
-    child.onclick = function() {showEditItem(folder, itemData);};
+    child.onclick = function() {showEditItem(folder, index);};
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
     child.onclick = function() {
-        showConfirm("Delete item " + itemData["name"] + "?", function() {
-            removeItemOrFolder(folder, itemData["name"]);
+        showConfirm("Delete item " + item["name"] + "?", function() {
+            removeItemOrFolder(folder, index);
             hideConfirm();
         });
     };
@@ -186,7 +184,9 @@ function createItemDiv(itemData, folder) {
     return div;
 }
 
-function createFolderDiv(name, itemList, parentFolder) {
+function createFolderDiv(parentFolder, index) {
+    const itemList = parentFolder[index]["items"];
+    const name = parentFolder[index]["name"];
     const div = document.createElement("div");
     div.className = "folder";
     const contents = document.createElement("div");
@@ -207,13 +207,19 @@ function createFolderDiv(name, itemList, parentFolder) {
     contents.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
-    child.onclick = function() {showDeleteConfirm(parentFolder, name);};
+    child.onclick = function() {
+        showConfirm("Delete folder " + name + "?", function() {
+            removeItemOrFolder(parentFolder, index);
+            hideConfirm();
+        });
+
+    };
     contents.appendChild(child);
     for (var i = 0; i < itemList.length; i++) {
         if ("items" in itemList[i]) {
-            contents.appendChild(createFolderDiv(itemList[i]["name"], itemList[i]["items"], itemList));
+            contents.appendChild(createFolderDiv(itemList, i));
         } else {
-            contents.appendChild(createItemDiv(itemList[i], itemList));
+            contents.appendChild(createItemDiv(itemList, i));
         }
     }
     div.appendChild(contents);
@@ -233,9 +239,9 @@ function refreshInventoryView() {
     view.appendChild(child);
     for (var i = 0; i < inventory.length; i++) {
         if ("items" in inventory[i]) {
-            view.appendChild(createFolderDiv(inventory[i]["name"], inventory[i]["items"], inventory));
+            view.appendChild(createFolderDiv(inventory, i));
         } else {
-            view.appendChild(createItemDiv(inventory[i], inventory));
+            view.appendChild(createItemDiv(inventory, i));
         }
     }
 }
