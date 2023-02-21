@@ -184,10 +184,19 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "DANCE",
             "name": "Dance App",
-            "description": "Dance Like nobody is watching.<br>You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
-            "jsfile": "BodyPaint4/BodyPaint4.js",
+            "description": "Dance like nobody is watching.<br>You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
+            "jsfile": "DANCE/DANCE.js",
             "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
-            "caption": "BODY DANCE"
+            "caption": "DANCE"
+        },
+        {
+            "isActive": true,
+            "directory": "audioZones",
+            "name": "Audio Zones Helper",
+            "description": "This tool helps you to setup Audio Zones using 3D box entities in-world. The tools will generate the coordinates that need to be captured in the Domain Server (Content > Audio Environment). The 3D representations of the audio zones can be hidden and locked to be preserved for future adjustments or restorations.",
+            "jsfile": "audioZones/app-audioZones.js",
+            "icon": "audioZones/images/icon_audioZone_inactive.png",
+            "caption": "AUDIO-Z"
         }
     ]
 };
