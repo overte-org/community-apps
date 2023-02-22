@@ -28,7 +28,7 @@
 
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
     
-    var radius = Settings.getValue("entityListDefaultRadius");
+    var radius = Settings.getValue("entityListDefaultRadius", 300);
     
     tablet.screenChanged.connect(onScreenChanged);
 
