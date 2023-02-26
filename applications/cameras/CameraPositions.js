@@ -19,7 +19,7 @@
 //
 (function() {
     var LOCATION_ROOT_URL = Script.resolvePath(".");
-    var FORM_URL = "https://htmlpreview.github.io/?" + LOCATION_ROOT_URL + "CameraPos.html?" + Date.now();    
+    var FORM_URL = LOCATION_ROOT_URL + "CameraPos.html?" + Date.now(); 
     var onForm = false;
     var button;
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");  
