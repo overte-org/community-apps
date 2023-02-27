@@ -173,30 +173,12 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
-            "directory": "cam360",
-            "name": "Camera 360",
-            "description": "This camera takes spherical snapshots. It has two capture modes:<br>- The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event.<br>- The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene.<br>This includes a 360&deg; media viewer.",
-            "jsfile": "cam360/cam360.js",
-            "icon": "cam360/resources/images/icons/cam360-i.svg",
-            "caption": "CAM360"
-        },
-        {
-            "isActive": true,
-            "directory": "DANCE",
-            "name": "Dance App",
-            "description": "Dance Like nobody is watching.<br>You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
-            "jsfile": "BodyPaint4/BodyPaint4.js",
-            "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
-            "caption": "BODY DANCE"
-        },
-        {
-            "isActive": true,
             "directory": "cameras",
             "name": "cameras",
             "description": "Setup 12 cameras in desktop mode and switch viewpoints using F1 to F12 keys",
             "jsfile": "cameras/CameraPositions.js",
             "icon": "cameras/CameraPos-inactive.svg",
             "caption": "CAMERAS"
-        }        
+        }
     ]
 };
