@@ -4,7 +4,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "inventory-app",
             "name": "Inventory App",
-            "description": "The inventory app allows you to store, use, and share items in Vircadia.",
+            "description": "The inventory app allows you to store, use, and share items in Overte.",
             "jsfile": "inventory-app/dist/inventory.js",
             "icon": "inventory-app/dist/inventory-i.svg",
             "caption": "INVENTORY"
@@ -188,6 +188,15 @@ var metadata = { "applications":
             "jsfile": "DANCE/DANCE.js",
             "icon": "DANCE/icons/tablet-icons/DANCE-i.svg",
             "caption": "DANCE"
+        },
+        {
+            "isActive": true,
+            "directory": "survivalKit",
+            "name": "Exploration Survival Kit",
+            "description": "Necessary tools for exploration: a COMPASS and a VR FLASHLIGHT.",
+            "jsfile": "survivalKit/app-survivalKit.js",
+            "icon": "survivalKit/icon_inactive.png",
+            "caption": "SURVIVAL"        
         },
         {
             "isActive": true,
