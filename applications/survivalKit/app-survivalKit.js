@@ -35,6 +35,9 @@
     var INTERCALL_DELAY = 200; //0.3 sec
     
     var FLASHLIGHT_NAME = "%%!!Survival.Kit.vr.flashlight!!%%";
+    var flashLightID = Uuid.NULL;
+    var flashLightLightID = Uuid.NULL;
+    var processTimer = new Date().getTime();
     
     tablet.screenChanged.connect(onScreenChanged);
 
@@ -88,10 +91,10 @@
         var n = d.getTime();
         
         if (typeof message === "string") {
-            eventObj = JSON.parse(message);
+            var eventObj = JSON.parse(message);
             if (eventObj.channel === channel) {
                 if (eventObj.action === "UPDATE_FLASHLIGHT_ACTIVATION" && (n - timestamp) > INTERCALL_DELAY) {
-                    d = new Date();
+                    var d = new Date();
                     timestamp = d.getTime();
                     if (eventObj.isActive === true) {
                         createFlashLight();
@@ -99,7 +102,7 @@
                         clearFlashLight();
                     }
                 } else if (eventObj.action === "UPDATE_FLASHLIGHT_FILTER" && (n - timestamp) > INTERCALL_DELAY) {
-                    d = new Date();
+                    var d = new Date();
                     timestamp = d.getTime();
                     filter = eventObj.filter;
                     updateFlashLightFilter();
