@@ -88,7 +88,7 @@
         var n = d.getTime();
         
         if (typeof message === "string") {
-            eventObj = JSON.parse(message);
+            var eventObj = JSON.parse(message);
             if (eventObj.channel === channel) {
                 if (eventObj.action === "UPDATE_FLASHLIGHT_ACTIVATION" && (n - timestamp) > INTERCALL_DELAY) {
                     d = new Date();
