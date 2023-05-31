@@ -105,7 +105,7 @@
     }
 
     function onMoreAppWebEventReceived(message) {
-        eventObj = JSON.parse(message);
+        var eventObj = JSON.parse(message);
         if ( eventObj.channel === channel) {
             if ( eventObj.action === "updateMaterialData") {
                 currentMaterialRecord = eventObj.materialRecord;
