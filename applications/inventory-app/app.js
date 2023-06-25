@@ -1,5 +1,10 @@
 "use strict";
 
+var inventory = [];
+var allFolders = [];
+var inbox = [];
+var nearbyUsers = [];
+
 function sendEvent(command, data) {
     EventBridge.emitWebEvent(JSON.stringify({app:"inventory",command:command,data:data}));
 }
@@ -11,10 +16,6 @@ function folderSorter(a, b) {
     if (!aIsFolder && bIsFolder) return 1;
     return a["name"].localeCompare(b["name"]);
 }
-
-var inventory = [];
-var allFolders = [];
-var inbox = [];
 
 function newItem(folder, name, type, url) {
     folder.push({name:name,type:type,url:url});
@@ -175,6 +176,19 @@ function showFolderSelect(text, func) {
     document.getElementById("folder-select-overlay").style.display = "block";
 }
 
+function hideUserSelect() {
+    document.getElementById("user-select-overlay").style.display = "none";
+    document.getElementById("user-select-list").selectedIndex = 0;
+}
+
+function showUserSelect(name, type, url) {
+    document.getElementById("user-select-button").onclick = function() {
+        sendEvent("share-item", {recipient:nearbyUsers[document.getElementById("user-select-list").selectedIndex]["uuid"], name:name, type:type, url:url});
+        hideUserSelect();
+    };
+    document.getElementById("user-select-overlay").style.display = "block";
+}
+
 function createItemDiv(folder, index) {
     const item = folder[index];
     const div = document.createElement("div");
@@ -210,6 +224,13 @@ function createItemDiv(folder, index) {
         removeItemOrFolder(folder, index);
         newItem(toFolder, item["name"], item["type"], item["url"]);
     });};
+    div.appendChild(child);
+    child = document.createElement("button");
+    child.appendChild(document.createTextNode("share"));
+    child.onclick = function() {
+        sendEvent("web-to-script-request-nearby-users", {});
+        showUserSelect(item["name"], item["type"], item["url"]);
+    };
     div.appendChild(child);
     child = document.createElement("button");
     child.appendChild(document.createTextNode("delete"));
@@ -275,7 +296,7 @@ function refreshInventoryView() {
     var child = document.createElement("option");
     child.appendChild(document.createTextNode("/"));
     folderList.appendChild(child);
-    const view = document.getElementById("view");
+    const view = document.getElementById("inventory");
     view.innerHTML = "";
     child = document.createElement("button");
     child.appendChild(document.createTextNode("new folder"));
@@ -294,6 +315,8 @@ function refreshInventoryView() {
     }
 }
 
+
+
 function deleteInboxItem(index) {
     for (var itemToShift = index + 1; itemToShift < inbox.length; itemToShift++) {
         inbox[itemToShift - 1] = inbox[itemToShift];
@@ -304,7 +327,7 @@ function deleteInboxItem(index) {
     return;
 }
 
-function createInboxItem(index) {
+function createInboxDiv(index) {
     const item = inbox[index];
     const data = item["data"];
     const div = document.createElement("div");
@@ -364,9 +387,20 @@ function refreshInboxView() {
         };
         inboxDiv.appendChild(child);
         for (var index = 0; index < inbox.length; index++) {
-            contents.appendChild(createInboxItem(index));
+            contents.appendChild(createInboxDiv(index));
         }
         inboxDiv.appendChild(contents);
+    }
+}
+
+
+
+function refreshNearbyUsers(userList) {
+    document.getElementById("user-select-list").innerHTML = "";
+    for (var i = 0; i < userList.length; i++) {
+        var child = document.createElement("option");
+        child.appendChild(document.createTextNode(userList[i].name));
+        document.getElementById("user-select-list").appendChild(child);
     }
 }
 
@@ -384,6 +418,13 @@ EventBridge.scriptEventReceived.connect(function(message) {
             case "script-to-web-receiving-item-queue":
                 inbox = parsed_message["data"];
                 refreshInboxView();
+                break;
+            case "script-to-web-nearby-users":
+                alert(JSON.stringify(parsed_message["data"]));
+                nearbyUsers = parsed_message["data"];
+                if (typeof nearbyUsers === "object") {
+                    refreshNearbyUsers(parsed_message["data"]);
+                }
                 break;
             //default:
                 //alert(message);

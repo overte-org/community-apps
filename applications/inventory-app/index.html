@@ -38,7 +38,7 @@
     </head>
     <body>
         <div id="inbox" class="folder"></div>
-        <div id="view" class="folder"></div>
+        <div id="inventory" class="folder"></div>
         <div id="confirm-overlay" class="overlay">
             <div class="dialog">
                 <p id="confirm-prompt"></p>
@@ -79,6 +79,13 @@
                 <p id="folder-select-prompt"></p>
                 <label for="folder-select-list">Folder</label><select name="folder-select-list" id="folder-select-list"></select><br />
                 <button type="button" id="folder-select-button">Select</button><button type="button" onclick="hideFolderSelect();">Cancel</button>
+            </div>
+        </div>
+        <div id="user-select-overlay" class="overlay">
+            <div class="dialog">
+                <p>Send to:</p>
+                <label for="user-select-list">User</label><select name="user-select-list" id="user-select-list"></select><br />
+                <button type="button" id="user-select-button">Select</button><button type="button" onclick="hideUserSelect();">Cancel</button>
             </div>
         </div>
     </body>
