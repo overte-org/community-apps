@@ -376,6 +376,9 @@ EventBridge.scriptEventReceived.connect(function(message) {
         switch (parsed_message["command"]) {
             case "script-to-web-inventory":
                 inventory = parsed_message["data"];
+                if (typeof inventory !== "object") { // if data is empty, then inventory becomes an empty string instead of an array.
+                    inventory = [];
+                }
                 refreshInventoryView();
                 break;
             case "script-to-web-receiving-item-queue":
