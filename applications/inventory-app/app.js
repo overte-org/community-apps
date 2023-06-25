@@ -176,17 +176,17 @@ function showFolderSelect(text, func) {
     document.getElementById("folder-select-overlay").style.display = "block";
 }
 
-function hideUserSelect() {
-    document.getElementById("user-select-overlay").style.display = "none";
-    document.getElementById("user-select-list").selectedIndex = 0;
+function hideShare() {
+    document.getElementById("share-overlay").style.display = "none";
+    document.getElementById("share-list").selectedIndex = 0;
 }
 
-function showUserSelect(name, type, url) {
-    document.getElementById("user-select-button").onclick = function() {
-        sendEvent("share-item", {recipient:nearbyUsers[document.getElementById("user-select-list").selectedIndex]["uuid"], name:name, type:type, url:url});
-        hideUserSelect();
+function showShare(name, type, url) {
+    document.getElementById("share-button").onclick = function() {
+        sendEvent("share-item", {recipient:nearbyUsers[document.getElementById("share-list").selectedIndex]["uuid"], name:name, type:type, url:url});
+        hideShare();
     };
-    document.getElementById("user-select-overlay").style.display = "block";
+    document.getElementById("share-overlay").style.display = "block";
 }
 
 function createItemDiv(folder, index) {
@@ -229,7 +229,7 @@ function createItemDiv(folder, index) {
     child.appendChild(document.createTextNode("share"));
     child.onclick = function() {
         sendEvent("web-to-script-request-nearby-users", {});
-        showUserSelect(item["name"], item["type"], item["url"]);
+        showShare(item["name"], item["type"], item["url"]);
     };
     div.appendChild(child);
     child = document.createElement("button");
@@ -396,11 +396,11 @@ function refreshInboxView() {
 
 
 function refreshNearbyUsers(userList) {
-    document.getElementById("user-select-list").innerHTML = "";
+    document.getElementById("share-list").innerHTML = "";
     for (var i = 0; i < userList.length; i++) {
         var child = document.createElement("option");
         child.appendChild(document.createTextNode(userList[i].name));
-        document.getElementById("user-select-list").appendChild(child);
+        document.getElementById("share-list").appendChild(child);
     }
 }
 
@@ -420,7 +420,6 @@ EventBridge.scriptEventReceived.connect(function(message) {
                 refreshInboxView();
                 break;
             case "script-to-web-nearby-users":
-                alert(JSON.stringify(parsed_message["data"]));
                 nearbyUsers = parsed_message["data"];
                 if (typeof nearbyUsers === "object") {
                     refreshNearbyUsers(parsed_message["data"]);
