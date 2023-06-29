@@ -33,11 +33,11 @@ Script.scriptEnding.connect(function() {
 var doppleganger = new DopplegangerClass({
     avatar: MyAvatar,
     mirrored: false,
-    autoUpdate: true
+    autoUpdate: true,
 });
 
 // hide the doppleganger if this client script is unloaded
-Script.scriptEnding.connect(doppleganger, 'stop');
+Script.scriptEnding.connect(doppleganger, doppleganger.stop);
 
 // hide the doppleganger if the user switches domains (which might place them arbitrarily far away in world space)
 function onDomainChanged() {
@@ -53,7 +53,7 @@ Script.scriptEnding.connect(function() {
 });
 
 // toggle on/off via tablet button
-button.clicked.connect(doppleganger, 'toggle');
+button.clicked.connect(doppleganger, doppleganger.toggle);
 
 // highlight tablet button based on current doppleganger state
 doppleganger.activeChanged.connect(function(active, reason) {

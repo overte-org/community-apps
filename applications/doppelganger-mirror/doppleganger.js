@@ -9,6 +9,7 @@
 //
 //  Created by Timothy Dedischew on 04/21/2017.
 //  Copyright 2017 High Fidelity, Inc.
+//  Copyright 2022 Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -62,9 +63,10 @@ Doppleganger.getMirroredJointNames = function(jointNames) {
 // @param {bool}   [options.autoUpdate=true] - Automatically sync joint data.
 function Doppleganger(options) {
     options = options || {};
-    this.avatar = options.avatar || MyAvatar;
+    this.avatar = MyAvatar;
     this.mirrored = 'mirrored' in options ? options.mirrored : false;
     this.autoUpdate = 'autoUpdate' in options ? options.autoUpdate : true;
+    this.testValue = options.testValue;
 
     // @public
     this.active = false;   // whether doppleganger is currently being displayed/updated
@@ -159,8 +161,6 @@ Doppleganger.prototype = {
     // @param {vec3} [options.position=(in front of avatar)] - starting position
     // @param {quat} [options.orientation=avatar.orientation] - starting orientation
     start: function(options) {
-		
-		
         options = options || {};
         if (this.entityID) {
             //log('start() called but entity model already exists', this.entityID);
@@ -215,7 +215,7 @@ Doppleganger.prototype = {
                 this._createUpdateThread();
             }
         };
-        this.addingEntity.connect(this, 'onAddingEntity');
+        this.addingEntity.connect(this, this.onAddingEntity);
 
         log('doppleganger created; entityID =', this.entityID);
 
@@ -226,7 +226,7 @@ Doppleganger.prototype = {
                 this.stop('entity_deleted');
             }
         };
-        Entities.deletingEntity.connect(this, 'onDeletedEntity');
+        Entities.deletingEntity.connect(this, this.onDeletedEntity);
 
         if ('onLoadComplete' in avatar) {
             // stop the current doppleganger if Avatar loads a different model URL
@@ -235,7 +235,7 @@ Doppleganger.prototype = {
                     this.stop('avatar_changed_load');
                 }
             };
-            avatar.onLoadComplete.connect(this, 'onLoadComplete');
+            avatar.onLoadComplete.connect(this, this.onLoadComplete);
         }
 
         this.activeChanged(this.active = true, 'start');
@@ -247,7 +247,7 @@ Doppleganger.prototype = {
     stop: function(reason) {
         reason = reason || 'stop';
         if (this.onUpdate) {
-            Script.update.disconnect(this, 'onUpdate');
+            Script.update.disconnect(this, this.onUpdate);
             delete this.onUpdate;
         }
         if (this._interval) {
@@ -255,15 +255,15 @@ Doppleganger.prototype = {
             this._interval = undefined;
         }
         if (this.onDeletedEntity) {
-            Entities.deletingEntity.disconnect(this, 'onDeletedEntity');
+            Entities.deletingEntity.disconnect(this, this.onDeletedEntity);
             delete this.onDeletedEntity;
         }
         if (this.onLoadComplete) {
-            this.avatar.onLoadComplete.disconnect(this, 'onLoadComplete');
+            this.avatar.onLoadComplete.disconnect(this, this.onLoadComplete);
             delete this.onLoadComplete;
         }
         if (this.onAddingEntity) {
-            this.addingEntity.disconnect(this, 'onAddingEntity');
+            this.addingEntity.disconnect(this, this.onAddingEntity);
         }
         if (this.entityID) {
             Entities.deleteEntity(this.entityID);
@@ -303,11 +303,11 @@ Doppleganger.prototype = {
         if (Doppleganger.USE_SCRIPT_UPDATE) {
             log('creating Script.update thread');
             this.onUpdate = this.update;
-            Script.update.connect(this, 'onUpdate');
+            Script.update.connect(this, this.onUpdate);
         } else {
             log('creating Script.setInterval thread @ ~', Doppleganger.TARGET_FPS +'fps');
             var timeout = 1000 / Doppleganger.TARGET_FPS;
-            this._interval = Script.setInterval(bind(this, 'update'), timeout);
+            this._interval = Script.setInterval(bind(this, this.update), timeout);
         }
     },
 
@@ -321,7 +321,7 @@ Doppleganger.prototype = {
         function waitForJointNames() {
             var error = null, result = null;
             if (!watchdogTimer) {
-                error = 'joints_unavailable';
+                error = 'joints_unavailable_watchodog_fail';
             } else if (resource.state === Resource.State.FAILED) {
                 error = 'prefetch_failed';
             } else if (resource.state === Resource.State.FINISHED) {
@@ -408,14 +408,14 @@ Doppleganger.addDebugControls = function(doppleganger) {
         start: function() {
             if (!this.onMousePressEvent) {
                 this.onMousePressEvent = this._onMousePressEvent;
-                Controller.mousePressEvent.connect(this, 'onMousePressEvent');
+                Controller.mousePressEvent.connect(this, this.onMousePressEvent);
             }
         },
 
         stop: function() {
             this.removeIndicators();
             if (this.onMousePressEvent) {
-                Controller.mousePressEvent.disconnect(this, 'onMousePressEvent');
+                Controller.mousePressEvent.disconnect(this, this.onMousePressEvent);
                 delete this.onMousePressEvent;
             }
         },
@@ -502,11 +502,11 @@ Doppleganger.addDebugControls = function(doppleganger) {
     doppleganger.activeChanged.connect(function(active) {
         if (active) {
             debugControls.start();
-            doppleganger.jointsUpdated.connect(debugControls, 'onJointsUpdated');
+            doppleganger.jointsUpdated.connect(debugControls, this.onJointsUpdated);
             Controller.mousePressEvent.connect(onMousePressEvent);
         } else {
             Controller.mousePressEvent.disconnect(onMousePressEvent);
-            doppleganger.jointsUpdated.disconnect(debugControls, 'onJointsUpdated');
+            doppleganger.jointsUpdated.disconnect(debugControls, this.onJointsUpdated);
             debugControls.stop();
         }
     });
@@ -520,7 +520,7 @@ Doppleganger.addDebugControls = function(doppleganger) {
         log('selected joint:', JSON.stringify(hit, 0, 2));
     });
 
-    Script.scriptEnding.connect(debugControls, 'removeIndicators');
+    Script.scriptEnding.connect(debugControls, debugControls.removeIndicators);
 
     return doppleganger;
 };
