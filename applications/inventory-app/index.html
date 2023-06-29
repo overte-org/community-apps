@@ -21,64 +21,73 @@
     </div>
     <div class="body">
       <div id="inventory-page" class="page">
-        <div class="directory">
-          <button class="item">ROOT</button>
-          <button class="item"><span>Folder</span></button>
-          <button class="item">Folder</button>
-          <button class="item">Folder</button>
-          <button class="item">Folder</button>
-          <button class="item">Folder</button>
-        </div>
+        <div class="directory"></div>
 
-        <div id="uuid" class="item-listing folder active">
-          <div class="icon">
-            <img src="./icons/folder.png" />
+        <div id="item-listings">
+          <div id="uuid" class="item-listing folder active">
+            <div class="icon">
+              <img src="./icons/folder.png" />
+            </div>
+
+            <div class="title">My awesome folder title</div>
+            <div class="action-buttons">
+              <button data-action="open-settings"><img src="./icons/gear.png" /></button>
+            </div>
+          </div>
+          <div data-target="" class="item-settings">
+            <button><span>Change Folder</span></button>
+            <button><span>Edit Item</span></button>
+            <button><span>Delete Item</span></button>
           </div>
 
-          <div class="title">My awesome folder title</div>
-          <div class="action-buttons">
-            <button data-action="open-settings"><img src="./icons/gear.png" /></button>
-          </div>
-        </div>
-        <div data-target="" class="item-settings">
-          <button><span>Change Folder</span></button>
-          <button><span>Edit Item</span></button>
-          <button><span>Delete Item</span></button>
-        </div>
+          <div class="item-listing">
+            <div class="icon">
+              <img src="./icons/folder.png" />
+            </div>
 
-        <div class="item-listing">
-          <div class="icon">
-            <img src="./icons/folder.png" />
+            <div class="title">test</div>
           </div>
-
-          <div class="title"></div>
         </div>
       </div>
       <div id="share-page" class="page hidden"></div>
     </div>
     <!-- <div class="footer"><span>Overte Inventory</span></div> -->
 
-    <template id="item-listing-template">
-      <div id="item" class="item-listing folder">
-        <div>
-          <div class="icon">
-            <img src="./icons/folder.png" />
-          </div>
-
-          <div class="title"></div>
-          <div class="action-buttons">
-            <button data-action="open-settings"><img src="./icons/gear.png" /></button>
-          </div>
+    <div id="item-listing-template" style="display:none;">
+      <div class="item-listing">
+        <div class="icon">
+          <img src="./icons/folder.png" />
         </div>
-        <div data-target="" class="item-settings">
-          <button><span>Change Folder</span></button>
-          <button><span>Edit Item</span></button>
-          <button><span>Delete Item</span></button>
+
+        <div class="title"></div>
+        <div class="action-buttons">
+          <button data-action="open-settings"><img src="./icons/gear.png" /></button>
         </div>
       </div>
-    </template>
+    </div>
 
-    <template id="share-listing-template">
+    <div id="folder-listing-template" style="display:none;">
+      <div class="item-listing folder">
+        <div class="icon">
+          <img src="./icons/folder.png" />
+        </div>
+
+        <div class="title"></div>
+        <div class="action-buttons">
+          <button data-action="open-settings"><img src="./icons/gear.png" /></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="item-settings-template" style="display:none;">
+      <div data-target="" class="item-settings">
+        <button><span>Change Folder</span></button>
+        <button><span>Edit Item</span></button>
+        <button><span>Delete Item</span></button>
+      </div>
+    </div>
+
+    <div id="share-listing-template" style="display:none;">
       <div id="uuid" class="item-listing share active">
         <div class="title"></div>
       </div>
@@ -92,7 +101,7 @@
           <button><span>Decline</span></button>
         </div>
       </div>
-    </template>
+    </div>
 
     <!-- <div id="inbox" class="folder"></div>
     <div id="inventory" class="folder"></div>

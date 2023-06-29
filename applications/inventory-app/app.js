@@ -1,9 +1,10 @@
 "use strict";
 
 var inventory = [];
-var allFolders = [];
 var inbox = [];
 var nearbyUsers = [];
+
+var currentFolder = [];
 
 function sendEvent(command, data) {
     EventBridge.emitWebEvent(JSON.stringify({app:"inventory",command:command,data:data}));
@@ -15,6 +16,49 @@ function folderSorter(a, b) {
     if (aIsFolder && !bIsFolder) return -1;
     if (!aIsFolder && bIsFolder) return 1;
     return a["name"].localeCompare(b["name"]);
+}
+
+function changeFolder(folderPath) {
+    currentFolder = inventory;
+    // change buttons up top
+    const directoryDiv = document.getElementsByClassName("directory")[0];
+    directoryDiv.innerHTML = "";
+    var folderButton = document.createElement("button");
+    folderButton.className = "item";
+    folderButton.appendChild(document.createTextNode("ROOT"));
+    folderButton.onclick = function() {changeFolder([]);};
+    directoryDiv.appendChild(folderButton);
+    for (var i = 0; i < folderPath.length; i++) {
+        folderButton = document.createElement("button");
+        folderButton.class = "item";
+        folderButton.appendChild(document.createTextNode(folderPath[i]));
+        folderButton.onclick = function() {changeFolder(folderPath.slice(0, i+1));};
+        directoryDiv.appendChild(folderButton);
+        // path traversal
+        for (var j = 0; j < currentFolder.length; j++) {
+            if (currentFolder[j]["name"] === folderPath[i]) {
+                currentFolder = currentFolder[j]["items"];
+                break;
+            }
+        }
+    }
+    // change items down low
+    const itemListingsDiv = document.getElementById("item-listings");
+    itemListingsDiv.innerHTML = "";
+    const itemListingTemplate = document.getElementById("item-listing-template");
+    const folderListingTemplate = document.getElementById("folder-listing-template");
+    for (var i = 0; i < currentFolder.length; i++) {
+        const currentItem = currentFolder[i];
+        const itemIsFolder = "items" in currentItem;
+        const itemName = currentItem["name"];
+        const listing = (itemIsFolder ? folderListingTemplate : itemListingTemplate).getElementsByClassName("item-listing")[0].cloneNode(true);
+        const itemNameBar = listing.getElementsByClassName("title")[0];
+        if (itemIsFolder) {
+            itemNameBar.onclick = function() {changeFolder(folderPath.concat([itemName]));};
+        }
+        itemNameBar.appendChild(document.createTextNode(itemName));
+        itemListingsDiv.appendChild(listing);
+    }
 }
 
 function newItem(folder, name, type, url) {
@@ -41,257 +85,8 @@ function removeItemOrFolder(folder, index) {
     return;
 }
 
-function hideAlert() {
-    document.getElementById("alert-overlay").style.display = "none";
-    document.getElementById("alert-message").innerHTML = "";
-}
-
-function showAlert(text) {
-    document.getElementById("alert-message").appendChild(document.createTextNode(text));
-    document.getElementById("alert-overlay").style.display = "block";
-}
-
-function hideConfirm() {
-    document.getElementById("confirm-overlay").style.display = "none";
-    document.getElementById("confirm-button").onclick = function(){};
-    document.getElementById("confirm-prompt").innerHTML = "";
-}
-
-function showConfirm(text, func) {
-    document.getElementById("confirm-prompt").appendChild(document.createTextNode(text));
-    document.getElementById("confirm-button").onclick = func;
-    document.getElementById("confirm-overlay").style.display = "block";
-}
-
-function hideNewFolder() {
-    document.getElementById("new-folder-overlay").style.display = "none";
-    document.getElementById("new-folder-button").onclick = function(){};
-    document.getElementById("new-folder-name").value = "";
-}
-
-function showNewFolder(folder) {
-    document.getElementById("new-folder-button").onclick = function() {
-        const name = document.getElementById("new-folder-name").value;
-        if (name === "") {
-            showAlert("Folder requires a name.");
-            return;
-        }
-        if (name.includes("/")) {
-            showAlert("Folder name may not include /");
-            return;
-        }
-        for (var item = 0; item < folder.length; item++) {
-            if (folder[item]["name"] === name) {
-                showAlert("Item or folder with name " + name + " already exists!");
-                return;
-            }
-        }
-        hideNewFolder();
-        newFolder(folder, name);
-    };
-    document.getElementById("new-folder-overlay").style.display = "block";
-    document.getElementById("new-folder-name").focus();
-}
-
-function hideNewItem() {
-    document.getElementById("new-item-overlay").style.display = "none";
-    document.getElementById("new-item-button").onclick = function(){};
-    document.getElementById("new-item-name").value = "";
-    document.getElementById("new-item-url").value = "";
-    document.getElementById("new-item-type").selectedIndex = 0;
-}
-
-function showNewItem(folder) {
-    document.getElementById("new-item-prompt").innerHTML = "Create new item";
-    document.getElementById("new-item-button").innerHTML = "Create";
-    document.getElementById("new-item-button").onclick = function() {
-        const name = document.getElementById("new-item-name").value;
-        if (name === "") {
-            showAlert("Item requires a name.");
-            return;
-        }
-        for (var item = 0; item < folder.length; item++) {
-            if (folder[item]["name"] === name) {
-                showAlert("Item or folder with name " + name + " already exists!");
-                return;
-            }
-        }
-        const typeList = document.getElementById("new-item-type");
-        const type = typeList.options[typeList.selectedIndex].text;
-        const url = document.getElementById("new-item-url").value
-        hideNewItem();
-        newItem(folder, name, type, url);
-    };
-    document.getElementById("new-item-overlay").style.display = "block";
-    document.getElementById("new-item-name").focus();
-}
-
-function showEditItem(folder, index) {
-    const item = folder[index];
-    document.getElementById("new-item-prompt").innerHTML = "Edit item";
-    document.getElementById("new-item-button").innerHTML = "Save";
-    document.getElementById("new-item-name").value = item["name"];
-    document.getElementById("new-item-url").value = item["url"];
-    const typeList = document.getElementById("new-item-type");
-    typeList.selectedIndex = typeList.options.length - 1;
-    for (var type = 0; type < typeList.options.length; type++) {
-        if (item["type"] === typeList.options[type].text) {
-            typeList.selectedIndex = type;
-            break;
-        }
-    }
-    document.getElementById("new-item-button").onclick = function() {
-        const name = document.getElementById("new-item-name").value;
-        if (name === "") {
-            showAlert("Item requires a name.");
-            return;
-        }
-        if (name !== item["name"]) {
-            for (var i = 0; i < folder.length; i++) {
-                if (folder[i]["name"] === name) {
-                    showAlert("Item or folder with name " + name + " already exists!");
-                    return;
-                }
-            }
-        }
-        const type = typeList.options[typeList.selectedIndex].text;
-        const url = document.getElementById("new-item-url").value
-        hideNewItem();
-        removeItemOrFolder(folder, index);
-        newItem(folder, name, type, url);
-    };
-    document.getElementById("new-item-overlay").style.display = "block";
-    document.getElementById("new-item-name").focus();
-}
-
-function hideFolderSelect() {
-    document.getElementById("folder-select-overlay").style.display = "none";
-    document.getElementById("folder-select-list").selectedIndex = 0;
-    document.getElementById("folder-select-prompt").innerHTML = "";
-}
-
-function showFolderSelect(text, func) {
-    document.getElementById("folder-select-prompt").appendChild(document.createTextNode(text));
-    document.getElementById("folder-select-button").onclick = func;
-    document.getElementById("folder-select-overlay").style.display = "block";
-}
-
-function hideShare() {
-    document.getElementById("share-overlay").style.display = "none";
-    document.getElementById("share-list").selectedIndex = 0;
-}
-
-function showShare(name, type, url) {
-    document.getElementById("share-button").onclick = function() {
-        sendEvent("share-item", {recipient:nearbyUsers[document.getElementById("share-list").selectedIndex]["uuid"], name:name, type:type, url:url});
-        hideShare();
-    };
-    document.getElementById("share-overlay").style.display = "block";
-}
-
-function createItemDiv(folder, index) {
-    const item = folder[index];
-    const div = document.createElement("div");
-    div.className = "item";
-    var child = document.createElement("p");
-    child.appendChild(document.createTextNode(item["name"]));
-    div.appendChild(child);
-    child = document.createElement("p");
-    child.appendChild(document.createTextNode(item["type"]));
-    div.appendChild(child);
-    child = document.createElement("p");
-    child.appendChild(document.createTextNode(item["url"]));
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("use"));
-    child.onclick = function() {sendEvent("use-item", item);};
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("edit"));
-    child.onclick = function() {showEditItem(folder, index);};
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("move"));
-    child.onclick = function() {showFolderSelect("Move to:", function() {
-        const toFolder = allFolders[document.getElementById("folder-select-list").selectedIndex];
-        for (var itemIndex = 0; itemIndex < toFolder.length; itemIndex++) {
-            if (toFolder[itemIndex]["name"] === item["name"]) {
-                showAlert("Folder already has an item named " + item["name"] + ".  Choose a different folder or rename the other item.");
-                return;
-            }
-        }
-        hideFolderSelect();
-        removeItemOrFolder(folder, index);
-        newItem(toFolder, item["name"], item["type"], item["url"]);
-    });};
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("share"));
-    child.onclick = function() {
-        sendEvent("web-to-script-request-nearby-users", {});
-        showShare(item["name"], item["type"], item["url"]);
-    };
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("delete"));
-    child.onclick = function() {
-        showConfirm("Delete item " + item["name"] + "?", function() {
-            removeItemOrFolder(folder, index);
-            hideConfirm();
-        });
-    };
-    div.appendChild(child);
-    return div;
-}
-
-function createFolderDiv(parentFolder, index, path) {
-    const itemList = parentFolder[index]["items"];
-    allFolders.push(itemList);
-    const name = parentFolder[index]["name"];
-    const div = document.createElement("div");
-    div.className = "folder";
-    const contents = document.createElement("div");
-    contents.style.display = "none";
-    const p = document.createElement("p");
-    p.appendChild(document.createTextNode(name));
-    p.onclick = function() {
-        contents.style.display = contents.style.display === "block" ? "none" : "block";
-    };
-    div.appendChild(p);
-    var child = document.createElement("button");
-    child.appendChild(document.createTextNode("new folder"));
-    child.onclick = function(){showNewFolder(itemList)};
-    contents.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("new item"));
-    child.onclick = function(){showNewItem(itemList)};
-    contents.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("delete"));
-    child.onclick = function() {
-        showConfirm("Delete folder " + name + "?", function() {
-            removeItemOrFolder(parentFolder, index);
-            hideConfirm();
-        });
-    };
-    contents.appendChild(child);
-    child = document.createElement("option");
-    child.appendChild(document.createTextNode(path));
-    document.getElementById("folder-select-list").appendChild(child);
-    for (var i = 0; i < itemList.length; i++) {
-        if ("items" in itemList[i]) {
-            contents.appendChild(createFolderDiv(itemList, i, path + itemList[i]["name"] + "/"));
-        } else {
-            contents.appendChild(createItemDiv(itemList, i));
-        }
-    }
-    div.appendChild(contents);
-    return div;
-}
-
 function refreshInventoryView() {
-    allFolders = [inventory];
-    const folderList = document.getElementById("folder-select-list");
+/*    const folderList = document.getElementById("folder-select-list");
     folderList.innerHTML = "";
     var child = document.createElement("option");
     child.appendChild(document.createTextNode("/"));
@@ -312,7 +107,8 @@ function refreshInventoryView() {
         } else {
             view.appendChild(createItemDiv(inventory, i));
         }
-    }
+    }*/
+    changeFolder([]);
 }
 
 
@@ -325,50 +121,6 @@ function deleteInboxItem(index) {
     sendEvent("web-to-script-update-receiving-item-queue", inbox);
     refreshInboxView();
     return;
-}
-
-function createInboxDiv(index) {
-    const item = inbox[index];
-    const data = item["data"];
-    const div = document.createElement("div");
-    div.className = "item";
-    child = document.createElement("p");
-    child.appendChild(document.createTextNode("from " + item["senderName"] + " " + item["senderUUID"]));
-    div.appendChild(child);
-    var child = document.createElement("p");
-    child.appendChild(document.createTextNode(data["name"]));
-    div.appendChild(child);
-    child = document.createElement("p");
-    child.appendChild(document.createTextNode(data["type"]));
-    div.appendChild(child);
-    child = document.createElement("p");
-    child.appendChild(document.createTextNode(data["url"]));
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("accept"));
-    child.onclick = function() {showFolderSelect("Put it where?", function() {
-        var toFolder = allFolders[document.getElementById("folder-select-list").selectedIndex];
-        for (var itemIndex = 0; itemIndex < toFolder.length; itemIndex++) {
-            if (toFolder[itemIndex]["name"] === data["name"]) {
-                showAlert("Folder already has an item named " + data["name"] + ".  Choose a different folder or rename the other item.");
-                return;
-            }
-        }
-        hideFolderSelect();
-        deleteInboxItem(index);
-        newItem(toFolder, data["name"], data["type"], data["url"]);
-    });};
-    div.appendChild(child);
-    child = document.createElement("button");
-    child.appendChild(document.createTextNode("delete"));
-    child.onclick = function() {
-        showConfirm("delete inbox item " + data["name"] + "?", function() {
-            deleteInboxItem(index);
-            hideConfirm();
-        });
-    };
-    div.appendChild(child);
-    return div;
 }
 
 function refreshInboxView() {
@@ -413,11 +165,12 @@ EventBridge.scriptEventReceived.connect(function(message) {
                 if (typeof inventory !== "object") { // if data is empty, then inventory becomes an empty string instead of an array.
                     inventory = [];
                 }
+                alert(JSON.stringify(parsed_message["data"]));
                 refreshInventoryView();
                 break;
             case "script-to-web-receiving-item-queue":
-                inbox = parsed_message["data"];
-                refreshInboxView();
+                //inbox = parsed_message["data"];
+                //refreshInboxView();
                 break;
             case "script-to-web-nearby-users":
                 nearbyUsers = parsed_message["data"];
@@ -430,16 +183,5 @@ EventBridge.scriptEventReceived.connect(function(message) {
         }
     }
 });
-
-window.onscroll = function() {
-    // have the dialog boxes follow the view point instead of staying up top always
-    const overlays = document.getElementsByClassName("overlay");
-    const scrollAmount = window.pageYOffset + "px";
-    for (var i = 0; i < overlays.length; i++) {
-        const style = overlays[i].style;
-        style.top = scrollAmount;
-        style.bottom = "-" + scrollAmount;
-    }
-};
 
 window.onload = function() {sendEvent("ready", {});}
