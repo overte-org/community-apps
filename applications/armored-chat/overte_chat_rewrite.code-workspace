@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "path": "../inventory-app"
+    }
+  ],
+  "settings": {
+    "liveSassCompile.settings.showOutputWindowOn": "None",
+    "cSpell.words": ["Overte"]
+  }
+}
