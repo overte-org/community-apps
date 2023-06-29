@@ -29,10 +29,11 @@ function changeFolder(folderPath) {
     folderButton.onclick = function() {changeFolder([]);};
     directoryDiv.appendChild(folderButton);
     for (var i = 0; i < folderPath.length; i++) {
+        const currentPath = folderPath.slice(0, i+1);
         folderButton = document.createElement("button");
         folderButton.class = "item";
         folderButton.appendChild(document.createTextNode(folderPath[i]));
-        folderButton.onclick = function() {changeFolder(folderPath.slice(0, i+1));};
+        folderButton.onclick = function() {changeFolder(currentPath);};
         directoryDiv.appendChild(folderButton);
         // path traversal
         for (var j = 0; j < currentFolder.length; j++) {
@@ -165,7 +166,6 @@ EventBridge.scriptEventReceived.connect(function(message) {
                 if (typeof inventory !== "object") { // if data is empty, then inventory becomes an empty string instead of an array.
                     inventory = [];
                 }
-                alert(JSON.stringify(parsed_message["data"]));
                 refreshInventoryView();
                 break;
             case "script-to-web-receiving-item-queue":
