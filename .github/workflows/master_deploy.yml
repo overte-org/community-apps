@@ -7,20 +7,21 @@ on:
 
 jobs:
   build_site:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     name: Deploy "More" repository
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Deploy More repository
-      uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ftp.tuxfamily.org
-        username: ${{ secrets.GHA_MORE_FTP_USER }}
-        password: ${{ secrets.GHA_MORE_FTP_PASS }}
+        server: www531.your-server.de
+        protocol: ftps
+        username: ${{ secrets.GHA_HETZNER_MORE_FTP_USER }}
+        password: ${{ secrets.GHA_HETZNER_MORE_FTP_PASS }}
         local-dir: ./
-        server-dir: overte/more.overte.org-web/htdocs/
+        server-dir: /
         exclude: |
           **/staging/**
           **/.*
