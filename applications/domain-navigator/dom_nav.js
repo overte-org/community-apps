@@ -52,7 +52,7 @@
 	function onWebEventReceivedz(eventz){
 
 		if(typeof eventz === "string"){
-			eventzget = JSON.parse(eventz);
+			var eventzget = JSON.parse(eventz);
 		
 	
 			if(eventzget.type === "give_tp_coor"){
