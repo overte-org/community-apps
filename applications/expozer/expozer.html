@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<!--
+    expozer.html
+
+    Created by Alezia Kurdis, June 17th 2023.
+    Copyright 2023 Overte e.V.
+
+    HTML UI for the "Expozer" application, to read the data of the entities arround you.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script>
+            var channel = "overte.application.ak.expozer";
+            var radius = 300;
+            var dataList = [];
+            
+            var tab = "domain";
+            var sortBy = "type";
+            var propertyPanelCurrentId = "";
+            var selectedID = "";
+            
+            
+            var MAX_DISPLAYED_CHAR_FOR_NAME = 70;
+            var INDENTATION = "&nbsp;&nbsp;&nbsp;";
+            var NULL_UUID = "{00000000-0000-0000-0000-000000000000}";
+            
+            var radiusParam = findGetParameter("radius");
+            if(radiusParam !== null){
+                radius =  parseInt(radiusParam, 10);
+            }
+            
+            //Paths
+            var thisPageName = "expozer.html";
+            var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            var ROOTPATH = currentPath.replace(thisPageName, "");
+
+            EventBridge.scriptEventReceived.connect(function(message){
+                messageObj = JSON.parse(message);
+                if (messageObj.channel === channel) {
+                    if (messageObj.action === "DATA_REFRESH") {
+                        dataList = [];
+                        dataList = messageObj.data;
+                        document.getElementById("nbrEntities").innerHTML = "ENTITIES FOUND: " + dataList.length;
+                        drawList();
+                    }
+                    if (messageObj.action ===  "SHOW_FILE") {
+                        drawFile(messageObj.url, messageObj.data);
+                    }
+                }
+            });
+            
+
+            function drawList() {
+                dataList.sort((a, b) => {
+                    var fa = a.type.toLowerCase();
+                    var fb = b.type.toLowerCase();
+                    var na = a.name.toLowerCase();
+                    var nb = b.name.toLowerCase();
+                    var scriptedA = a.script !== "" || a.serverScripts !== "";
+                    var scriptedB = b.script !== "" || b.serverScripts !== "";
+                    var lockedA = a.locked;
+                    var lockedB = b.locked;
+                    var visibleA = a.visible;
+                    var visibleB = b.visible;
+                    if (sortBy === "visible") {
+                        if (visibleA === visibleB) {
+                            return -1;
+                        }
+                        if (visibleA !== visibleB) {
+                            return 1;
+                        }
+                    }
+                    if (sortBy === "locked") {
+                        if (lockedA === lockedB) {
+                            return -1;
+                        }
+                        if (lockedA !== lockedB) {
+                            return 1;
+                        }
+                    }
+                    if (sortBy === "scripted") {
+                        if (scriptedA !== scriptedB) {
+                            return -1;
+                        }
+                        if (scriptedA === scriptedB) {
+                            return 1;
+                        }
+                    }
+                    if (sortBy === "type" || sortBy === "scripted") {
+                        if (fa < fb) {
+                            return -1;
+                        }
+                        if (fa > fb) {
+                            return 1;
+                        }
+                    }
+                    if (sortBy === "name" || sortBy === "type" || sortBy === "scripted") {
+                        if (na < nb) {
+                            return -1;
+                        }
+                        if (na > nb) {
+                            return 1;
+                        }
+                    }
+
+                    return 0;
+                });
+
+                var listData;
+                if (tab === "parent") {
+                    listData = genParentOrdering(dataList);
+                } else {
+                    listData = dataList.slice();
+                }
+                
+                var counts = {
+                    "domain": 0,
+                    "avatar": 0,
+                    "local": 0
+                };
+                
+                var theList = "";
+                var name = "";
+                var line = "";
+                var temporary = "";
+                var scripted = "";
+                var visible = "";
+                var locked = "";
+                var lineTint = 1;
+                var parentIndent;
+                for (var i=0; i < listData.length; i++) {
+                    counts[listData[i].entityHostType]++;
+                    if (listData[i].entityHostType === tab || tab === "parent") {
+                        if (tab === "parent" && listData[i].parentID === NULL_UUID) {
+                            lineTint = -lineTint;
+                        } else if (tab === "parent" && listData[i].parentID !== NULL_UUID) {
+                            //keep that line color
+                        } else {
+                            lineTint = -lineTint;
+                        }
+                        
+                        if (lineTint === 1) {
+                            line = " lightLine";
+                        } else {
+                            line = " darkLine";
+                        }
+                        
+                        if (selectedID === listData[i].id) {
+                            line = " selectedLine";
+                        }
+                        
+                        name = listData[i].name;
+                        if (name === "") {
+                            name = "&nbsp;";
+                        }
+                        if (tab === "parent") {
+                            parentIndent = getParentDeepness(listData[i].id, "");
+                            if (parentIndent !== "") {
+                                name = parentIndent + "&boxur; " + name;
+                            } else {
+                                name = parentIndent + name;
+                            }
+                        }                        
+                        if (name.length > MAX_DISPLAYED_CHAR_FOR_NAME) {
+                            name = name.substr(0, MAX_DISPLAYED_CHAR_FOR_NAME) + "...";
+                        }
+                        if (listData[i].lifetime !== -1) {
+                            temporary = " temporary";
+                        } else {
+                            temporary = "";
+                        }
+                        scripted = "&nbsp;";
+                        if (listData[i].script !== "" || listData[i].serverScripts !== "") {
+                            scripted = "S";
+                        }
+                        visible = "&nbsp;";
+                        if (listData[i].visible) {
+                            visible = "V";
+                        }
+                        locked = "&nbsp;";
+                        if (listData[i].locked) {
+                            locked = "L";
+                        }
+                        
+                        theList = theList + "<div class='lineContainer'>";
+                        theList = theList + '<button class="entityType' + temporary + line + '" id="type_' + listData[i].id + '" onclick="showInWorld(' + "'" + listData[i].id + "'" + ');">' + listData[i].type + "</button>";
+                        theList = theList + '<button class="entityName' + temporary + line + ' ' + listData[i].entityHostType + '" id="name_' + listData[i].id + '" onclick="showInWorld(' + "'" + listData[i].id + "'" + ');">' + name + "</button>";
+                        theList = theList + '<button class="icon' + line + '" id="locked_' + listData[i].id + '" onclick="showInWorld(' + "'" + listData[i].id + "'" + ');">' + locked + '</button>';
+                        theList = theList + '<button class="icon' + line + '" id="visible_' + listData[i].id + '" onclick="showInWorld(' + "'" + listData[i].id + "'" + ');">' + visible + '</button>';
+                        theList = theList + '<button class="icon' + line + '" id="scripted_' + listData[i].id + '" onclick="showInWorld(' + "'" + listData[i].id + "'" + ');">' + scripted + '</button>';
+                        theList = theList + '<button class="seeDetails' + temporary + line + '" id="detail_' + listData[i].id + '" onclick="displayProperties(' + "'" + listData[i].id + "'" + ');">&#9654;</button>';
+                        theList = theList + "</div>";
+                    }
+                }
+                document.getElementById("list").innerHTML = theList;
+                document.getElementById("domainEntities").innerHTML = "DOMAIN (" + counts.domain + ")";
+                document.getElementById("avatarEntities").innerHTML = "AVATAR (" + counts.avatar + ")";
+                document.getElementById("localEntities").innerHTML = "LOCAL (" + counts.local + ")";
+            }
+            
+            function showInWorld(id) {
+                selectedID = id;
+                refresh();
+                var data = getPropertiesFromID(id);
+                var message = {
+                    "channel": channel,
+                    "action": "SHOW_ENTITY",
+                    "position": data.position,
+                    "rotation": data.rotation,
+                    "dimensions": data.dimensions
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            function removeShowInWorld(){
+                var message = {
+                    "channel": channel,
+                    "action": "REMOVE_SHOW_ENTITY"
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            function genParentOrdering(arr) {
+              var table = {};
+              arr.forEach(el => {
+                if (!table[el.parentID]) {
+                  table[el.parentID] = [];
+                }
+                table[el.parentID].push(el)
+              })
+              var result = [];
+              var constructResult = (key) => {
+                if (table[key]) {
+                  table[key].forEach(el => {
+                    result.push(el);
+                    constructResult(el.id);
+                  })
+                }
+              }
+
+              constructResult(NULL_UUID);
+
+              return result;
+            }
+
+            function getParentDeepness(id, indent) {
+                for (var j = 0; j < dataList.length; j++) {
+                    if (dataList[j].id === id) {
+                        if (dataList[j].parentID === NULL_UUID) {
+                            return indent;
+                        } else {
+                            return indent + INDENTATION + getParentDeepness(dataList[j].parentID, indent);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            function findGetParameter(parameterName) {
+                var result = null,
+                    tmp = [];
+                var items = location.search.substr(1).split("&");
+                for (var index = 0; index < items.length; index++) {
+                    tmp = items[index].split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                }
+                return result;
+            }
+
+        </script>
+        <script src='jquery.min.js'></script>
+        <style>
+            @font-face {
+                font-family: FiraSans-SemiBold;
+                src: url(fonts/FiraSans-SemiBold.ttf);
+            }
+
+            @font-face {
+                font-family: FiraSans-Regular;
+                src: url(fonts/FiraSans-Regular.ttf);
+            }
+
+            html {
+                width: 100%;
+                height: 100%;
+            }
+
+            body {
+                background: #6666666;
+                font-family: FiraSans-Regular;
+                font-size: 12px;
+                color: #FFFFFF;
+                text-decoration: none;
+                font-style: normal;
+                font-variant: normal;
+                text-transform: none;
+            }
+            
+            #uninstall {
+                font-family: FiraSans-SemiBold;
+                background-color: #222222;
+                font-size: 9px;
+                color: #cccccc;
+                border-radius: 3px;
+                border: 0px solid #000000;
+                transition-duration: 0.2s;
+                width: 100px;
+                padding: 3px;
+            }
+
+            #uninstall:hover {
+                background-color: #000000;
+                color: #ffffff;
+            }
+
+            #uninstall:focus {
+                outline: none;
+            }
+
+            .lightLine {
+                background-color: #222222;
+            }
+
+            .darkLine {
+                background-color: #111111;
+            }
+
+            .selectedLine {
+                background-color: #888888;
+            }
+
+            #headerContainer {
+                margin: 0px 0px 0px 0px;
+            }
+            
+            button.headerType {
+                font-family: FiraSans-SemiBold;
+                color: #888888;
+                background-color: #555555;
+                font-size: 10px;
+                border: 0px solid #000000;
+                border-right: 1px solid #888888;
+                width: 69px;
+                padding: 3px;
+                text-align: left;
+                margin: 0px;
+            }
+            
+            button.headerName {
+                font-family: FiraSans-SemiBold;
+                font-size: 10px;
+                color: #888888;
+                background-color: #555555;
+                border: 0px solid #000000;
+                border-right: 1px solid #888888;
+                width: 245px;
+                padding: 3px;
+                text-align: left;
+                margin: 0px;
+            }
+            
+            button.headerScripted {
+                font-family: FiraSans-SemiBold;
+                font-size: 10px;
+                color: #888888;
+                background-color: #555555;
+                border: 0px solid #000000;
+                border-right: 1px solid #888888;
+                width: 16px;
+                padding: 3px;
+                text-align: center;
+                margin: 0px;
+            }
+
+            button.headerLocked {
+                font-family: FiraSans-SemiBold;
+                font-size: 10px;
+                color: #888888;
+                background-color: #555555;
+                border: 0px solid #000000;
+                border-right: 1px solid #888888;
+                width: 16px;
+                padding: 3px;
+                text-align: center;
+                margin: 0px;
+            }
+            
+            button.headerVisible {
+                font-family: FiraSans-SemiBold;
+                font-size: 10px;
+                color: #888888;
+                background-color: #555555;
+                border: 0px solid #000000;
+                border-right: 1px solid #888888;
+                width: 16px;
+                padding: 3px;
+                text-align: center;
+                margin: 0px;
+            }
+            
+            button.entityType {
+                font-family: FiraSans-SemiBold;
+                color: #ffffff;
+                font-size: 10px;
+                border: 0px solid #000000;
+                width: 70px;
+                padding: 3px;
+                text-align: left;
+                margin: 0px;
+            }
+            
+            button.seeDetails {
+                font-family: FiraSans-SemiBold;
+                background-color: #999999;
+                color: #000000;
+                font-size: 10px;
+                border: 1px solid #000000;
+                padding: 2px;
+                width: 24px;
+                text-align: center;
+                margin: 0px;
+            }
+            
+            button.entityName {
+                font-family: FiraSans-SemiBold;
+                font-size: 10px;
+                border: 0px solid #000000;
+                width: 246px;
+                padding: 3px;
+                text-align: left;
+                margin: 0px;
+            }
+            
+            button.icon {
+                font-family: FiraSans-SemiBold;
+                font-size: 10px;
+                color: #ffffff;
+                border: 0px solid #000000;
+                width: 18px;
+                padding: 3px;
+                text-align: center;
+                margin: 0px;
+            }
+            
+            div.lineContainer {
+                margin: 0px 0px 0px 0px;
+            }
+            
+            button:focus {
+                outline: none;
+            }
+
+            textarea:focus {
+                outline: none;
+            }
+            
+            .domain {
+                color: #4570ff;
+            }
+            .avatar {
+                color: #4fbd57;
+            }
+            .local {
+                color: #e8ba00;
+            }
+
+            .parent {
+                color: #bbbbbb;
+            }
+            
+            .tab {
+                border-radius: 6px 6px 0px 0px;
+                background-image: linear-gradient(rgba(68,68,68,1) 20%, rgba(10,10,10,1) 100%);
+                background-color: #444444;
+                border: 0px;
+                padding: 3px;
+                width: 100px;
+                margin: 0px;
+                font-family: FiraSans-SemiBold;
+                font-size: 11px;
+            }
+            
+            .tabActive {
+                border-radius: 6px 6px 0px 0px;
+                background-image: ;
+                background-color: #555555;
+                border: 0px;
+                padding: 3px;
+                width: 100px;
+                margin: 0px;                
+                font-family: FiraSans-SemiBold;
+                font-size: 11px;
+            }
+            
+            .temporary {
+                font-style: italic;
+            }
+            
+            #toolbarContainer {
+                text-align: left;
+                width:100%;
+                height: 24px;
+                display: flex;
+                margin-bottom: 6px;
+            }
+            
+            #ToolbarHeaderContainer {
+                font-family: FiraSans-SemiBold;
+                font-size: 15px;
+                text-align: left;
+                width: 50%;
+                height: 100%;
+            }
+            
+            #ToolbarControleContainer {
+                font-family: FiraSans-SemiBold;
+                font-size: 13px;
+                text-align: right;
+                width: 50%;
+                height: 100%;
+            }
+            
+            #radius {
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                color: #bbbbbb;
+                background-color: #444444;
+                border: 1px solid #bbbbbb;
+            }
+
+            #refresh {
+                font-family: FiraSans-SemiBold;
+                font-size: 14px;
+                color: #bbbbbb;
+                font-weight: 700;
+                padding: 1px 5px 1px 5px;
+                border-radius: 4px 4px 4px 4px;
+                background-image: linear-gradient(rgba(68,68,68,1) 20%, rgba(10,10,10,1) 100%);
+                border: 0px;
+                
+            }
+
+            #refresh:hover {
+                background-image: linear-gradient(rgba(98,98,98,1) 20%, rgba(40,40,40,1) 100%);
+                color: #ffffff;
+            }
+
+            input:focus {
+                outline: none;
+            }
+
+            #sidewalk {
+                width: 50px;
+            }
+            #list {
+                width: 398px;
+                min-height: 600px;
+                border: 0px;
+                background-image: ;
+                background-color: #555555;
+            }
+            
+            #scollableList {
+                background-image: url("images/sidewalk.png");
+                background-position: left top;
+                background-repeat: repeat;
+                display: flex;
+                width: 100%;
+                height: 600px;
+                overflow-x: hidden;
+                overflow-y: visible;
+                margin-bottom: 6px;
+            }
+            
+            #listContainer {
+                width: 100%;
+            }
+            
+            ::-webkit-scrollbar {
+                width: 20px;
+                height: 10px;
+            }
+            ::-webkit-scrollbar-track {
+                background-color: #2e2e2e;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background-color: #696969;
+                border: 2px solid #2e2e2e;
+                border-radius: 8px;
+            }
+            
+            #sortContainer {
+                background-color: #555555;
+            }
+            
+            .overlay {
+                height: 100%;
+                width: 0;
+                position: fixed;
+                z-index: 1;
+                top: 0;
+                left: 0;
+                background-color: rgba(0,0,0, 1);
+                overflow: hidden;
+                transition: 0.5s;
+            }
+
+            #propertiesName {
+                text-align: left;
+                width: 70%;
+                font-family: FiraSans-SemiBold;
+                font-size: 14px;
+                color: #ffffff;
+                font-weight: 700;
+                height: 24px;
+            }
+            
+            #copy {
+                font-family: FiraSans-SemiBold;
+                font-size: 12px;
+                color: #bbbbbb;
+                font-weight: 700;
+                padding: 3px 8px 3px 8px;
+                border-radius: 4px 4px 4px 4px;
+                background-image: linear-gradient(rgba(88,88,88,1) 20%, rgba(30,30,30,1) 100%);
+                border: 0px;
+                
+            }
+
+            #copy:hover {
+                background-image: linear-gradient(rgba(118,118,118,1) 20%, rgba(50,50,50,1) 100%);
+                color: #ffffff;
+            }
+            
+            #back {
+                font-family: FiraSans-SemiBold;
+                font-size: 28px;
+                color: #aaaaaa;
+                padding: 0px;
+                background-color: #000000;
+                border: 0px;
+            }
+
+            #back:hover {
+                color: #ffffff;
+            }
+            
+            #fileBack {
+                font-family: FiraSans-SemiBold;
+                font-size: 28px;
+                color: #aaaaaa;
+                padding: 0px;
+                background-color: #000000;
+                border: 0px;
+            }
+            
+            #fileBack:hover {
+                color: #ffffff;
+            }
+            
+            #properties {
+                width: 100%px;
+                height: 660px;
+                border: 0px;
+                background-color: #222222;
+                overflow: auto;
+                font-family: FiraSans-Regular;
+                font-size: 11px;
+                color: #aaaaaa;
+                padding: 3px;
+            }
+            
+            #file {
+                width: 100%;
+                height: 655px;
+                border: 0px;
+                background-color: #222222;
+                overflow: auto;
+                font-family: FiraSans-Regular;
+                font-size: 11px;
+                color: #aaaaaa;
+                padding: 3px;
+                resize: none;
+            }
+            
+            .propertyLabel {
+                color: #ffffff;
+                font-family: FiraSans-SemiBold;
+            }
+            
+            a {
+                color: #61cdff;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="toolbarContainer">
+            <div id="ToolbarHeaderContainer"><div id="nbrEntities"></div></div>
+            <div id="ToolbarControleContainer">Radius: <input id="radius" name="radius" type="text" size="5" onKeyUp="updateRadius();">&nbsp;&nbsp;&nbsp;
+            <button id="refresh" onclick="selectedID = '';refresh();">&#8635;</button>
+            </div>
+        </div>
+        <div id="listContainer">
+            <div id = "tabsContainer">
+                <button id="domainEntities" class="tab domain" onclick="setTab('domain');">DOMAIN (0)</button>
+                <button id="avatarEntities"class="tab avatar" onclick="setTab('avatar');">AVATAR (0)</button>
+                <button id="localEntities"class="tab local" onclick="setTab('local');">LOCAL (0)</button>
+                <button id="byParent" class="tab parent" onclick="setTab('parent');">BY PARENT</button>
+            </div>
+            <div id="sortContainer">
+                <div class="headerContainer">
+                    <button class="headerType" id="sortByType" onclick="sortDataBy('type');">TYPE</button>
+                    <button class="headerName" id="sortByName" onclick="sortDataBy('name');">NAME</button>
+                    <button class="headerLocked" id="sortByLocked" onclick="sortDataBy('locked');">L</button>
+                    <button class="headerVisible" id="sortByVisible" onclick="sortDataBy('visible');">V</button>
+                    <button class="headerScripted" id="sortByScripted" onclick="sortDataBy('scripted');">S</button>
+                </div>
+                
+            </div>
+            <div id="scollableList">
+                <div id="list"></div>
+                <div id="sidewalk"></div>
+            </div>
+        </div>
+        <div style="text-align: right; width:100%;">
+            <button id="uninstall" onClick = "uninstall();">Uninstall this app</button>
+        </div>
+        <div id="propertiesPanel" class="overlay" >
+            <table style="width:100%;"><tr style="vertical-align: middle; height: 30px;">
+                <td style="vertical-align: top; width:10%; height:30px; text-align: left;"><button id="back" onclick="closeProperties();">&#129092;</button></td>
+                <td style="width:75%; height:30px; text-align: left;"><div id="propertiesName"></div></td>
+                <td style="width:15%; height:30px; text-align: right;"><button id="copy" onclick="copyProperty();">Copy</button></td>
+            </tr></table>
+            <div id="properties"></div>
+        </div>
+        <div id="filePanel" class="overlay" >
+            <table style="width:100%;"><tr style="vertical-align: middle; height: 30px;">
+                <td style="vertical-align: top; width:10%; height:30px; text-align: left;"><button id="fileBack" onclick="closeFile();">&#129092;</button></td>
+                <td style="width:90%; height:30px; text-align: left;"><div id="fileName"></div></td>
+            </tr></table>
+            <div style="width: 100%;"><textarea id="file" wrap="off"></textarea></div>
+        </div>        
+        <script>
+            
+            function drawFile(url, content) {
+                document.getElementById("fileName").innerHTML = shortenUrl(url);
+                document.getElementById("file").value = content;
+                document.getElementById("filePanel").style.width = "100%";
+            }
+            
+            function shortenUrl(url) {
+                if (url.length >= 90) {
+                    return url.substr(0, 41) + "... ..." + url.substr(url.length-42, 42);
+                } else {
+                    return url;
+                }
+            }
+            
+            function closeFile() {
+                document.getElementById("filePanel").style.width = "0%";
+            }
+            
+            function copyProperty() {
+                var dataToCopy = JSON.stringify(getPropertiesFromID(propertyPanelCurrentId));
+                copyToClipboard(dataToCopy);
+                document.getElementById("copy").style.color = "#00ff00";
+            }
+			function copyToClipboard(data) {
+				var $temp = $("<input>");
+				$("body").append($temp);
+				$temp.val(data).select();
+				document.execCommand("copy");
+				$temp.remove();
+			}
+
+            function displayProperties(id) {
+                propertyPanelCurrentId = id;
+                showInWorld(id);
+                var properties = getPropertiesFromID(id);
+                document.getElementById("propertiesName").innerHTML = "<font class='" + properties.entityHostType + "'>" + properties.name + "</font>";
+                document.getElementById("properties").innerHTML = drawProperties(properties);
+                document.getElementById("copy").style.color = "#bbbbbb";
+                document.getElementById("propertiesPanel").style.width = "100%";
+            }
+            
+            function getPropertiesFromID(id) {
+                var prop = [];
+                for (var i = 0; i < dataList.length; i++) {
+                    if (dataList[i].id === id) {
+                        prop = dataList[i];
+                        break;
+                    }
+                }
+                return prop;
+            }
+            
+            function closeProperties() {
+                document.getElementById("propertiesPanel").style.width = "0%";
+            }
+
+            function drawProperties(obj) {
+                var txt = "";
+                var urlProperties = ["script", "serverScripts", "modelURL", "materialURL", "compoundShapeUrl", "scriptURL", "filterURL"];
+                for(var propt in obj){
+                    var value = obj[propt];
+                    if (urlProperties.indexOf(propt) !== -1 && value.substr(0, 4) === "http" && (value.indexOf(".js") !== -1 || value.indexOf(".fst") !== -1 )) {
+                        txt = txt + "<font class='propertyLabel'>" + propt + ":</font> " + '<a href="#" onclick="openFile(' + "'" + value + "'" + '); return false;">' + value + "</a><br>";
+                    } else if (propt === "parentID") {
+                        txt = txt + "<font class='propertyLabel'>" + propt + ":</font> " + genLinkFromID(value) + "<br>";
+                    } else if (propt === "renderWithZones") {
+                        txt = txt + "<font class='propertyLabel'>" + propt + ":</font> [";
+                        if (value.length > 0) {
+                            for (var k = 0; k < value.length; k++) {
+                                if (k !== 0) {
+                                    txt = txt + ", " + genLinkFromID(value[k]);
+                                } else {
+                                    txt = txt + genLinkFromID(value[k]);
+                                }
+                            }
+                        }
+                        txt = txt + "]<br>";
+                    } else {
+                        txt = txt + "<font class='propertyLabel'>" + propt + ":</font> " + JSON.stringify(value) + "<br>";
+                    }
+                }
+                return txt;
+            }
+
+            function genLinkFromID(id) {
+                if (id === NULL_UUID) {
+                    return NULL_UUID;
+                } else {
+                    var data = getPropertiesFromID(id);
+                    return "<a class='" + data.entityHostType + "' href='#' onclick='displayProperties(" + '"' + id + '"' + "); return false;'>" + data.name + "</a>";
+                }
+            }
+
+            function openFile(url) {
+                var message = {
+                    "channel": channel,
+                    "action": "GET_FILE",
+                    "url": url
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+
+
+            
+            function sortDataBy(criteria) {
+                var colorTag = "<font style='color:#dddddd;'>";
+                sortBy = criteria;
+                if (criteria === "type") {
+                    document.getElementById("sortByType").innerHTML = colorTag + "TYPE</font>";
+                    document.getElementById("sortByName").innerHTML = "NAME";
+                    document.getElementById("sortByScripted").innerHTML = "S";
+                    document.getElementById("sortByLocked").innerHTML = "L";
+                    document.getElementById("sortByVisible").innerHTML = "V";
+                } else if  (criteria === "name") {
+                    document.getElementById("sortByType").innerHTML = "TYPE";
+                    document.getElementById("sortByName").innerHTML = colorTag + "NAME</font>";
+                    document.getElementById("sortByScripted").innerHTML = "S";
+                    document.getElementById("sortByLocked").innerHTML = "L";
+                    document.getElementById("sortByVisible").innerHTML = "V";
+                } else if  (criteria === "scripted") {
+                    document.getElementById("sortByType").innerHTML = "TYPE";
+                    document.getElementById("sortByName").innerHTML = "NAME";
+                    document.getElementById("sortByScripted").innerHTML = colorTag + "S</font>";
+                    document.getElementById("sortByLocked").innerHTML = "L";
+                    document.getElementById("sortByVisible").innerHTML = "V";
+                } else if  (criteria === "locked") {
+                    document.getElementById("sortByType").innerHTML = "TYPE";
+                    document.getElementById("sortByName").innerHTML = "NAME";
+                    document.getElementById("sortByScripted").innerHTML = "S";
+                    document.getElementById("sortByLocked").innerHTML = colorTag + "L</font>";
+                    document.getElementById("sortByVisible").innerHTML = "V";
+                } else if  (criteria === "visible") {
+                    document.getElementById("sortByType").innerHTML = "TYPE";
+                    document.getElementById("sortByName").innerHTML = "NAME";
+                    document.getElementById("sortByScripted").innerHTML = "S";
+                    document.getElementById("sortByLocked").innerHTML = "L";
+                    document.getElementById("sortByVisible").innerHTML = colorTag + "V</font>";
+                } else {
+                    document.getElementById("sortByType").innerHTML = "TYPE";
+                    document.getElementById("sortByName").innerHTML = "NAME";
+                    document.getElementById("sortByScripted").innerHTML = "S";
+                    document.getElementById("sortByLocked").innerHTML = "L";
+                    document.getElementById("sortByVisible").innerHTML = "V";
+                }
+                selectedID = "";
+                removeShowInWorld();
+                refresh();
+            }
+            
+            function setTab(tabName) {
+                tab = tabName;
+                manageTabs();
+                selectedID = "";
+                removeShowInWorld();
+                refresh();
+            }
+            
+            function manageTabs() {
+                document.getElementById("domainEntities").className = "tab domain";
+                document.getElementById("avatarEntities").className = "tab avatar";
+                document.getElementById("localEntities").className = "tab local";
+                document.getElementById("byParent").className = "tab parent";
+                switch(tab) {
+                    case "domain":
+                        document.getElementById("domainEntities").className = "tabActive domain";
+                        break;
+                    case "avatar":
+                        document.getElementById("avatarEntities").className = "tabActive avatar";
+                        break;
+                    case "local":
+                        document.getElementById("localEntities").className = "tabActive local";
+                        break;
+                    case "parent":
+                        document.getElementById("byParent").className = "tabActive parent";
+                        break;
+                } 
+            
+            }
+            
+            function updateRadius() {
+                var newRadius = parseInt(document.getElementById("radius").value, 10);
+                radius = newRadius;
+                if (radius > 0) {
+                    refresh();
+                } else {
+                    dataList = [];
+                    drawList();
+                }
+                selectedID = "";
+                removeShowInWorld();
+            }
+            
+            function refresh() {
+                document.getElementById("radius").value = radius;
+                var message = {
+                    "channel": channel,
+                    "action": "REFRESH",
+                    "radius": radius
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            function uninstall() {
+                var message = {
+                    "channel": channel,
+                    "action": "SELF_UNINSTALL"
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            manageTabs();
+            sortDataBy(sortBy);
+            refresh();
+        </script>
+    </body>
+</html>
