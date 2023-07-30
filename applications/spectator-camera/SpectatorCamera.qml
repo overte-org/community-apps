@@ -6,6 +6,7 @@
 //
 //  Created by Zach Fox on 2018-12-12
 //  Copyright 2018 High Fidelity, Inc.
+//  Copyright 2023 Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -16,9 +17,9 @@ import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtGraphicalEffects 1.0
 
-import "qrc:////qml//styles-uit" as HifiStylesUit
-import "qrc:////qml//controls-uit" as HifiControlsUit
-import "qrc:////qml//controls" as HifiControls
+import stylesUit 1.0 as HifiStylesUit
+import controlsUit 1.0 as HifiControlsUit
+import controls 1.0 as HifiControls
 import "qrc:////qml//hifi" as Hifi
 
 Rectangle {
