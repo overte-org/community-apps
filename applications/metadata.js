@@ -215,6 +215,15 @@ var metadata = { "applications":
             "jsfile": "cameras/CameraPositions.js",
             "icon": "cameras/CameraPos-inactive.svg",
             "caption": "CAMERAS"
-        }        
+        },
+        {
+            "isActive": true,
+            "directory": "expozer",
+            "name": "expozer",
+            "description": "This tool allows you to browse all the possible entities of a domain (Domain, Avatar and Local entities). You can view the data from any domains, even those where you don't have the permission to edit. It has also an entity list grouped by parents. The tool also lets you see directly the content of different types of file (.js, .json, .fst). Perfect for: debugging, learning, or to see how thing are done.",
+            "jsfile": "expozer/app-expozer.js",
+            "icon": "expozer/images/appicon_i.png",
+            "caption": "EXPOZER"
+        }
     ]
 };
