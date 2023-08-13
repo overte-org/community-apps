@@ -8,18 +8,8 @@
     
     UI for the "Appreciate" application.
 
-    * This program ("Appreciate" application) is free software: you can redistribute it and/or modify
-    * it under the terms of the GNU General Public License as published by
-    * the Free Software Foundation, either version 3 of the License, or
-    * (at your option) any later version.
-    * 
-    * This program is distributed in the hope that it will be useful,
-    * but WITHOUT ANY WARRANTY; without even the implied warranty of
-    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    * GNU General Public License for more details.
-    * 
-    * You should have received a copy of the GNU General Public License
-    * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Distributed under the Apache License, Version 2.0
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 -->
 
 <html>
@@ -27,8 +17,6 @@
         <title>Appreciate</title>
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="css/style.css">
-        <!--I modified jscolor to prevent it from printing the color code to the value of the input onchange. -->
-        <script type="text/javascript" src="js/jscolor.js"></script>
     </head>
 
     <body>
@@ -38,7 +26,7 @@
         <div id="mainContainer">
             <div id="titleBarContainer">
                 <div id="titleText" style="font-weight:bold;">
-                    Appreciate v1.5
+                    Appreciate v1.6
                 </div>
                 <label class="switch">
                     <input id="appreciateSwitch" type="checkbox" onclick="appreciateSwitchClicked(this)">
@@ -73,14 +61,13 @@
                     <input id="showAppreciationEntityCheckbox" type="checkbox" onclick="showAppreciationEntityCheckboxClicked(this)">
                     <span class="checkmark"></span>
                 </label>
-
+                <br>
                 <div id="colorPickerContainer">
-                    <input type="button" id="colorPicker" class="jscolor"
-                        onchange="setEntityColor(this.jscolor)" value="Choose Dodecahedron Color">
-                    </input>
+                    <div id="colorPicker">Dodecahedron Color</div>
+                    <img src="images/hueBar.jpg" id="hueSelector" draggable="false">
                 </div>
+                
             </div>
-
             <div id="instructions">
                 <div id="desktopModeInstructions">
                     Desktop Mode:<br/>Tap or hold the Z key on your keyboard!
@@ -89,8 +76,12 @@
                     VR Mode:<br/>Raise your hands above your head and shake them!
                 </div>
             </div>
+            
         </div>
         
+        <div id ="uninstallBar">
+            <button id="uninstall" onClick = "uninstall();">Uninstall this application</button>
+        </div>
         <!--Include this script here so it only executes once the DOM is ready.-->
         <script type="text/javascript" src="js/appreciate_ui.js"></script>
     </body>

@@ -6,6 +6,13 @@ Show someone else that you like what they're doing. Open the app to see usage in
 
 ## Releases
 
+### v1.6 (By Alezia Kurdis for Overte, August 12th, 2023)
+
+- Replace the Color Picker Component (sadly GPLv3) by a simple hue selector.
+- Add a Install button
+- Keep the icon active if the switch is on.
+- The appreciation dodecahedron is now emissive, and glows as the intensity grows.
+
 ### v1.5 | [48d8247](https://github.com/highfidelity/hifi-content/commit/48d8247)
 
 - Fixed an issue where Appreciate app users wearing avatars without a specific joint wouldn't hear the Appreciate sound or see the Appreciation Dodecahedron

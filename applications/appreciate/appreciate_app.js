@@ -8,20 +8,10 @@
     "Appreciate" application.
     Show someone else that you like what they're doing. 
     Open the app to see usage instructions and some options!
-    (version 1.5.0)
+    (version 1.6.0)
 
-    * This program ("Appreciate" application) is free software: you can redistribute it and/or modify
-    * it under the terms of the GNU General Public License as published by
-    * the Free Software Foundation, either version 3 of the License, or
-    * (at your option) any later version.
-    * 
-    * This program is distributed in the hope that it will be useful,
-    * but WITHOUT ANY WARRANTY; without even the implied warranty of
-    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    * GNU General Public License for more details.
-    * 
-    * You should have received a copy of the GNU General Public License
-    * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Distributed under the Apache License, Version 2.0
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 */
 
 (function () {
@@ -71,29 +61,10 @@
         return minOutput + (maxOutput - minOutput) *
         (factor - minInput) / (maxInput - minInput);
     }
-    
-
-    // Linearly scales an RGB color between 0 and 1 based on RGB color values
-    // between 0 and 255.
-    function linearScaleColor(intensity, min, max) {
-        var output = {
-            "red": 0,
-            "green": 0,
-            "blue": 0
-        };
-
-        output.red = linearScale(intensity, 0, 1, min.red, max.red);
-        output.green = linearScale(intensity, 0, 1, min.green, max.green);
-        output.blue = linearScale(intensity, 0, 1, min.blue, max.blue);
-
-        return output;
-    }
-
 
     function randomFloat(min, max) {
         return Math.random() * (max - min) + min;
     }
-
 
     // Updates the Current Intensity Meter UI element. Called when intensity changes.
     function updateCurrentIntensityUI() {
@@ -117,6 +88,7 @@
         if (intensityEntity) {
             Entities.deleteEntity(intensityEntity);
             intensityEntity = false;
+            intensityEntityMaterial = Uuid.NULL;
         }
     }
 
@@ -179,6 +151,7 @@
     // current intensity of their appreciation.
     // Many of these property values are empirically determined.
     var intensityEntity = false;
+    var intensityEntityMaterial = Uuid.NULL;
     var INTENSITY_ENTITY_MAX_DIMENSIONS = {
         "x": 0.24,
         "y": 0.24,
@@ -205,6 +178,7 @@
         "blue": 5
     };
     var MIN_COLOR_MULTIPLIER = 0.4;
+    var MAX_GLOW = 3;
     var intensityEntityColorMax = JSON.parse(Settings.getValue("appreciate/entityColor",
         JSON.stringify(INTENSITY_ENTITY_COLOR_MAX_DEFAULT)));
     var ANGVEL_ENTITY_MULTIPLY_FACTOR = 62;
@@ -225,35 +199,12 @@
         },
         "angularDamping": 0,
         "grab": {
-            "grabbable": false,
-            "equippableLeftRotation": {
-                "x": -0.0000152587890625,
-                "y": -0.0000152587890625,
-                "z": -0.0000152587890625,
-                "w": 1
-            },
-            "equippableRightRotation": {
-                "x": -0.0000152587890625,
-                "y": -0.0000152587890625,
-                "z": -0.0000152587890625,
-                "w": 1
-            }
+            "grabbable": false
         },
         "collisionless": true,
         "ignoreForCollisions": true,
-        "queryAACube": {
-            "x": -0.17320507764816284,
-            "y": -0.17320507764816284,
-            "z": -0.17320507764816284,
-            "scale": 0.3464101552963257
-        },
         "damping": 0,
-        "color": intensityEntityColorMin,
-        "clientOnly": false,
-        "avatarEntity": true,
-        "localEntity": false,
-        "faceCamera": false,
-        "isFacingAvatar": false
+        "color": intensityEntityColorMin
     };
     var currentInitialAngularVelocity = {
         "x": 0,
@@ -266,12 +217,22 @@
         }
 
         if (currentIntensity > 0) {
+            var matData = {
+                "materialVersion": 1,
+                "materials": [
+                    {
+                        "name": "intensity",
+                        "albedo": [intensityEntityColorMax.red/255, intensityEntityColorMax.green/255, intensityEntityColorMax.blue/255],
+                        "metallic": 0.001,
+                        "roughness": 0.9,
+                        "emissive": [(intensityEntityColorMax.red/255) * (MAX_GLOW * currentIntensity), (intensityEntityColorMax.green/255) * (MAX_GLOW * currentIntensity), (intensityEntityColorMax.blue/255) * (MAX_GLOW * currentIntensity)],
+                        "cullFaceMode": "CULL_BACK",
+                        "model": "hifi_pbr"
+                    }
+                ]
+            };
+            
             if (intensityEntity) {
-                intensityEntityColorMin.red = intensityEntityColorMax.red * MIN_COLOR_MULTIPLIER;
-                intensityEntityColorMin.green = intensityEntityColorMax.green * MIN_COLOR_MULTIPLIER;
-                intensityEntityColorMin.blue = intensityEntityColorMax.blue * MIN_COLOR_MULTIPLIER;
-
-                var color = linearScaleColor(currentIntensity, intensityEntityColorMin, intensityEntityColorMax);
 
                 var propsToUpdate = {
                     position: getAppreciationPosition()
@@ -290,13 +251,8 @@
                     lastAngularVelocity = currentAngularVelocity;
                 }
 
-                var currentColor = color;
-                if (colorChangedEnough(currentColor, lastColor, COLOR_DISTANCE_THRESHOLD_PERCENT_CHANGE)) {
-                    propsToUpdate.color = currentColor;
-                    lastColor = currentColor;
-                }
-
                 Entities.editEntity(intensityEntity, propsToUpdate);
+                Entities.editEntity(intensityEntityMaterial, {"materialData": JSON.stringify(matData)});
             } else {
                 var props = INTENSITY_ENTITY_PROPERTIES;
                 props.position = getAppreciationPosition();
@@ -310,11 +266,21 @@
                 props.angularVelocity = currentInitialAngularVelocity;
 
                 intensityEntity = Entities.addEntity(props, "avatar");
+                intensityEntityMaterial = Entities.addEntity({
+                    "type": "Material",
+                    "name": "Intensity Entity Material",
+                    "parentID": intensityEntity,
+                    "materialURL": "materialData",
+                    "materialData": JSON.stringify(matData),
+                    "priority": 2,
+                    "parentMaterialName": "0"
+                }, "avatar");
             }
         } else {
             if (intensityEntity) {
                 Entities.deleteEntity(intensityEntity);
                 intensityEntity = false;
+                intensityEntityMaterial = Uuid.NULL;
             }
             
             maybeClearUpdateIntensityEntityInterval();
@@ -327,6 +293,13 @@
         updateCurrentIntensityUI();
     }
 
+    function onClosed() {
+        if (appreciateEnabled) {
+            ui.buttonActive(true);
+        } else {
+            ui.buttonActive(false);
+        }
+    }
 
     // Locally pre-caches all of the sounds in the sounds/claps and sounds/whistles
     // directories.
@@ -1018,7 +991,11 @@
                 intensityEntityColorMax = message.entityColor;
                 Settings.setValue("appreciate/entityColor", JSON.stringify(intensityEntityColorMax));
                 break;
-
+                
+            case "uninstall":
+                ScriptDiscoveryService.stopScript(Script.resolvePath(''), false);
+                break;
+                
             case "zKeyDown":
                 var pressEvent = {
                     "text": "Z",
@@ -1088,11 +1065,11 @@
         if (intensityEntity) {
             Entities.deleteEntity(intensityEntity);
             intensityEntity = false;
+            intensityEntityMaterial = Uuid.NULL;
         }
 
         HMD.displayModeChanged.disconnect(enableOrDisableAppreciate);
     }
-
 
     // When called, this function will stop the versions of this script that are
     // baked into the client installation IF there's another version of the script
@@ -1121,7 +1098,6 @@
         }
     }
 
-
     // Called when the script starts up
     var BUTTON_NAME = "APPRECIATE";
     var APP_UI_URL = Script.resolvePath('resources/appreciate_ui.html');
@@ -1135,7 +1111,8 @@
             // clap by Rena from the Noun Project
             graphicsDirectory: Script.resolvePath("./resources/images/icons/"),
             onOpened: onOpened,
-            onMessage: onMessage
+            onMessage: onMessage,
+            onClosed: onClosed
         });
         
         cleanupOldIntensityEntities();
@@ -1146,6 +1123,12 @@
         getAnimations();
         HMD.displayModeChanged.connect(enableOrDisableAppreciate);
         maybeStopBakedScriptVersions();
+        
+        if (appreciateEnabled) {
+            ui.buttonActive(true);
+        } else {
+            ui.buttonActive(false);
+        }
     }
 
 

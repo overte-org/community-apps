@@ -7,18 +7,8 @@
 
     Javascript code for the UI of the "Appreciate" application.
 
-    * This program ("Appreciate" application) is free software: you can redistribute it and/or modify
-    * it under the terms of the GNU General Public License as published by
-    * the Free Software Foundation, either version 3 of the License, or
-    * (at your option) any later version.
-    * 
-    * This program is distributed in the hope that it will be useful,
-    * but WITHOUT ANY WARRANTY; without even the implied warranty of
-    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    * GNU General Public License for more details.
-    * 
-    * You should have received a copy of the GNU General Public License
-    * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Distributed under the Apache License, Version 2.0
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 */
 
 /* globals document EventBridge setTimeout */
@@ -67,14 +57,15 @@ function showAppreciationEntityCheckboxClicked(checkbox) {
     }
 }
 
-// Called when the user changes the entity's color using the jscolor picker.
+// Called when the user changes the entity's color using the hue selector.
 // Modifies the color of the Intensity Meter gradient and sends a message to the App JS.
 var START_COLOR_MULTIPLIER = 0.2;
-function setEntityColor(jscolor) {
+function setEntityColor(colorArray) {
+    
     var newEntityColor = {
-        "red": jscolor.rgb[0],
-        "green": jscolor.rgb[1],
-        "blue": jscolor.rgb[2]
+        "red": colorArray[0],
+        "green": colorArray[1],
+        "blue": colorArray[2]
     };
 
     var startColor = {
@@ -86,14 +77,69 @@ function setEntityColor(jscolor) {
     var currentIntensityDisplayWidth = document.getElementById("currentIntensityDisplay").offsetWidth;
     var bgString = "linear-gradient(to right, rgb(" + startColor.red + ", " +
         startColor.green + ", " + startColor.blue + ") 0, " +
-        jscolor.toHEXString() + " " + currentIntensityDisplayWidth + "px)";
+        "rgb(" + newEntityColor.red + ", " + newEntityColor.green + ", " + newEntityColor.blue + ") " +
+        currentIntensityDisplayWidth + "px)";
     document.getElementById("currentIntensity").style.backgroundImage = bgString;
+    document.getElementById("colorPicker").style.backgroundColor = "rgb(" + newEntityColor.red + ", " + newEntityColor.green + ", " + newEntityColor.blue + ")";
 
     EventBridge.emitWebEvent(JSON.stringify({
         app: "appreciate",
         method: "setEntityColor",
         entityColor: newEntityColor
     }));
+}
+
+var hueSelector = document.getElementById('hueSelector');
+hueSelector.addEventListener("click", function(event) {
+    var rect = hueSelector.getBoundingClientRect();
+    var hue = event.clientX - rect.left;
+    if (hue >= 0 || hue <= 360) {
+        setEntityColor(hslToRgb(hue/360, 1, 0.65)); //.65 is adding just a bit of white in the saturated color (0.5) to get a brighter glow effect.
+    }
+});
+
+/*
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   {number}  h       The hue
+ * @param   {number}  s       The saturation
+ * @param   {number}  l       The lightness
+ * @return  {Array}           The RGB representation
+ */
+function hslToRgb(h, s, l){
+    var r, g, b;
+
+    if(s == 0){
+        r = g = b = l; // achromatic
+    }else{
+        var hue2rgb = function hue2rgb(p, q, t){
+            if(t < 0) t += 1;
+            if(t > 1) t -= 1;
+            if(t < 1/6) return p + (q - p) * 6 * t;
+            if(t < 1/2) return q;
+            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function uninstall() {
+    var message = {
+        "app": "appreciate",
+        "method": "uninstall"
+    };
+    EventBridge.emitWebEvent(JSON.stringify(message));
 }
 
 // Handle EventBridge messages from *_app.js.
@@ -133,19 +179,8 @@ function onScriptEventReceived(message) {
 
             document.getElementById("loadingContainer").style.display = "none";
 
-            var color = document.getElementById("colorPicker").jscolor;
-            color.fromRGB(message.entityColor.red, message.entityColor.green, message.entityColor.blue);
-
-            var startColor = {
-                "red": Math.floor(color.rgb[0] * START_COLOR_MULTIPLIER),
-                "green": Math.floor(color.rgb[1] * START_COLOR_MULTIPLIER),
-                "blue": Math.floor(color.rgb[2] * START_COLOR_MULTIPLIER)
-            };
-            var currentIntensityDisplayWidth = document.getElementById("currentIntensityDisplay").offsetWidth;
-            document.getElementById("currentIntensity").style.backgroundImage = 
-                "linear-gradient(to right, rgb(" + startColor.red + ", " +
-                startColor.green + ", " + startColor.blue + ") 0, " +
-                color.toHEXString() + " " + currentIntensityDisplayWidth + "px)";
+            setEntityColor([message.entityColor.red, message.entityColor.green, message.entityColor.blue]);
+            
             break;
 
         case "updateCurrentIntensityUI":
