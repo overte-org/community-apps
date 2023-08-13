@@ -9,7 +9,7 @@ Show someone else that you like what they're doing. Open the app to see usage in
 ### v1.6 (By Alezia Kurdis for Overte, August 12th, 2023)
 
 - Replace the Color Picker Component (sadly GPLv3) by a simple hue selector.
-- Add a Install button
+- Add a "Uninstall" button
 - Keep the icon active if the switch is on.
 - The appreciation dodecahedron is now emissive, and glows as the intensity grows.
 
