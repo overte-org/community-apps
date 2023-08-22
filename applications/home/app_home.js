@@ -38,7 +38,7 @@
             if (LocationBookmarks.getHomeLocationAddress()) {
                 location.handleLookupString(LocationBookmarks.getHomeLocationAddress());
             } else {
-                location.goToLocalSandbox();
+                Window.location = "file:///~/serverless/tutorial.json";
             }
             button.editProperties({
                 isActive: false
