@@ -1,10 +1,9 @@
 //
-// scaleMe.js
-// By: alizardguy
-//
 // Distributed under the Apache License, Version 2.0.
 // See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
+"use strict";
+
 (function (){
     var jsMainFileName = "scaleMe.js";
     var ROOT = Script.resolvePath('').split(jsMainFileName)[0];
@@ -49,8 +48,6 @@
     //Receive message from the HTML UI
     function onAppWebEventReceived(message) {
         if (typeof message === "string") {
-            var d = new Date();
-            var n = d.getTime();
             var instruction = JSON.parse(message);
             if (instruction.channel === channel) {
                 if (instruction.action === "SCALE") { //<== Use this for action trigger the UI script processing. (whithout delay)
