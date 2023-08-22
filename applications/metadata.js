@@ -233,6 +233,15 @@ var metadata = { "applications":
             "jsfile": "scaleMe/scaleMe.js",
             "icon": "scaleMe/icons/inactive.png",
             "caption": "SCALEME"
+        },
+        {
+            "isActive": true,
+            "directory": "appreciate",
+            "name": "appreciate",
+            "description": "Show someone else that you like what they're doing. (By applauding, clapping, whistling...) Open the app to see usage instructions and some options.",
+            "jsfile": "appreciate/appreciate_app.js",
+            "icon": "appreciate/resources/images/icons/appreciate-i.svg",
+            "caption": "APPRECIATE"
         }
     ]
 };
