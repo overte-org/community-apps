@@ -15,8 +15,6 @@
     var APP_ICON_INACTIVE = ROOT + "icons/inactive.png";
     var appStatus = false;
     var channel = "overte.application.more.zardsscaleme";
-    var timestamp = 0;
-    var INTERCALL_DELAY = 200; //0.3 sec
 
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 
