@@ -196,7 +196,7 @@ var metadata = { "applications":
             "description": "Necessary tools for exploration: a COMPASS and a VR FLASHLIGHT.",
             "jsfile": "survivalKit/app-survivalKit.js",
             "icon": "survivalKit/icon_inactive.png",
-            "caption": "SURVIVAL"        
+            "caption": "SURVIVAL"
         },
         {
             "isActive": true,
@@ -224,6 +224,15 @@ var metadata = { "applications":
             "jsfile": "expozer/app-expozer.js",
             "icon": "expozer/images/appicon_i.png",
             "caption": "EXPOZER"
+        },
+        {
+            "isActive": true,
+            "directory": "scaleMe",
+            "name": "SCALEME",
+            "description": "A simple app for changing the player scale.",
+            "jsfile": "scaleMe/scaleMe.js",
+            "icon": "scaleMe/icons/inactive.png",
+            "caption": "SCALEME"
         }
     ]
 };

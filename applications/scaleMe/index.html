@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Scale Me</title>
+        <!-- main head script -->
+        <script>
+            var channel = "overte.application.more.zardsscaleme";
+
+            //Paths
+            var thisPageName = "index.html";      
+            var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            var ROOTPATH = currentPath.replace(thisPageName, "");
+
+        </script>
+        <!-- main head styles -->
+        <style>
+            html {
+                width: 100%;
+                height: 100%;
+            }
+
+            body {
+                background: #454545;
+                margin: 0;
+                font-family: sans-serif;
+                background: linear-gradient(#2b2b2b, #0f212e);
+                color: white;
+            }
+
+            .top-bar {
+                height: 90px;
+                background: linear-gradient(#2b2b2b, #1e1e1e);
+                font-weight: bold;
+                padding-left: 30px;
+                padding-right: 30px;
+                display: flex;
+                align-items: center;
+                position: fixed;
+                width: 480px;
+                top: 0;
+                z-index: 1;
+            }
+
+            main{
+                margin-top: 55px;
+                padding: 30px;
+                text-align: center;
+            }
+
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            li{
+                display: inline-block;
+                vertical-align: middle;
+            }
+
+            
+            button {
+                font-weight: bold;
+                height: 45px;
+                min-width: 100px;
+                text-align: center;
+                border: none;
+                cursor: pointer;
+                text-decoration: none;
+                background: linear-gradient(#343434 20%, #000 100%);
+                color: white;
+                padding: 5px;
+                margin: 4px;
+                border-radius: 5px;
+                
+            }
+
+            button:hover{
+                background: linear-gradient(#bbbbbb 20%, #646464 100%);
+            }
+
+            .scaleSlider{
+                min-width: 300px;
+            }
+        
+            .break{
+                width: 100%;
+                height: 40px;
+            }
+
+            input{
+                width: 50px;
+                height: 35px;
+                border-radius: 5px;
+                text-align: center;
+                font-size: large;
+                font-weight: bolder;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="top-bar">
+            <h1>Scale Me App</h1>
+        </div>
+
+        <main>
+            <h4> Scale Slider </h4>
+            <input id="scaleSlider" class="scaleSlider" type="range" value="1" min="0.5" max="9" step="0.5"> 
+            <br>
+            <input name="scale" type="number" value="1" step="0.1" min="0.1" max="10" id="scaleInput">
+            <button id="scaleSliderButton" onclick="scale(scaleInputValue)">Set Scale</button>
+            <div class="break"></div>
+            <h4> Preset Scales </h2>
+            <ul>
+                <li><button id="0.25x" onclick="scale(0.25)">0.25 scale</button></li>
+                <li><button id="0.5x" onclick="scale(0.5)">0.5 scale</button></li>
+                <li><button id="1x" onclick="scale(1)">1 scale</button></li>
+                <li><button id="2x" onclick="scale(2)">2 scale</button></li>
+                <li><button id="3x" onclick="scale(3)">3 scale</button></li>
+                <li><button id="9x" onclick="scale(9)">9 scale</button></li>
+            </ul>
+        </main>
+
+        <script>
+            var scaleInputValue = 1;
+
+            function scale(scaleAmount){
+                var message = {
+                    "channel": channel,
+                    "action" : "SCALE",
+                    "amount" : scaleAmount
+                }
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+
+            document.getElementById("scaleSlider").addEventListener('input', function(){
+                document.getElementById("scaleInput").value = document.getElementById("scaleSlider").value;
+                scaleInputValue = document.getElementById("scaleSlider").value;
+            })
+
+            document.getElementById("scaleInput").addEventListener('input', function(){
+                document.getElementById("scaleSlider").value = document.getElementById("scaleInput").value;
+                scaleInputValue = document.getElementById("scaleInput").value;
+            })
+        </script>
+    </body>
+</html>
