@@ -1,7 +1,5 @@
 # nametags.js
 
-Display users' display names above their heads.
-
-Information: http://ctrlaltstudio.com/vircadia/nametags
+Display the "Display Name" of a user over their head.
 
 [LICENSE](LICENSE)
