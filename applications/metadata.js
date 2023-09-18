@@ -242,6 +242,24 @@ var metadata = { "applications":
             "jsfile": "appreciate/appreciate_app.js",
             "icon": "appreciate/resources/images/icons/appreciate-i.svg",
             "caption": "APPRECIATE"
+        },
+        {
+            "isActive": true,
+            "directory": "zDebugger",
+            "name": "zDebugger",
+            "description": "An improved console log with keyword and type filtering.",
+            "jsfile": "zDebugger/zDebugger.js",
+            "icon": "zDebugger/icon-inactive.png",
+            "caption": "ZDEBUG"
+        },
+        {
+            "isActive": true,
+            "directory": "scriptManager",
+            "name": "scriptManager",
+            "description": "A visually improved script manager, includes the ability to bookmark scripts.",
+            "jsfile": "scriptManager/scriptManager.js",
+            "icon": "scriptManager/icon-inactive.png",
+            "caption": "SCRIPTS"
         }
     ]
 };
