@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="output.css">
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="cash.min.js"></script>
+</head>
+
+<body class="bg-gray-800">
+    <div class="flex flex-col h-screen">
+        <div class="w-full flex flex-col">
+            <div class="flex justify-between text-center text-white select-none mx-2">
+                <div data-tab="running"
+                    class="script-tab flex-grow bg-green-600 rounded-t-lg py-2 text-lg font-bold mx-0.5 border-t-2 border-x-2 border-stone-200">
+                    Running</div>
+                <div data-tab="stopped"
+                    class="script-tab flex-grow bg-red-950 rounded-t-lg py-2 text-md mx-0.5 border-t-2 border-x-2 border-stone-600">
+                    Stopped
+                </div>
+                <div data-tab="saved"
+                    class="script-tab flex-grow bg-yellow-950 rounded-t-lg py-2 text-md mx-0.5 border-t-2 border-x-2 border-stone-600">
+                    Saved
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col h-full flex-grow min-h-[50%] overflow-y-scroll">
+            <div class="script-view flex-grow bg-gray-900 rounded-md w-full border-2 border-stone-500"
+                data-view="running">
+                <div class="pb-1 flex justify-center mt-1">
+                    <input id="btnLoadNew" class="bg-slate-400 text-stone-200 px-6 py-2 mx-2 rounded-md" type="button"
+                        value="Load From URL">
+                    <input id="btnReloadAll" class="bg-cyan-600 text-stone-200 px-6 py-2 mx-2 rounded-md" type="button"
+                        value="Reload All">
+                    <input id="btnLoadDefaults" class="bg-stone-600 text-stone-200 px-6 py-2 mx-2 rounded-md"
+                        type="button" value="Load Defaults">
+                    <input id="btnStopAll" class="bg-red-700 text-stone-200 px-6 py-2 mx-2 rounded-md" type="button"
+                        value="Stop All">
+                </div>
+                <div data-list="running"></div>
+            </div>
+            <div class="script-view flex-grow bg-gray-900 rounded-md w-full border-2 border-stone-500"
+                data-view="stopped" style="display: none">
+                <p id="stoppedScriptMessage" class="text-white text-center mt-2">Running scripts that were stopped will be displayed here.<br /><span class="italic">This list is reset when this window is closed.</span></p>
+                <div data-list="stopped">
+                </div>
+            </div>
+            <div class="script-view flex-grow bg-gray-900 rounded-md w-full border-2 border-stone-500" data-view="saved"
+                style="display: none">
+                <p id="savedScriptMessage" class="text-white text-center mt-2">Saved scripts will be displayed here.<br /><span class="italic">This list is persisted across restarts.</span></p>
+                <div data-list="saved">
+                    Saved
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const channel = "application.zetaphor.scriptManager"
+        const scriptViews = $('.script-view')
+        const stoppedScriptMessage = $('#stoppedScriptMessage')
+        const savedScriptMessage= $('#savedScriptMessage')
+
+        const defaultScripts = [
+            'defaultScripts.js',
+            'app-more.js',
+            'FloofChat.js',
+            'notificationCore.js',
+            'controllerScripts.js',
+            'simplifiedNametag.js'
+        ]
+
+        const activeColors = {
+            'running': 'bg-green-600',
+            'stopped': 'bg-red-700',
+            'saved': 'bg-yellow-600',
+            'help': 'bg-cyan-600',
+        }
+
+        const inactiveColors = {
+            'running': 'bg-green-950',
+            'stopped': 'bg-red-950',
+            'saved': 'bg-yellow-950',
+            'help': 'bg-cyan-950',
+        }
+
+        var currentTab = 'running'
+        let runningScripts = []
+        let stoppedScripts = []
+        let savedScripts = []
+
+        if (typeof EventBridge !== 'undefined') {
+            EventBridge.scriptEventReceived.connect(function (message) {
+                let messageObj = JSON.parse(message)
+                if (typeof messageObj.channel === 'undefined') return
+                if (messageObj.action == 'scripts_update') {
+                    runningScripts = messageObj.data
+                } else if (messageObj.action == 'saved_update') {
+                    savedScripts = messageObj.data
+                    console.log("received saved list")
+                }
+                rebuildScriptsLists()
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            sendWebEvent('refresh_scripts')
+            sendWebEvent('get_saved')
+        })
+
+        $('#btnReloadAll').on("click", function () {
+            for (let i = 0; i < runningScripts.length; i++) {
+                sendWebEvent('reload_script', runningScripts[i]['url'])
+            }
+        })
+
+        $('#btnStopAll').on("click", function () {
+            const currentScripts = runningScripts
+            for (let i = 0; i < currentScripts.length; i++) {
+                if (currentScripts[i]['name'] !== 'scriptManager.js') {
+                    stopRunningScript(currentScripts[i]['name'], currentScripts[i]['url'])
+                }
+            }
+        })
+
+        $('#btnLoadDefaults').on("click", function () {
+            loadScript('defaultScripts.js', 'file:///~//defaultScripts.js')
+            setTimeout(function() {
+                sendWebEvent('refresh_scripts')
+            }, 1000)
+        })
+
+        $('#btnLoadNew').on("click", function () {
+            sendWebEvent('prompt_load')
+        })
+
+        $('.script-tab').on('click', function () {
+            const newType = this.getAttribute('data-tab')
+            if (newType === currentTab) return
+            const activeTab = $(`[data-tab="${currentTab}"]`)
+            const activeType = activeTab.attr('data-tab')
+            const newTab = $(`[data-tab="${newType}"]`)
+            activeTab.removeClass(`font-bold border-stone-200 ${activeColors[activeType]}`)
+            activeTab.addClass(`border-stone-600 ${inactiveColors[activeType]}`)
+            newTab.removeClass(`border-stone-600 ${inactiveColors[newType]}`)
+            newTab.addClass(`font-bold border-stone-200 ${activeColors[newType]}`)
+            currentTab = newType
+            scriptViews.hide()
+            $(`[data-view="${currentTab}"]`).show()
+        })
+
+        $('[data-list]').on('click', function (event) {
+            let target = $(event.target)
+            let scriptName = ''
+            let buttonType = ''
+            let scriptUrl = ''
+            if (event.target.nodeName === 'path') {
+                scriptName = event.target.parentElement.getAttribute('data-script')
+                scriptUrl = event.target.parentElement.getAttribute('data-script-url')
+                buttonType = event.target.parentElement.getAttribute('data-btn-type')
+            } else if (event.target.nodeName === 'svg') {
+                scriptName = event.target.getAttribute('data-script')
+                scriptUrl = event.target.getAttribute('data-script-url')
+                buttonType = event.target.getAttribute('data-btn-type')
+            }
+            if (buttonType === 'save') toggleSaved(scriptName, scriptUrl)
+            else if (buttonType === 'stop') stopRunningScript(scriptName, scriptUrl)
+            else if (buttonType === 'reload') sendWebEvent('reload_script', scriptUrl)
+            else if (buttonType === 'load') loadScript(scriptName, scriptUrl)
+            rebuildScriptsLists()
+        })
+
+        function sendWebEvent(action, data = null) {
+            const eventData = {
+                "channel": channel,
+                "action": action,
+                "data": data
+            }
+            EventBridge.emitWebEvent(JSON.stringify(eventData))
+        }
+
+        function buildRunningScriptList() {
+            $('[data-list="running"]').empty()
+            for (let i = 0; i < runningScripts.length; i++) {
+                const saved = savedScripts.some(script => script.name === runningScripts[i]['name'])
+                addRunningScript(runningScripts[i], saved)
+            }
+        }
+
+        function buildSavedScriptList() {
+            $('[data-list="saved"]').empty()
+            for (let i = 0; i < savedScripts.length; i++) {
+                addSavedScript(savedScripts[i])
+            }
+            if (savedScripts.length) savedScriptMessage.hide()
+            else savedScriptMessage.show()
+        }
+
+        function buildStoppedScriptList() {
+            $('[data-list="stopped"]').empty()
+            for (let i = 0; i < stoppedScripts.length; i++) {
+                addStoppedScript(stoppedScripts[i])
+            }
+            if (stoppedScripts.length) stoppedScriptMessage.hide()
+            else stoppedScriptMessage.show()
+        }
+
+        function rebuildScriptsLists() {
+            buildRunningScriptList()
+            buildStoppedScriptList()
+            buildSavedScriptList()
+        }
+
+        function addRunningScript(script, saved) {
+            let scriptUrl = script.url
+            const displayName = script.name.split('.js')[0]
+            if (scriptUrl.includes('file:///')) scriptUrl = 'scripts/' + scriptUrl.split('file:///~//')[1]
+            const newItem = $(
+                `<div class="flex justify-between rounded-sm bg-slate-700 hover:bg-slate-800 text-white p-2 border-b-2 border-stone-500" data-script="${script.name.toLowerCase()}">
+                    <div class="flex-grow select-none">
+                        <span class="font-bold block">${displayName} ${defaultScripts.includes(script.name) ? ' <span class="text-stone-300 text-sm italic">(System Default)</span>' : ''}</span>
+                        <span class="text-stone-300 truncate w-full text-sm">${scriptUrl}</span>
+                    </div>
+                    <div class="flex space-x-2 flex-shrink-0">
+                        <svg data-btn-type="save" ${saved ? 'style="display:none"' : ''} data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-yellow-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" data-script="${script.name}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="15 0 75 100"><path d="M83.5 92.3c-1 0-2.1-.4-3-1.2L50.8 59.7a1 1 0 0 0-1.4 0l-30 31.4a4 4 0 0 1-7-2.8V11.7a4 4 0 0 1 4-4h67.1a4 4 0 0 1 4 4v76.6A4 4 0 0 1 85 92l-1.5.3zM50 49.1a4 4 0 0 1 3 1.2l24.8 26a1 1 0 0 0 1.7-.6v-60h-59v60a1 1 0 0 0 1.7.7l24.8-26a4 4 0 0 1 3-1.3z"/></svg>
+                        <svg data-btn-type="save" ${saved ? '' : 'style="display:none"'} data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-yellow-600 stroke-stone-300 fill-stone-300 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="15 0 75 100"><path d="M83.5 92.3c-1 0-2.1-.4-3-1.2L50.8 59.7a1 1 0 0 0-1.4 0l-30 31.4a4 4 0 0 1-7-2.8V11.7a4 4 0 0 1 4-4h67.1a4 4 0 0 1 4 4v76.6c0 1.6-1 3-2.5 3.7l-1.5.3Z"/></svg>
+                        <svg data-btn-type="reload" data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-cyan-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="8 0 75 100"><path d="M84.5 75.1A46 46 0 0 0 45.9 4 45.8 45.8 0 0 0 0 49.7 46 46 0 0 0 43.8 96a46.4 46.4 0 0 0 27.3-7.6 5.4 5.4 0 0 1-6-4.5l-.7-4.5A34.9 34.9 0 0 1 11 50a34.8 34.8 0 1 1 62.6 21 1.4 1.4 0 0 1-2.6-.6l-2.6-14.6c-.6-3.6-6-2.6-5.3 1l4.7 26.7a2.5 2.5 0 0 0 3 2.1l26.8-4.7c3.6-.6 2.7-6-.9-5.4l-11 2a1.4 1.4 0 0 1-1.3-2.3Z"/></svg>
+                        <svg data-btn-type="stop" data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-red-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="-155 95 75 100"><path d="m-74.9 117.2-27.3 27.8 27.3 27.8-14.2 14-27.1-27.5-27 27.5-14.3-14 27.3-27.8-27.3-27.8 14.3-14 27 27.5 27.1-27.5z"/></svg>
+                    </div>
+                </div>`
+            );
+            $('[data-list="running"]').append(newItem)
+        }
+
+        function addSavedScript(script) {
+            let scriptUrl = script.url
+            const displayName = script.name.split('.js')[0]
+            const running = runningScripts.find(runningScript => runningScript.name === script.name)
+            if (scriptUrl.includes('file:///')) scriptUrl = 'scripts/' + scriptUrl.split('file:///~//')[1]
+            const newItem = $(
+                `<div class="flex justify-between rounded-sm bg-slate-700 hover:bg-slate-800 text-white p-2 border-b-2 border-stone-500" data-script="${script.name.toLowerCase()}">
+                    <div class="flex-grow">
+                        <span class="font-bold block">${displayName} ${defaultScripts.includes(script.name) ? ' <span class="text-stone-300 text-sm italic">(Default)</span>' : ''}</span>
+                        <span class="text-stone-300 truncate w-full text-sm">${scriptUrl}</span>
+                    </div>
+                    <div class="flex space-x-2 flex-shrink-0">
+                        <svg data-btn-type="save" data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-yellow-600 stroke-stone-300 fill-stone-300 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="15 0 75 100"><path d="M83.5 92.3c-1 0-2.1-.4-3-1.2L50.8 59.7a1 1 0 0 0-1.4 0l-30 31.4a4 4 0 0 1-7-2.8V11.7a4 4 0 0 1 4-4h67.1a4 4 0 0 1 4 4v76.6c0 1.6-1 3-2.5 3.7l-1.5.3Z"/></svg>
+                        <svg data-btn-type="reload" ${running ? '' : 'style="display:none"'} data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-cyan-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="8 0 75 100"><path d="M84.5 75.1A46 46 0 0 0 45.9 4 45.8 45.8 0 0 0 0 49.7 46 46 0 0 0 43.8 96a46.4 46.4 0 0 0 27.3-7.6 5.4 5.4 0 0 1-6-4.5l-.7-4.5A34.9 34.9 0 0 1 11 50a34.8 34.8 0 1 1 62.6 21 1.4 1.4 0 0 1-2.6-.6l-2.6-14.6c-.6-3.6-6-2.6-5.3 1l4.7 26.7a2.5 2.5 0 0 0 3 2.1l26.8-4.7c3.6-.6 2.7-6-.9-5.4l-11 2a1.4 1.4 0 0 1-1.3-2.3Z"/></svg>
+                        <svg data-btn-type="load" ${running ? 'style="display:none"' : ''} data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-cyan-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="35 25 25 50"><path d="M33.8 982.4a1 1 0 0 0-.8 1v38a1 1 0 0 0 1.5.8l32-19a1 1 0 0 0 0-1.7l-32-19a1 1 0 0 0-.7-.1Z" color="#000" overflow="visible" style="text-indent:0;text-transform:none;block-progression:tb" transform="translate(0 -952.4)"/></svg>
+                        <svg ${running ? '' : 'style="display:none"'} data-btn-type="stop" data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-red-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="-155 95 75 100"><path d="m-74.9 117.2-27.3 27.8 27.3 27.8-14.2 14-27.1-27.5-27 27.5-14.3-14 27.3-27.8-27.3-27.8 14.3-14 27 27.5 27.1-27.5z"/></svg>
+                    </div>
+                </div>`
+            );
+            $('[data-list="saved"]').append(newItem)
+        }
+
+        function addStoppedScript(script) {
+            let scriptUrl = script.url
+            const displayName = script.name.split('.js')[0]
+            if (scriptUrl.includes('file:///')) scriptUrl = 'scripts/' + scriptUrl.split('file:///~//')[1]
+            const newItem = $(
+                `<div class="flex justify-between rounded-sm bg-slate-700 hover:bg-slate-800 text-white p-2 border-b-2 border-stone-500" data-script="${script.name.toLowerCase()}">
+                    <div class="flex-grow">
+                        <span class="font-bold block">${displayName} ${defaultScripts.includes(script.name) ? ' <span class="text-stone-300 text-sm italic">(Default)</span>' : ''}</span>
+                        <span class="text-stone-300 truncate w-full text-sm">${scriptUrl}</span>
+                    </div>
+                    <div class="flex space-x-2 flex-shrink-0">
+                        <svg ${savedScripts.includes(script.name) ? 'style="display:none"' : ''} class="btn-save px-2 py-2 rounded-lg w-12 h-12 bg-yellow-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" data-script="${script.name}" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="15 0 75 100"><path d="M83.5 92.3c-1 0-2.1-.4-3-1.2L50.8 59.7a1 1 0 0 0-1.4 0l-30 31.4a4 4 0 0 1-7-2.8V11.7a4 4 0 0 1 4-4h67.1a4 4 0 0 1 4 4v76.6A4 4 0 0 1 85 92l-1.5.3zM50 49.1a4 4 0 0 1 3 1.2l24.8 26a1 1 0 0 0 1.7-.6v-60h-59v60a1 1 0 0 0 1.7.7l24.8-26a4 4 0 0 1 3-1.3z"/></svg>
+                        <svg ${savedScripts.includes(script.name) ? '' : 'style="display:none"'} data-script="${script.name}" class="btn-save px-2 py-2 rounded-lg w-12 h-12 bg-yellow-600 stroke-stone-300 fill-stone-300 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="15 0 75 100"><path d="M83.5 92.3c-1 0-2.1-.4-3-1.2L50.8 59.7a1 1 0 0 0-1.4 0l-30 31.4a4 4 0 0 1-7-2.8V11.7a4 4 0 0 1 4-4h67.1a4 4 0 0 1 4 4v76.6c0 1.6-1 3-2.5 3.7l-1.5.3Z"/></svg>
+                        <svg data-btn-type="load" data-script="${script.name}" data-script-url="${script.url}" class="px-2 py-2 rounded-lg w-12 h-12 bg-cyan-600 stroke-stone-200 fill-gray-100 hover:stroke-stone-300 hover:fill-stone-900" xmlns="http://www.w3.org/2000/svg" viewBox="35 25 25 50"><path d="M33.8 982.4a1 1 0 0 0-.8 1v38a1 1 0 0 0 1.5.8l32-19a1 1 0 0 0 0-1.7l-32-19a1 1 0 0 0-.7-.1Z" color="#000" overflow="visible" style="text-indent:0;text-transform:none;block-progression:tb" transform="translate(0 -952.4)"/></svg>
+                    </div>
+                </div>`
+            );
+            $('[data-list="stopped"]').append(newItem)
+        }
+
+        function toggleSaved(name, url) {
+            const saved = savedScripts.some(script => script.name === name)
+            if (saved) {
+                savedScripts = savedScripts.filter(script => script.name !== name)
+            } else savedScripts.push({
+                name: name,
+                url: url
+            })
+            rebuildScriptsLists()
+            sendWebEvent('set_saved', savedScripts)
+        }
+
+        function loadScript(name, url) {
+            sendWebEvent('load_script', url)
+            runningScripts.push({
+                name: name,
+                url: url
+            })
+
+            let removedScript = null
+            stoppedScripts = stoppedScripts.filter(item => {
+                if (item.name === name) {
+                    removedScript = item
+                    return false
+                }
+                return true
+            })
+            rebuildScriptsLists()
+        }
+
+        function stopRunningScript(name, url) {
+            let removedScript = null
+            runningScripts = runningScripts.filter(item => {
+                if (item.name === name) {
+                    removedScript = item
+                    return false
+                }
+                return true
+            })
+            sendWebEvent('stop_script', url)
+            stoppedScripts.push(removedScript)
+            rebuildScriptsLists()
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,152 @@
+<html>
+
+<head>
+  <title>zDebugger</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="output.css">
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  <script src="cash.min.js"></script>
+</head>
+
+<body class="bg-gray-800">
+  <div class="flex flex-col h-screen">
+    <div class="w-full flex flex-col px-3 py-3 fixed bg-gray-800 border-b-2 border-stone-500">
+      <input id="filterContentInput" class="w-full bg-gray-600 text-white p-3 rounded-md" type="text"
+        placeholder="Filter logs...">
+      <div class="flex justify-between mt-2">
+        <input class="debug-button bg-cyan-500 px-3 py-2 rounded-md cursor-pointer" type="button" value="Info"
+          debug-type="info" debug-message="Testing info button">
+        <input class="debug-button bg-slate-400 px-3 py-2 rounded-md cursor-pointer" type="button" value="Print"
+          debug-type="print" debug-message="Testing print button">
+        <input class="debug-button bg-rose-500 px-3 py-2 rounded-md cursor-pointer" type="button" value="Error"
+          debug-type="error" debug-message="Testing error button">
+        <input class="debug-button bg-yellow-500 px-3 py-2 rounded-md cursor-pointer" type="button" value="Warn"
+          debug-type="warn" debug-message="Testing warn button">
+        <input id="clearButton" class="bg-stone-700 text-white px-3 py-2 rounded-md cursor-pointer" type="button"
+          value="Clear">
+      </div>
+    </div>
+    <div id="logs" class="flex-grow bg-gray-900 rounded-md mt-12 pt-16 w-full border-2 border-stone-500 min-h-[50%]">
+    </div>
+  </div>
+
+  <script>
+    console.log('Loaded the page')
+    const debugButtons = $(".debug-button")
+    const clearButton = $("#clearButton")
+    const logsEl = $('#logs')
+    // const filterSourceEl = $('#filterSourceInput')
+    const filterContentEl = $('#filterContentInput')
+    const rawChannel = "application.zetaphor.zDebugger.raw"
+    // const requireChannel = "application.zetaphor.zDebugger.require"
+    let logs = []
+
+    const visibleStates = {
+      info: true,
+      warn: true,
+      error: true,
+      print: true
+    }
+
+    const typeColors = {
+      'info': 'cyan-500',
+      'print': 'slate-400',
+      'error': 'rose-500',
+      'warn': 'yellow-500'
+    }
+
+    const disabledColors = {
+      'info': 'cyan-700',
+      'print': 'slate-600',
+      'error': 'rose-700',
+      'warn': 'yellow-700'
+    }
+
+    svgScript = `<svg class="w-6 h-6 mr-0.5 background" xmlns="http://www.w3.org/2000/svg" viewBox="3 -0.5 19 24"><path d="M12.6 6 9.5 17.4l2 .6 3-11.6-2-.6zm4.7.3L23 12l-5.7 5.7-1.4-1.5 4.3-4.2-4.3-4.2zm-10.6 0L1 12l5.7 5.7L8 16.2 3.8 12l4.3-4.2z" color="#000" paint-order="fill markers stroke" style="font-feature-settings:normal;font-variant-alternates:normal;font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal;font-variant-position:normal;font-variation-settings:normal;inline-size:0;isolation:auto;mix-blend-mode:normal;shape-margin:0;shape-padding:0;solid-color:#000;text-decoration-color:#000;text-decoration-line:none;text-decoration-style:solid;text-indent:0;text-orientation:mixed;text-transform:none;white-space:normal"/></svg>`
+    svgError = `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="-1 -2 28 28"><path d="M15.3 22.8H8.7a2.7 2.7 0 0 1-2-.9l-4.6-4.6a2.7 2.7 0 0 1-.9-2V8.7a2.7 2.7 0 0 1 .9-2l4.6-4.6a2.7 2.7 0 0 1 2-.9h6.6a2.7 2.7 0 0 1 2 .9L22 6.7a2.7 2.7 0 0 1 .8 2v6.6a2.7 2.7 0 0 1-.8 2L17.3 22a2.7 2.7 0 0 1-2 .8Zm-6.6-20a1.3 1.3 0 0 0-.9.3L3.1 7.8a1.3 1.3 0 0 0-.3.9v6.6a1.3 1.3 0 0 0 .3.9l4.7 4.7a1.3 1.3 0 0 0 .9.4h6.6a1.3 1.3 0 0 0 .9-.4l4.7-4.7a1.3 1.3 0 0 0 .4-.9V8.7a1.3 1.3 0 0 0-.4-.9l-4.7-4.7a1.3 1.3 0 0 0-.9-.3Zm4 10.4v-7a.8.8 0 0 0-1.4 0v7a.8.8 0 0 0 1.4 0Zm-.7 5.3a1.3 1.3 0 1 1 1.3-1.3 1.3 1.3 0 0 1-1.3 1.3Z"/></svg>`
+    svgInfo = `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 -4 24 30.9"><path d="M12.4 0C5.6 0 0 5.6 0 12.4s5.6 12.4 12.4 12.4 12.4-5.6 12.4-12.4S19.1 0 12.4 0zm0 23.2c-5.9 0-10.8-4.9-10.8-10.8S6.5 1.6 12.4 1.6s10.8 4.9 10.8 10.8-4.9 10.8-10.8 10.8z" class="st0"/><path d="M13.5 18.2c0 .5-.4 1-1 1h-.3a1 1 0 0 1-1-1V9.9c0-.5.4-1 1-1h.3c.5 0 1 .4 1 1v8.3z" class="st0"/><circle cx="12.4" cy="6.7" r="1.1" class="st0"/></svg>`
+
+    if (typeof EventBridge !== 'undefined') {
+      EventBridge.scriptEventReceived.connect(function (message) {
+        let messageObj = JSON.parse(message)
+        if (typeof messageObj.channel === 'undefined') return
+        if (messageObj.channel === rawChannel) {
+          messageObj['time'] = getTime()
+          logs.push(messageObj)
+          buildLogs()
+        } else if (messageObj.channel === requireChannel) {
+          console.log('Saw require channel message')
+        }
+      })
+    }
+
+    function getTime() {
+      const now = new Date()
+      const hours = String(now.getHours()).padStart(2, '0')
+      const minutes = String(now.getMinutes()).padStart(2, '0')
+      const seconds = String(now.getSeconds()).padStart(2, '0')
+      return `${hours}:${minutes}:${seconds}`
+    }
+
+    function buildLogs() {
+      logsEl.empty()
+      const filterText = filterContentEl.val().toLowerCase()
+      for (let i = 0; i < logs.length; i++) {
+        if (visibleStates[logs[i]['type']] && (!filterText || logs[i]['message'].toLowerCase().includes(filterText))) {
+          addRawLog(logs[i])
+        }
+      }
+    }
+
+    function addRawLog(data) {
+      let svg = svgScript
+      if (data.type === 'error') svg = svgError
+      else if (data.type === 'info') svg = svgInfo
+
+      let newItem = $(
+        `<div class="rounded-sm bg-slate-700 text-white p-2 border-b-2 border-stone-500" data-type="${data.type}"" data-script="${data.source.toLowerCase()}">
+          <div class="flex items-center">
+            <span class="stroke-${typeColors[data.type]} fill-${typeColors[data.type]}">${svg}</span>
+            <span class="text-stone-500">${data.time}</span>&nbsp;-&nbsp;<span class="text-stone-400 italic">${data.source}</span>
+          </div>
+          <div class="mt-1">
+            <span>${data.message}</span></div>
+          </div>
+        </div>`
+      );
+      $('#logs').append(newItem)
+    }
+
+    filterContentEl.on("keyup", function () {
+      buildLogs()
+    })
+
+    clearButton.on("click", function () {
+      logs = []
+      logsEl.empty()
+    })
+
+    debugButtons.on("click", function () {
+      const type = this.getAttribute('debug-type')
+      visibleStates[type] = !visibleStates[type]
+      if (visibleStates[type]) {
+        this.classList.remove(`bg-${disabledColors[type]}`)
+        this.classList.add(`bg-${typeColors[type]}`)
+        $(`[data-type="${type}"]`).show()
+      } else {
+        this.classList.remove(`bg-${typeColors[type]}`)
+        this.classList.add(`bg-${disabledColors[type]}`)
+        $(`[data-type="${type}"]`).hide()
+      }
+
+      // addRawLog({
+      //   type: this.getAttribute("debug-type"),
+      //   source: `${this.getAttribute("debug-type").toUpperCase()} button`,
+      //   message: this.getAttribute("debug-message")
+      // })
+    })
+  </script>
+</body>
+
+</html>
