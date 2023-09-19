@@ -6,6 +6,7 @@
 let user_nametags = {};
 let user_uuids = [];
 let visible = Settings.getValue("Nametags_toggle", true);
+let maximum_name_length = 50;
 
 const logs = (info) => console.log("[NAMETAGS] " + info);
 
@@ -25,12 +26,14 @@ function startup() {
   user_uuids.forEach((avatar) => {
     let uuid = avatar;
     if (user_nametags[uuid]) return;
-    let definite_avatar = AvatarList.getAvatar(uuid);
+    const definite_avatar = AvatarList.getAvatar(uuid);
+    const display_name = definite_avatar.displayName ? definite_avatar.displayName.substring(0, maximum_name_length) : "Anonymous";
+
     user_nametags[uuid] = { overlay: { text: {}, background: {} } };
     user_nametags[uuid].overlay.text = Entities.addEntity(
       {
         type: "Text",
-        text: definite_avatar.displayName.substring(0, 50),
+        text: display_name,
         backgroundAlpha: 0.0,
         billboardMode: "full",
         unlit: true,
@@ -62,7 +65,7 @@ function startup() {
     // We need to have this on a timeout because "textSize" can not be determined instantly after the entity was created.
     // https://apidocs.overte.org/Entities.html#.textSize
     Script.setTimeout(() => {
-      let textSize = Entities.textSize(user_nametags[uuid].overlay.text, definite_avatar.displayName.substring(0, 50));
+      let textSize = Entities.textSize(user_nametags[uuid].overlay.text, display_name);
       Entities.editEntity(user_nametags[uuid].overlay.text, { dimensions: { x: textSize.width + 0.25, y: textSize.height - 0.05, z: 0.1 } });
       Entities.editEntity(user_nametags[uuid].overlay.background, {
         dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height - 0.05, z: 0.1 },
