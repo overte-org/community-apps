@@ -7,20 +7,30 @@ let user_nametags = {};
 let user_uuids = [];
 let visible = Settings.getValue("Nametags_toggle", true);
 let maximum_name_length = 50;
+let last_camera_mode = Camera.mode;
 
 const logs = (info) => console.log("[NAMETAGS] " + info);
 
 // New user connected
-AvatarManager.avatarAddedEvent.connect(() => {
-  Script.setTimeout(() => {
-    clear();
-    startup();
-  }, 1000);
-});
+AvatarManager.avatarAddedEvent.connect(reset);
+
+Script.setInterval(() => {
+  if (last_camera_mode !== Camera.mode) {
+    reset();
+    last_camera_mode = Camera.mode;
+  }
+}, 2000);
+
+function reset() {
+  clear();
+  startup();
+}
 
 function startup() {
+  const include_self = !HMD.active && !Camera.mode.includes("first person");
+
   user_uuids = AvatarList.getAvatarIdentifiers();
-  user_uuids.push(MyAvatar.sessionUUID);
+  if (include_self) user_uuids.push(MyAvatar.sessionUUID);
   user_uuids = user_uuids.filter((uuid) => uuid); // Remove empty, undefined values from array
 
   user_uuids.forEach((avatar) => {
