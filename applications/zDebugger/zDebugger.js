@@ -101,9 +101,5 @@
     tablet.removeButton(button)
   }
 
-  // Script.setInterval(function () {
-  //   print("Print message");
-  // }, 3000);
-
   Script.scriptEnding.connect(cleanup)
 }())
