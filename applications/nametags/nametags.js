@@ -17,13 +17,6 @@ const logs = (info) => console.log("[NAMETAGS] " + info);
 // New user connected
 AvatarManager.avatarAddedEvent.connect(reset);
 
-Script.setInterval(() => {
-  if (last_camera_mode !== Camera.mode) {
-    reset();
-    last_camera_mode = Camera.mode;
-  }
-}, 2000);
-
 function reset() {
   clear();
   startup();
@@ -88,7 +81,7 @@ function startup() {
       });
     }, 100);
 
-    check_interval = Script.setInterval(adjustNametagHeight, 5000);
+    check_interval = Script.setInterval(adjustNameTag, 5000);
   });
 }
 function clear() {
@@ -98,9 +91,9 @@ function clear() {
   }
   user_uuids = {};
   user_nametags = {};
-  Script.clearInterval(adjustNametagHeight);
+  Script.clearInterval(adjustNameTag);
 }
-function adjustNametagHeight() {
+function adjustNameTag() {
   const user_list = Object.keys(user_nametags);
 
   user_list.forEach((uuid) => {
@@ -115,6 +108,11 @@ function adjustNametagHeight() {
       position: Vec3.sum(definite_avatar.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
     });
   });
+
+  if (last_camera_mode !== Camera.mode) {
+    reset();
+    last_camera_mode = Camera.mode;
+  }
 }
 function scriptEnding() {
   clear();
