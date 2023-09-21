@@ -10,6 +10,7 @@ let user_uuids = [];
 let visible = Settings.getValue("Nametags_toggle", true);
 let maximum_name_length = 50;
 let last_camera_mode = Camera.mode;
+let check_interval;
 
 const logs = (info) => console.log("[NAMETAGS] " + info);
 
@@ -41,6 +42,9 @@ function startup() {
     const definite_avatar = AvatarList.getAvatar(uuid);
     const display_name = definite_avatar.displayName ? definite_avatar.displayName.substring(0, maximum_name_length) : "Anonymous";
 
+    const headJointIndex = definite_avatar.getJointIndex("Head");
+    const jointInObjectFrame = definite_avatar.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
+
     user_nametags[uuid] = { overlay: { text: {}, background: {} } };
     user_nametags[uuid].overlay.text = Entities.addEntity(
       {
@@ -50,7 +54,7 @@ function startup() {
         billboardMode: "full",
         unlit: true,
         parentID: uuid,
-        position: Vec3.sum(definite_avatar.position, { x: 0, y: 1 * definite_avatar.scale, z: 0 }),
+        position: Vec3.sum(definite_avatar.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
         visible: true,
         isSolid: false,
         topMargin: 0.025,
@@ -66,7 +70,7 @@ function startup() {
         emissive: true,
         alpha: 0.8,
         keepAspectRatio: false,
-        position: Vec3.sum(definite_avatar.position, { x: 0, y: 1 * definite_avatar.scale, z: 0 }),
+        position: Vec3.sum(definite_avatar.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
         parentID: user_nametags[uuid].overlay.text,
         billboardMode: "full",
         imageURL: Script.resolvePath("./assets/badge.svg"),
@@ -83,6 +87,8 @@ function startup() {
         dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height - 0.05, z: 0.1 },
       });
     }, 100);
+
+    check_interval = Script.setInterval(adjustNametagHeight, 5000);
   });
 }
 function clear() {
@@ -92,6 +98,23 @@ function clear() {
   }
   user_uuids = {};
   user_nametags = {};
+  Script.clearInterval(adjustNametagHeight);
+}
+function adjustNametagHeight() {
+  const user_list = Object.keys(user_nametags);
+
+  user_list.forEach((uuid) => {
+    const definite_avatar = AvatarList.getAvatar(uuid);
+    const headJointIndex = definite_avatar.getJointIndex("Head");
+    const jointInObjectFrame = definite_avatar.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
+
+    Entities.editEntity(user_nametags[uuid].overlay.background, {
+      position: Vec3.sum(definite_avatar.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
+    });
+    Entities.editEntity(user_nametags[uuid].overlay.text, {
+      position: Vec3.sum(definite_avatar.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
+    });
+  });
 }
 function scriptEnding() {
   clear();
