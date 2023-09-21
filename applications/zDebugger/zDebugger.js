@@ -1,3 +1,15 @@
+//
+//  zDebugger.js
+//
+//  Created by Zetaphor, September 21st 2023.
+//  Copyright 2023 Overte e.V.
+//
+//  This application let you setup different Anti-Aliasing setup for HMD and Desktop.
+//  And it switches the configuration when the mode changes.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+//
 "use strict";
 (function () {
   const jsMainFileName = "zDebugger.js"
