@@ -1,3 +1,14 @@
+<!--
+    scriptManager.js
+
+    Created by Zetaphor, September 21st 2023.
+    Copyright 2023 Overte e.V.
+
+    This app provides an improved script manager experience complete with the ability to bookmark scripts for quick recall.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
 <!DOCTYPE html>
 <html>
 
@@ -42,13 +53,16 @@
             </div>
             <div class="script-view flex-grow bg-gray-900 rounded-md w-full border-2 border-stone-500"
                 data-view="stopped" style="display: none">
-                <p id="stoppedScriptMessage" class="text-white text-center mt-2">Running scripts that were stopped will be displayed here.<br /><span class="italic">This list is reset when this window is closed.</span></p>
+                <p id="stoppedScriptMessage" class="text-white text-center mt-2">Running scripts that were stopped will
+                    be displayed here.<br /><span class="italic">This list is reset when this window is closed.</span>
+                </p>
                 <div data-list="stopped">
                 </div>
             </div>
             <div class="script-view flex-grow bg-gray-900 rounded-md w-full border-2 border-stone-500" data-view="saved"
                 style="display: none">
-                <p id="savedScriptMessage" class="text-white text-center mt-2">Saved scripts will be displayed here.<br /><span class="italic">This list is persisted across restarts.</span></p>
+                <p id="savedScriptMessage" class="text-white text-center mt-2">Saved scripts will be displayed
+                    here.<br /><span class="italic">This list is persisted across restarts.</span></p>
                 <div data-list="saved">
                     Saved
                 </div>
@@ -59,7 +73,7 @@
         const channel = "application.zetaphor.scriptManager"
         const scriptViews = $('.script-view')
         const stoppedScriptMessage = $('#stoppedScriptMessage')
-        const savedScriptMessage= $('#savedScriptMessage')
+        const savedScriptMessage = $('#savedScriptMessage')
 
         const defaultScripts = [
             'defaultScripts.js',
@@ -125,7 +139,7 @@
 
         $('#btnLoadDefaults').on("click", function () {
             loadScript('defaultScripts.js', 'file:///~//defaultScripts.js')
-            setTimeout(function() {
+            setTimeout(function () {
                 sendWebEvent('refresh_scripts')
             }, 1000)
         })
