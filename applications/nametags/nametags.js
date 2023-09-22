@@ -98,6 +98,7 @@ function adjustNameTag() {
 
   user_list.forEach((uuid) => {
     const definite_avatar = AvatarList.getAvatar(uuid);
+    const display_name = definite_avatar.displayName ? definite_avatar.displayName.substring(0, maximum_name_length) : "Anonymous";
     const headJointIndex = definite_avatar.getJointIndex("Head");
     const jointInObjectFrame = definite_avatar.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
 
@@ -106,7 +107,18 @@ function adjustNameTag() {
     });
     Entities.editEntity(user_nametags[uuid].overlay.text, {
       position: Vec3.sum(definite_avatar.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
+      text: display_name,
     });
+
+    // // We need to have this on a timeout because "textSize" can not be determined instantly after the entity was created.
+    // // https://apidocs.overte.org/Entities.html#.textSize
+    Script.setTimeout(() => {
+      let textSize = Entities.textSize(user_nametags[uuid].overlay.text, display_name);
+      Entities.editEntity(user_nametags[uuid].overlay.text, { dimensions: { x: textSize.width + 0.25, y: textSize.height - 0.05, z: 0.1 } });
+      Entities.editEntity(user_nametags[uuid].overlay.background, {
+        dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height - 0.05, z: 0.1 },
+      });
+    }, 100);
   });
 
   if (last_camera_mode !== Camera.mode) {
