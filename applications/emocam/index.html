@@ -1,9 +1,10 @@
 <!--
     index.html
 
-    Created by George Deac, October 21st 2023.
+    Created by George Deac, October 21st, 2023.
     Copyright 2023 George Deac.
     Copyright 2023 The MediaPipe Authors.
+    Copyright 2023, Overte e.V.
 
     Overte Application for Mediapipe face tracking in Desktop mode.
 
@@ -13,236 +14,232 @@
 
 <!DOCTYPE html>
 <html lang="en" >
+    <head>
+        <meta charset="UTF-8">
+        <title>MediaPipe Face Landmarker</title>
+        <style>
+            @use "@material";
+            body {
+              font-family: helvetica, arial, sans-serif;
+              margin: 2em;
+              bgcolor: "white";
+              color: #3d3d3d;
+              --mdc-theme-primary: #007f8b;
+              --mdc-theme-on-primary: #f1f3f4;
+            }
 
-<head>
-  <meta charset="UTF-8">
-  
-  <title>MediaPipe Face Landmarker</title>
-  
-  
-<style>
-@use "@material";
-body {
-  font-family: helvetica, arial, sans-serif;
-  margin: 2em;
-  bgcolor: "white";
-  color: #3d3d3d;
-  --mdc-theme-primary: #007f8b;
-  --mdc-theme-on-primary: #f1f3f4;
-}
+            h1 {
+              font-style: italic;
+              color: #ff6f00;
+              color: #007f8b;
+            }
 
-h1 {
-  font-style: italic;
-  color: #ff6f00;
-  color: #007f8b;
-}
+            h2 {
+              clear: both;
+            }
 
-h2 {
-  clear: both;
-}
+            em {
+              font-weight: bold;
+            }
 
-em {
-  font-weight: bold;
-}
+            video {
+              clear: both;
+              display: block;
+              transform: rotateY(180deg);
+              -webkit-transform: rotateY(180deg);
+              -moz-transform: rotateY(180deg);
+            }
 
-video {
-  clear: both;
-  display: block;
-  transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
-  -moz-transform: rotateY(180deg);
-}
+            section {
+              opacity: 1;
+              transition: opacity 500ms ease-in-out;
+            }
 
-section {
-  opacity: 1;
-  transition: opacity 500ms ease-in-out;
-}
+            header,
+            footer {
+              clear: both;
+            }
 
-header,
-footer {
-  clear: both;
-}
+            .removed {
+              display: none;
+            }
 
-.removed {
-  display: none;
-}
+            .invisible {
+              opacity: 0.2;
+            }
 
-.invisible {
-  opacity: 0.2;
-}
+            .note {
+              font-style: italic;
+              font-size: 130%;
+            }
 
-.note {
-  font-style: italic;
-  font-size: 130%;
-}
+            .videoView,
+            .detectOnClick,
+            .blend-shapes {
+              position: relative;
+              
+              width: 48%;
+              margin: 2% 1%;
+              cursor: pointer;
+            }
 
-.videoView,
-.detectOnClick,
-.blend-shapes {
-  position: relative;
-  
-  width: 48%;
-  margin: 2% 1%;
-  cursor: pointer;
-}
+            .videoView p,
+            .detectOnClick p {
+              position: absolute;
+              padding: 5px;
+              background-color: #007f8b;
+              color: #fff;
+              border: 1px dashed rgba(255, 255, 255, 0.7);
+              z-index: 2;
+              font-size: 12px;
+              margin: 0;
+            }
 
-.videoView p,
-.detectOnClick p {
-  position: absolute;
-  padding: 5px;
-  background-color: #007f8b;
-  color: #fff;
-  border: 1px dashed rgba(255, 255, 255, 0.7);
-  z-index: 2;
-  font-size: 12px;
-  margin: 0;
-}
+            .highlighter {
+              background: rgba(0, 255, 0, 0.25);
+              border: 1px dashed #fff;
+              z-index: 1;
+              position: absolute;
+            }
 
-.highlighter {
-  background: rgba(0, 255, 0, 0.25);
-  border: 1px dashed #fff;
-  z-index: 1;
-  position: absolute;
-}
+            .canvas {
+              z-index: 1;
+              position: absolute;
+              pointer-events: none;
+            }
 
-.canvas {
-  z-index: 1;
-  position: absolute;
-  pointer-events: none;
-}
+            .output_canvas {
+              transform: rotateY(180deg);
+              -webkit-transform: rotateY(180deg);
+              -moz-transform: rotateY(180deg);
+            }
 
-.output_canvas {
-  transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
-  -moz-transform: rotateY(180deg);
-}
+            .detectOnClick {
+              z-index: 0;
+            }
 
-.detectOnClick {
-  z-index: 0;
-}
+            .detectOnClick img {
+              width: 100%;
+            }
 
-.detectOnClick img {
-  width: 100%;
-}
+            .blend-shapes-item {
+              display: flex;
+              align-items: center;
+              height: 20px;
+            }
 
-.blend-shapes-item {
-  display: flex;
-  align-items: center;
-  height: 20px;
-}
+            .blend-shapes-label {
+              display: flex;
+              width: 120px;
+              justify-content: flex-end;
+              align-items: center;
+              margin-right: 4px;
+            }
 
-.blend-shapes-label {
-  display: flex;
-  width: 120px;
-  justify-content: flex-end;
-  align-items: center;
-  margin-right: 4px;
-}
+            .blend-shapes-value {
+              display: flex;
+              height: 16px;
+              align-items: center;
+              background-color: #007f8b;
+            }
+            .wrapper {
+                max-width: 800px;
+                margin: 50px auto;
+              }
+              
+              h1 {
+                font-weight: 200;
+                font-size: 3em;
+                margin: 0 0 0.1em 0;
+              }
+              
+              h2 {
+                font-weight: 200;
+                font-size: 0.9em;
+                margin: 0 0 50px;
+                color: #555;
+              }
+              
+              a {
+                margin-top: 50px;
+                display: block;
+                color: #3e95cd;
+              }
+            .switch {
+              position: relative;
+              display: inline-block;
+              width: 60px;
+              height: 34px;
+            }
+            /* Hide default HTML checkbox */
+            .switch input {
+              opacity: 0;
+              width: 0;
+              height: 0;
+            }	
+            /* The slider */
+            .slider {
+              position: absolute;
+              cursor: pointer;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: #ccc;
+              -webkit-transition: .4s;
+              transition: .4s;
+            }
 
-.blend-shapes-value {
-  display: flex;
-  height: 16px;
-  align-items: center;
-  background-color: #007f8b;
-}
-.wrapper {
-	max-width: 800px;
-	margin: 50px auto;
-  }
-  
-  h1 {
-	font-weight: 200;
-	font-size: 3em;
-	margin: 0 0 0.1em 0;
-  }
-  
-  h2 {
-	font-weight: 200;
-	font-size: 0.9em;
-	margin: 0 0 50px;
-	color: #555;
-  }
-  
-  a {
-	margin-top: 50px;
-	display: block;
-	color: #3e95cd;
-  }
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}	
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
+            .slider:before {
+              position: absolute;
+              content: "";
+              height: 26px;
+              width: 26px;
+              left: 4px;
+              bottom: 4px;
+              background-color: white;
+              -webkit-transition: .4s;
+              transition: .4s;
+            }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
+            input:checked + .slider {
+              background-color: #007db8;
+            }
 
-input:checked + .slider {
-  background-color: #007db8;
-}
+            input:focus + .slider {
+              box-shadow: 0 0 1px #007db8;
+            }
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #007db8;
-}
+            input:checked + .slider:before {
+              -webkit-transform: translateX(26px);
+              -ms-transform: translateX(26px);
+              transform: translateX(26px);
+            }
 
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
+            /* Rounded sliders */
+            .slider.round {
+              border-radius: 34px;
+            }
 
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
+            .slider.round:before {
+              border-radius: 50%;
+            }
+        </style>
 
-.slider.round:before {
-  border-radius: 50%;
-}
-</style>
-
-<script>
-  window.console = window.console || function(t) {};
-</script>
+        <script>
+            window.console = window.console || function(t) {};
+        </script>
 
 
-  <meta charset="utf-8">
-  <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta charset="utf-8">
+        <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-</head>
+        <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+        <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    </head>
 <body bgcolor="white">
 
 
@@ -298,11 +295,13 @@ input:checked + .slider:before {
       <ul class="blend-shapes-list" id="video-blend-shapes"></ul>
     </div>
   </section>
-</body>
-</html>
+<!--/body>
+</html-->
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="jquery.min.js"></script>
 <script>
+
+var channel = "org.overte.application.emocam";
 
 // Graph max range adjust
 var maxY = 100; // Default Y max value
@@ -860,6 +859,7 @@ function drawBlendShapes(el, blendShapes) {
   var inputElements = document.getElementsByClassName('switchmove');
   if(inputElements[0].checked){
 		var send = {
+          "channel": channel,
 		  "type": "trackingmotion",
 		  "data": mappedJson,
 		  "yaw": yawDegrees,
@@ -868,6 +868,7 @@ function drawBlendShapes(el, blendShapes) {
 		}
 	} else {
   		var send = {
+          "channel": channel,
 		  "type": "tracking",
 		  "data": mappedJson,
 		  "yaw": yawDegrees,
