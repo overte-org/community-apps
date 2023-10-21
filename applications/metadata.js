@@ -260,6 +260,15 @@ var metadata = { "applications":
             "jsfile": "scriptManager/scriptManager.js",
             "icon": "scriptManager/icon-inactive.png",
             "caption": "SCRIPTS"
+        },
+        {
+            "isActive": true,
+            "directory": "emocam",
+            "name": "emocam",
+            "description": "Desktop mode face tracking application based on Mediapipe. This allows face tracking and head tracking in desktop mode using a single webcam. (Note: This application has external dependencies. It may stop working one day.)",
+            "jsfile": "emocam/emocam1.js",
+            "icon": "emocam/images/face.png",
+            "caption": "EMOTIONS"
         }
     ]
 };
