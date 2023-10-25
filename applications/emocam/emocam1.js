@@ -34,6 +34,11 @@
     var yawValue = 0;
     var forwardValue = 0;
     var sideValue = 0;
+    var handlerId = 0;
+    var pitch = 0;
+    var yaw = 0;
+    var roll = 0;
+    var lastDataArrived = Date.now();
 
     button = tablet.addButton({
         icon: ROOT + "images/face.png",
@@ -63,6 +68,19 @@
     var forwardBinding = mapping.from(function() { return forwardValue; }).to(Controller.Actions.TranslateZ);
     var sideBinding = mapping.from(function() { return sideValue; }).to(Controller.Actions.TranslateX);
     mapping.enable();
+
+    var propList = ["headRotation", "headType"];
+    handlerId = MyAvatar.addAnimationStateHandler(function (props) {
+        if (Date.now() - lastDataArrived < 2000) {
+            let headTransform = Quat.fromPitchYawRollDegrees(pitch, -yaw, roll);
+            return {
+                headRotation: headTransform,
+                headType: 4
+            };
+        } else {
+            return props;
+        }
+    }, propList);
 
     function onWebEventReceived(event) {
 
@@ -170,14 +188,14 @@
                         }
                     }
                 }
-                var direction = Vec3.multiplyQbyV(Quat.fromPitchYawRollDegrees(parsed.pitch, parsed.yaw, 0 ), {x: 0, y: 0, z: 100});
-                direction = Vec3.multiplyQbyV(MyAvatar.orientation, direction);
-                direction = Vec3.sum(direction, MyAvatar.position);
-                MyAvatar.setHeadLookAt(direction);
-                print("YAW="+MyAvatar.headYaw);
+
+                yaw = parsed.yaw;
+                pitch = parsed.pitch;
+                roll = parsed.roll;
                 for (var blendshape in bend) {
                     MyAvatar.setBlendshape(blendshape, bend[blendshape]);
                 }
+                lastDataArrived = Date.now();
             }
         }
     }
@@ -198,6 +216,8 @@
     tablet.webEventReceived.connect(onWebEventReceived);
 
     Script.scriptEnding.connect(function () {
+
+        MyAvatar.removeAnimationStateHandler(handlerId);
 
         if (onEmoteScreen) {
             tablet.gotoHomeScreen();
