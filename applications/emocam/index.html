@@ -802,24 +802,52 @@ async function predictWebcam() {
             y: normalVector.y / magnitude,
             z: normalVector.z / magnitude
         };
+
+        const sidewaysVector = {
+            x: referencePoints[2].x - referencePoints[3].x,
+            y: referencePoints[2].y - referencePoints[3].y,
+            z: referencePoints[2].z - referencePoints[3].z
+        };
+
+        const upwardVector = {
+                x: sidewaysVector.y * normalizedNormal.z - sidewaysVector.z * normalizedNormal.y,
+                y: sidewaysVector.z * normalizedNormal.x - sidewaysVector.x * normalizedNormal.z,
+                z: sidewaysVector.x * normalizedNormal.y - sidewaysVector.y * normalizedNormal.x
+            };
+        
+        // Normalize the upward normal vector (optional but can give better results)
+        const upwardMagnitude = Math.sqrt(upwardVector.x ** 2 + upwardVector.y ** 2 + upwardVector.z ** 2);
+        const upwardNormal = {
+            x: upwardVector.x / upwardMagnitude,
+            y: upwardVector.y / upwardMagnitude,
+            z: upwardVector.z / upwardMagnitude
+        };
     
         // Calculate the yaw, pitch, and roll angles
         const yaw = Math.atan2(normalizedNormal.x, normalizedNormal.z);
         const pitch = Math.atan2(-normalizedNormal.y, Math.sqrt(normalizedNormal.x ** 2 + normalizedNormal.z ** 2));
-        const roll = Math.atan2(normalizedNormal.y, normalizedNormal.x);
+
+        const planeRightZ = Math.sin(yaw);
+        const planeRightX = -Math.cos(yaw);
+
+        let roll = -Math.asin(upwardNormal.x*planeRightX + upwardNormal.z*planeRightZ);
+
+        if (upwardNormal.y < 0) {
+            roll = Math.sign(roll) * Math.PI - roll;
+        }
     
-        // Convert to degrees if needed
-		if (calibration === 0){
-		    yawC = yaw * (180 / Math.PI);
-			pitchC = pitch * (180 / Math.PI);
-			rollC = roll * (180 / Math.PI);
-			calibration = 1;
-		}
+        // Convert to degrees
+        if (calibration === 0){
+            yawC = yaw * (180 / Math.PI);
+            pitchC = pitch * (180 / Math.PI);
+            rollC = roll * (180 / Math.PI);
+            //console.log("YawC: ", yawC, "PitchC: ", pitchC, "RollC: ", rollC);
+            calibration = 1;
+        }
         yawDegrees = yaw * (180 / Math.PI) - yawC;
         pitchDegrees = pitch * (180 / Math.PI) - pitchC;
         rollDegrees = roll * (180 / Math.PI) - rollC;
 		
-    
         //console.log("Yaw: ", yawDegrees, "Pitch: ", pitchDegrees, "Roll: ", rollDegrees);
 	}
 	
