@@ -16,6 +16,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+            crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.4.1633559476" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/kalidokit@1.1/dist/kalidokit.umd.js"></script>
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
     <title>MediaPipe Face Landmarker</title>
     <style>
         @use "@material";
@@ -235,15 +244,6 @@
         };
     </script>
 
-
-    <meta charset="utf-8">
-    <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 </head>
 <body bgcolor="white">
 
@@ -271,9 +271,15 @@
             </td>
         </tr>
     </table>
-    <div style="position: relative;">
-        <video id="webcam" autoplay playsinline></video>
-        <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
+    <div class="container">
+        <video class="input_video" id="holistics" width="426px" height="240px"></video>
+        <canvas class="output_canvas1" id="output_canvas1" width="426px" height="240px"
+                style="position: absolute; left: 0px; top: 42px;"></canvas>
+    </div>
+    <div style="position: absolute; left: 0px; top: 42px;">
+        <video id="webcam" width="426px" height="240px" autoplay playsinline></video>
+        <canvas class="output_canvas" id="output_canvas" width="426px" height="240px"
+                style="position: absolute; left: 0px; top: 0px;"></canvas>
     </div>
 </div>
 
@@ -298,13 +304,71 @@
 <p id="output"></p>
 <div class="blend-shapes">
     <ul class="blend-shapes-list" id="video-blend-shapes"></ul>
+
+
 </div>
 </section>
-<!--/body>
-</html-->
+
 
 <script src="jquery.min.js"></script>
-<script>
+<script id="rendered-js" type="module">
+    var leftHandRig = [];
+    var rightHandRig = [];
+    var poseRig = [];
+    //var leftHandlm = {};
+    //var leftHandlm = {};
+    var poselm3D = [];
+    var poselm = [];
+
+    const videoElement = document.getElementById("holistics");
+    const canvasElement1 = document.getElementsByClassName('output_canvas1')[0];
+    const canvasCtx1 = canvasElement1.getContext('2d');
+
+    function onResults(results) {
+        if (results.faceLandmarks) {
+            let facelm = results.faceLandmarks;
+            poselm = results.poseLandmarks;
+            poselm3D = results.ea;
+            let rightHandlm = results.rightHandLandmarks;
+            let leftHandlm = results.leftHandLandmarks;
+            let faceRig = Kalidokit.Face.solve(facelm, {
+                runtime: "mediapipe",
+                video: HTMLVideoElement
+            });
+            poseRig = Kalidokit.Pose.solve(poselm3D, poselm, {
+                runtime: "mediapipe",
+                video: HTMLVideoElement
+            });
+            rightHandRig = Kalidokit.Hand.solve(rightHandlm, "Right");
+            leftHandRig = Kalidokit.Hand.solve(leftHandlm, "Left");
+        }
+    }
+
+    const holistic = new Holistic({
+        locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
+        }
+    });
+    holistic.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: true,
+        smoothSegmentation: true,
+        refineFaceLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+    holistic.onResults(onResults);
+
+    const camera = new Camera(videoElement, {
+        onFrame: async () => {
+            await holistic.send({image: videoElement});
+        },
+        width: 1280,
+        height: 720
+    });
+    camera.start();
+
 
     var channel = "org.overte.application.emocam";
 
@@ -642,8 +706,6 @@
     }
 
 
-</script>
-<script id="rendered-js" type="module">
     // Copyright 2023 The MediaPipe Authors.
     // Licensed under the Apache License, Version 2.0 (the "License");
     // you may not use this file except in compliance with the License.
@@ -664,7 +726,7 @@
     let runningMode = "IMAGE";
     let enableWebcamButton;
     let webcamRunning = false;
-    const videoWidth = 400;
+    const videoWidth = 426;
     var checkedValue = null;
     var yawDegrees;
     var pitchDegrees;
@@ -868,21 +930,7 @@
                 //console.log("Yaw: ", yawDegrees, "Pitch: ", pitchDegrees, "Roll: ", rollDegrees);
             }
 
-            //draw on canvas
-            for (const landmarks of results.faceLandmarks) {
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_TESSELATION, {
-                    color: "#C0C0C070",
-                    lineWidth: 1
-                });
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYE, {color: "#FF3030"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_EYEBROW, {color: "#FF3030"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYE, {color: "#30FF30"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_EYEBROW, {color: "#30FF30"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_FACE_OVAL, {color: "#E0E0E0"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LIPS, {color: "#E0E0E0"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS, {color: "#FF3030"});
-                drawingUtils.drawConnectors(landmarks, FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS, {color: "#30FF30"});
-            }
+
         }
         drawBlendShapes(videoBlendShapes, results.faceBlendshapes);
         // Call this function again to keep predicting when the browser is ready.
@@ -921,9 +969,15 @@
                 "data": mappedJson,
                 "yaw": yawDegrees,
                 "pitch": pitchDegrees,
-                "roll": rollDegrees
+                "roll": rollDegrees,
+                "leftHandRig": leftHandRig,
+                "rightHandRig": rightHandRig,
+                "poseRig": poseRig,
+                "poselm3D": poselm3D,
+                "poselm": poselm
             }
         }
+
 
         EventBridge.emitWebEvent(JSON.stringify(send));
     }

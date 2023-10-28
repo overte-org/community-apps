@@ -39,6 +39,14 @@
     var roll = 0;
     var lastDataArrived = Date.now();
 
+    var isLeftHandTracked = false;
+    var leftHandRotation = null;
+    var leftHandPosition = null;
+
+    var isRightHandTracked = false;
+    var rightHandRotation = null;
+    var rightHandPosition = null;
+
     button = tablet.addButton({
         icon: ROOT + "images/face.png",
         activeIcon: ROOT + "images/facei.png",
@@ -76,14 +84,25 @@
     }).to(Controller.Actions.TranslateX);
     mapping.enable();
 
-    var propList = ["headRotation", "headType"];
+    var propList = ["headRotation", "headType",
+        "rightHandPosition", "rightHandRotation", "rightHandType",
+        "leftHandPosition", "leftHandRotation", "leftHandType"];
     handlerId = MyAvatar.addAnimationStateHandler(function (props) {
         if (Date.now() - lastDataArrived < 2000) {
-            let headTransform = Quat.fromPitchYawRollDegrees(pitch, -yaw, roll);
-            return {
-                headRotation: headTransform,
-                headType: 4
-            };
+            let returnProps = props;
+            if (isLeftHandTracked) {
+                returnProps.leftHandType = 0;
+                returnProps.leftHandRotation = leftHandRotation;
+                returnProps.leftHandPosition = leftHandPosition;
+            }
+            if (isRightHandTracked) {
+                returnProps.rightHandType = 0;
+                returnProps.rightHandRotation = rightHandRotation;
+                returnProps.rightHandPosition = rightHandPosition;
+            }
+            returnProps.headRotation = Quat.fromPitchYawRollDegrees(pitch, -yaw, roll);
+            returnProps.headType = 4;
+            return returnProps;
         } else {
             return props;
         }
@@ -130,8 +149,6 @@
                     "EyeOut_R": emotion["eyeLookOutRight"],
                     "EyeUp_L": emotion["eyeLookUpLeft"],
                     "EyeUp_R": emotion["eyeLookUpRight"],
-                    "EyeSquint_L": emotion["eyeSquintLeft"],
-                    "EyeSquint_R": emotion["eyeSquintRight"],
                     "TongueOut": emotion["jawForward"],
                     "JawLeft": emotion["jawLeft"] * 3,
                     "JawRight": emotion["jawRight"] * 3,
@@ -196,12 +213,36 @@
                     }
                 }
 
+                let headLM = parsed.poselm3D[0]; // Nose landmark
+                let headPosition = {x: headLM.x, y: -headLM.y, z: -headLM.z};
+                let offset = { x: 0, y: 0.4, z: 0};
+                let scale = 2.0;
+
+                //print(JSON.stringify(parsed));
+                if (parsed.rightHandRig) {
+                    isRightHandTracked = true;
+                    rightHandPosition = {
+                        //x: parsed.poselm3D[16].x,
+                        //y: parsed.poselm3D[16].y,
+                        //z: parsed.poselm3D[16].z}; // Left wrist
+                        x: (parsed.poselm3D[16].x - headPosition.x) * scale + offset.x,
+                        y: (-parsed.poselm3D[16].y - headPosition.y) * scale + offset.y,
+                        z: (-parsed.poselm3D[16].z - headPosition.z) * scale + offset.z}; // Left wrist
+                    //rightHandRotation = Quat.fromPitchYawRollRadians(parsed.rightHandRig.RightWrist.x,
+                    //    parsed.rightHandRig.RightWrist.y,
+                    //    parsed.rightHandRig.RightWrist.z);
+                    print("RightHand: " + JSON.stringify(rightHandPosition) +" Head: " + JSON.stringify(headPosition));
+                } else {
+                    isRightHandTracked = false;
+                }
+
                 yaw = parsed.yaw;
                 pitch = parsed.pitch;
                 roll = parsed.roll;
                 for (var blendshape in bend) {
                     MyAvatar.setBlendshape(blendshape, bend[blendshape]);
                 }
+                print("FPS: " + (1000 / (Date.now() - lastDataArrived)));
                 lastDataArrived = Date.now();
             }
         }
