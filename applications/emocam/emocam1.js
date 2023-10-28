@@ -37,6 +37,7 @@
     var pitch = 0;
     var yaw = 0;
     var roll = 0;
+    var headTransform = null;
     var lastDataArrived = Date.now();
 
     button = tablet.addButton({
@@ -79,7 +80,6 @@
     var propList = ["headRotation", "headType"];
     handlerId = MyAvatar.addAnimationStateHandler(function (props) {
         if (Date.now() - lastDataArrived < 2000) {
-            let headTransform = Quat.fromPitchYawRollDegrees(pitch, -yaw, roll);
             return {
                 headRotation: headTransform,
                 headType: 4
@@ -196,9 +196,20 @@
                     }
                 }
 
-                yaw = parsed.yaw;
                 pitch = parsed.pitch;
+                yaw = parsed.yaw;
                 roll = parsed.roll;
+                let trackingOrientation = Quat.fromPitchYawRollDegrees(pitch, -yaw, roll);
+                let cameraMode = Camera.mode;
+                if (cameraMode === "first person" || cameraMode === "first person look at"
+                    || cameraMode === "third person" || cameraMode === "look at") {
+                    let cameraRotation = Quat.multiply(Quat.inverse(MyAvatar.orientation), Camera.orientation);
+                    let cameraRotationYawOnly = Quat.cancelOutRollAndPitch(cameraRotation);
+                    let cameraRotationAdjusted = Quat.slerp(cameraRotationYawOnly, Quat.IDENTITY, 0.5);
+                    headTransform = Quat.multiply(cameraRotationAdjusted, trackingOrientation);
+                } else {
+                    headTransform = trackingOrientation;
+                }
                 for (var blendshape in bend) {
                     MyAvatar.setBlendshape(blendshape, bend[blendshape]);
                 }
