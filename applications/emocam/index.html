@@ -275,9 +275,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <link href="css/material-components-web.min.css" rel="stylesheet">
-    <script src="js/material-components-web.min.js"></script>
-    <script src="js/Chart.min.js"></script>
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 </head>
 <body bgcolor="white">
 
@@ -304,11 +304,11 @@
             </td>
         </tr>
         <tr><td colspan="4">
-            <div style="display:hidden" class="select">
-                    <select hidden id="videoSource"></select>
+            <div class="select">
+                    <select id="videoSource"></select>
             </div>
             <div class="dropdown" onclick="deviceFunction()">
-                <label>Video source: </label><input style="width:200px" type="text" id="videoDropdown" onchange="enableCam()"></input><font id="v"><b>&#8595;</b></font>
+                <label>Video source: </label><input style="width:200px" type="text" id="videoDropdown"></input><font id="v"><b>&#8595;</b></font>
                 <div id="vid_list" class="dropdown-content"></div>
             </div>                
         </td></tr>
@@ -352,7 +352,7 @@
 <script>
 
     var channel = "org.overte.application.emocam";
-
+    var vidopttrigger = false;
     // Graph max range adjust
     var maxY = 100; // Default Y max value
 
@@ -416,12 +416,7 @@ function myFunction() {
 }
 function deviceFunction() {
   $("#vid_list").toggle();
-}
-$(document).on("click", ".vid_link", function (event) {
-            var hrefValue = $(this).text();
-            $("#videoDropdown").val(hrefValue);
-           // handleLandmarkChange();
-    });    
+}  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
@@ -617,7 +612,6 @@ window.onclick = function(event) {
         }
             var first_morph = $("#myDropdown a:first-child").attr("id");
             var first_href = $("#"+first_morph).text();
-            console.log(first_href)
             $("#landmarkDropdown").val(first_href);
     };
 
@@ -726,7 +720,7 @@ window.onclick = function(event) {
     // See the License for the specific language governing permissions and
     // limitations under the License.
 
-    import vision from "./js/tasks-vision@0.10.0.js";
+    import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
     const {FaceLandmarker, FilesetResolver, DrawingUtils} = vision;
     const demosSection = document.getElementById("demos");
@@ -744,15 +738,16 @@ window.onclick = function(event) {
     var yawC = 0;
     var pitchC = 0;
     var rollC = 0;
+    var hrefValue;
     // Before we can use HandLandmarker class we must wait for it to finish
     // loading. Machine Learning models can be large and take a moment to
     // get everything needed to run.
     async function runDemo() {
         // Read more `CopyWebpackPlugin`, copy wasm set from "https://cdn.skypack.dev/node_modules" to `/wasm`
-        const filesetResolver = await FilesetResolver.forVisionTasks("js/wasm");
+        const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
         faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
-                modelAssetPath: "js/face_landmarker.task",
+                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
                 delegate: "GPU"
             },
             outputFaceBlendshapes: true,
@@ -782,46 +777,43 @@ window.onclick = function(event) {
     } else {
         console.warn("getUserMedia() is not supported by your browser");
     }
-
+    $(document).on("click", ".vid_link", function (event) {
+        var videoElement = document.querySelector('video');
+        hrefValue = $(this).text();
+        var idValue = $(this).attr('id');
+        vidopttrigger = true;
+        document.querySelector("#videoSource").value=idValue;
+        $("#videoSource").val(idValue).prop('selected', true);
+        $("#videoSource").val(idValue).change();
+        $("#videoDropdown").val(hrefValue);
+    });  
     // Enable the live webcam view and start detection.
     function enableCam(event) {
-
         var videoElement = document.querySelector('video');
         var videoSelect = document.querySelector('select#videoSource');
         videoSelect.onchange = getStream;
-
+        getStream().then(getDevices).then(gotDevices);
         if (!faceLandmarker) {
             console.log("Wait! faceLandmarker not loaded yet.");
             return;
         }
+
         if (webcamRunning === true) {
             webcamRunning = false;
             enableWebcamButton.innerText = "VIDEO ON";
             window.stream.getTracks().forEach(track => {
                 track.stop();
                 state = "off";
-            });
-            $('#videoSource').empty();
-            $('#vid_list').empty();
-            $("#videoDropdown").val("");
+            });          
+            $('#vid_list').empty();  
+            $('#videoSource').empty();             
         } else {
             webcamRunning = true;
-            enableWebcamButton.innerText = "VIDEO OFF";
-            const constraints = {
-            video: true
-            };    
-            state = "on";            
-            getStream().then(getDevices).then(gotDevices);        
+            enableWebcamButton.innerText = "VIDEO OFF";   
+            state = "on";      
+            video.addEventListener("loadeddata", predictWebcam);           
         }
-        // getUsermedia parameters.
-        // const constraints = {
-        //     video: true
-        // };
-        // Activate the webcam stream.
-        // navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-        //     video.srcObject = stream;
-        //     video.addEventListener("loadeddata", predictWebcam);
-        // });
+        vidopttrigger = false;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -839,60 +831,49 @@ window.onclick = function(event) {
         // See the License for the specific language governing permissions and
         // limitations under the License.    
 
-        function getStream() {
-            console.log("1")
-        if (window.stream) {
-            window.stream.getTracks().forEach(track => {
-            track.stop();
-            });
-        }
-
-        const videoSource = videoDropdown.value;
-        const constraints = {
-            video: {deviceId: videoSource ? {exact: videoSource} : undefined}
-        };
-        return navigator.mediaDevices.getUserMedia(constraints).
-            then(gotStream).catch(handleError);
-        }
-
-        function gotStream(stream) {
-            console.log("2")
-            window.stream = stream; // make stream available to console
-            videoSelect.selectedIndex = [...videoSelect.options].
-            findIndex(option => option.text === stream.getVideoTracks()[0].label);
-            videoElement.srcObject = stream;
-        }
-
         function getDevices() {
-            console.log("3")
-            // AFAICT in Safari this only gets default devices until gUM is called :/
+        // AFAICT in Safari this only gets default devices until gUM is called :/
             return navigator.mediaDevices.enumerateDevices();
         }
 
         function gotDevices(deviceInfos) {
-            console.log("4")
             window.deviceInfos = deviceInfos; // make available to console
             console.log('Available input and output devices:', deviceInfos);
             for (const deviceInfo of deviceInfos) {
                 const option = document.createElement('option');
                 option.value = deviceInfo.deviceId;
-
-                if (deviceInfo.kind === 'videoinput' && state != "off") {
-                option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
-                //console.log(option.value, option.text)
-                videoSelect.appendChild(option);
-                $("#vid_list").append("<a class='vid_link' href='#' id='"+option.value+"'>" + option.text + "</a>");
+                if (deviceInfo.kind === 'videoinput') {
+                    option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+                    videoSelect.appendChild(option);
+                    $("#vid_list").append("<a class='vid_link' href='#' id='"+option.value+"'>" + option.text + "</a>");
                 }
             }
-            var first_vid = $("#vid_list a:first-child").attr("id");
-            var first_text = $("#"+first_vid).text();
-            console.log(first_text)
-            $("#videoDropdown").val(first_text);
+        }
 
+        function getStream() {
+            if (window.stream) {
+                window.stream.getTracks().forEach(track => {
+                track.stop();
+            });
+            }
+
+            const videoSource = videoSelect.value;
+            const constraints = {
+                video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+            };
+            return navigator.mediaDevices.getUserMedia(constraints).
+                then(gotStream).catch(handleError);
+        }
+
+        function gotStream(stream) {
+            window.stream = stream; // make stream available to console
+            videoSelect.selectedIndex = [...videoSelect.options].
+                findIndex(option => option.text === stream.getVideoTracks()[0].label);
+            videoElement.srcObject = stream;
         }
 
         function handleError(error) {
-        console.error('Error: ', error);
+            console.error('Error: ', error);
         }
 }
 ////////////////////////////////////////////////////////////////////////////
