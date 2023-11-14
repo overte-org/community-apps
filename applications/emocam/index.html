@@ -275,9 +275,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <link href="css/material-components-web.min.css" rel="stylesheet">
-    <script src="js/material-components-web.min.js"></script>
-    <script src="js/Chart.min.js"></script>
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 </head>
 <body bgcolor="white">
 
@@ -720,7 +720,7 @@ window.onclick = function(event) {
     // See the License for the specific language governing permissions and
     // limitations under the License.
 
-    import vision from "./js/tasks-vision@0.10.0.js";
+    import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
 
     const {FaceLandmarker, FilesetResolver, DrawingUtils} = vision;
     const demosSection = document.getElementById("demos");
@@ -744,7 +744,7 @@ window.onclick = function(event) {
     // get everything needed to run.
     async function runDemo() {
         // Read more `CopyWebpackPlugin`, copy wasm set from "https://cdn.skypack.dev/node_modules" to `/wasm`
-        const filesetResolver = await FilesetResolver.forVisionTasks("js/wasm");
+        const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
         faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
                 modelAssetPath: "js/face_landmarker.task",
@@ -786,6 +786,8 @@ window.onclick = function(event) {
         $("#videoSource").val(idValue).prop('selected', true);
         $("#videoSource").val(idValue).change();
         $("#videoDropdown").val(hrefValue);
+        MyAvatar.removeAnimationStateHandler(handlerId);
+        MyAvatar.restoreAnimation();
     });  
     // Enable the live webcam view and start detection.
     function enableCam(event) {
