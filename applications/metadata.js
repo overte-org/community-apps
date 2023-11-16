@@ -2,12 +2,12 @@ var metadata = { "applications":
     [
         {
             "isActive": true,
-            "directory": "inventory-app",
-            "name": "Inventory App",
-            "description": "The inventory app allows you to store, use, and share items in Overte.",
-            "jsfile": "inventory-app/dist/inventory.js",
-            "icon": "inventory-app/dist/inventory-i.svg",
-            "caption": "INVENTORY"
+            "directory": "emocam",
+            "name": "Face tracking",
+            "description": "Desktop mode face tracking application based on Mediapipe. This allows face tracking and head tracking in desktop mode using a single webcam. (Note: This application has external dependencies. It may stop working one day.)",
+            "jsfile": "emocam/emocam1.js",
+            "icon": "emocam/images/face.png",
+            "caption": "EMOTIONS"
         },
         {
             "isActive": true,
@@ -263,12 +263,12 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
-            "directory": "emocam",
-            "name": "emocam",
-            "description": "Desktop mode face tracking application based on Mediapipe. This allows face tracking and head tracking in desktop mode using a single webcam. (Note: This application has external dependencies. It may stop working one day.)",
-            "jsfile": "emocam/emocam1.js",
-            "icon": "emocam/images/face.png",
-            "caption": "EMOTIONS"
+            "directory": "inventory-app",
+            "name": "Inventory App",
+            "description": "The inventory app allows you to store, use, and share items in Overte.",
+            "jsfile": "inventory-app/dist/inventory.js",
+            "icon": "inventory-app/dist/inventory-i.svg",
+            "caption": "INVENTORY"
         }
     ]
 };
