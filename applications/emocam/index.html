@@ -304,8 +304,8 @@
             </td>
         </tr>
         <tr><td colspan="4">
-            <div class="select">
-                    <select id="videoSource"></select>
+            <div hidden class="select">
+                    <select hidden id="videoSource"></select>
             </div>
             <div class="dropdown" onclick="deviceFunction()">
                 <label>Video source: </label><input style="width:200px" type="text" id="videoDropdown"></input><font id="v"><b>&#8595;</b></font>
@@ -747,7 +747,7 @@ window.onclick = function(event) {
         const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
         faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
-                modelAssetPath: "js/face_landmarker.task",
+                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
                 delegate: "GPU"
             },
             outputFaceBlendshapes: true,
@@ -1071,9 +1071,13 @@ window.onclick = function(event) {
                 "roll": rollDegrees
             }
         }
+        var $bootvid = $("#videoSource :selected").text();
+        $("#videoDropdown").val($bootvid);
 
         EventBridge.emitWebEvent(JSON.stringify(send));
     }
+
+
 
 </script>
 

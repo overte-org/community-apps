@@ -11,22 +11,20 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
+var webWindow;
 
 (function () {
     var jsMainFileName = "emocam1.js";
     var ROOT = Script.resolvePath('').split(jsMainFileName)[0];
     var channel = "org.overte.application.emocam";
 
-    var TABLET_BUTTON_NAME = "EMOTIONS";
-    var TRANSITION_TIME_SECONDS = 0.25;
-    var onEmoteScreen = false;
     var button;
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
-    var icon = "face.png";
-    var activeIcon = "face.png";
-    var isActive = true;
-    var EMOTE_APP_BASE = "index.html?" + Date.now();
-    var EMOTE_APP_URL = Script.resolvePath(EMOTE_APP_BASE);
+    // var icon = "face.png";
+    // var activeIcon = "face.png";
+    // var isActive = true;
+    var EMOTE_APP_QML_BASE = "view.qml";
+    var EMOTE_APP_URL = Script.resolvePath(EMOTE_APP_QML_BASE);
     var EMOTE_APP_SORT_ORDER = 12;
     var EMOTE_LABEL = "FACE";
     var pitchValue = 0;
@@ -48,18 +46,27 @@
     });
 
     function onClicked() {
-        if (onEmoteScreen) {
-            tablet.gotoHomeScreen();
+        if (!webWindow) {
+            webWindow = Desktop.createWindow(EMOTE_APP_URL, {
+                title: "Face tracking",
+                presentationMode: Desktop.PresentationMode.NATIVE,
+                size: { x: 500, y: 400 }
+            });
+            if (webWindow) {
+                webWindow.webEventReceived.connect(onWebEventReceived);
+                webWindow.closed.connect(onWindowClosed);
+                button.editProperties({isActive: true});
+            } else {
+                print("Failed to create web window");
+            }
         } else {
-            onEmoteScreen = true;
-            tablet.gotoWebScreen(EMOTE_APP_URL);
-            //webWindow = new OverlayWebWindow(' ', EMOTE_APP_URL, 480, 810, false);
+            if (webWindow.visible) {
+                webWindow.visible = false;
+            } else {
+                webWindow.visible = true;
+            }
+            button.editProperties({isActive: webWindow.visible});
         }
-    }
-
-    function onScreenChanged(type, url) {
-        onEmoteScreen = type === "Web" && (url.indexOf(EMOTE_APP_BASE) === url.length - EMOTE_APP_BASE.length);
-        button.editProperties({isActive: onEmoteScreen});
     }
 
     var mapping = Controller.newMapping();
@@ -228,16 +235,19 @@
         }
     }
 
+    function onWindowClosed() {
+        webWindow = null;
+        button.editProperties({isActive: false});
+    }
+
     button.clicked.connect(onClicked);
-    tablet.screenChanged.connect(onScreenChanged);
-    tablet.webEventReceived.connect(onWebEventReceived);
 
     Script.scriptEnding.connect(function () {
 
         MyAvatar.removeAnimationStateHandler(handlerId);
 
-        if (onEmoteScreen) {
-            tablet.gotoHomeScreen();
+        if (webWindow) {
+            webWindow.close();
         }
         button.clicked.disconnect(onClicked);
         tablet.screenChanged.disconnect(onScreenChanged);
