@@ -20,9 +20,6 @@ var webWindow;
 
     var button;
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
-    // var icon = "face.png";
-    // var activeIcon = "face.png";
-    // var isActive = true;
     var EMOTE_APP_QML_BASE = "view.qml";
     var EMOTE_APP_URL = Script.resolvePath(EMOTE_APP_QML_BASE);
     var EMOTE_APP_SORT_ORDER = 12;
@@ -242,6 +239,8 @@ var webWindow;
 
     button.clicked.connect(onClicked);
 
+    button.clicked.connect(onClicked);
+    
     Script.scriptEnding.connect(function () {
 
         MyAvatar.removeAnimationStateHandler(handlerId);
@@ -250,8 +249,7 @@ var webWindow;
             webWindow.close();
         }
         button.clicked.disconnect(onClicked);
-        tablet.screenChanged.disconnect(onScreenChanged);
-        if (tablet) {
+         if (tablet) {
             tablet.removeButton(button);
         }
 
