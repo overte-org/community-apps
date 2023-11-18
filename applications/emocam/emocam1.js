@@ -134,8 +134,6 @@ var webWindow;
                     "EyeOut_R": emotion["eyeLookOutRight"],
                     "EyeUp_L": emotion["eyeLookUpLeft"],
                     "EyeUp_R": emotion["eyeLookUpRight"],
-                    "EyeSquint_L": emotion["eyeSquintLeft"],
-                    "EyeSquint_R": emotion["eyeSquintRight"],
                     "TongueOut": emotion["jawForward"],
                     "JawLeft": emotion["jawLeft"] * 3,
                     "JawRight": emotion["jawRight"] * 3,
@@ -147,7 +145,7 @@ var webWindow;
                     "MouthLowerDown_L": emotion["mouthLowerDownLeft"],
                     "MouthLowerDown_R": emotion["mouthLowerDownRight"],
                     "MouthPress_L": emotion["mouthPressLeft"],
-                    "MouthPress_L": emotion["mouthPressRight"],
+                    "MouthPress_R": emotion["mouthPressRight"],
                     "LipsPucker": emotion["mouthPucker"],
                     "MouthRight": emotion["mouthRight"],
                     "MouthRollLower": emotion["mouthRollLower"],
@@ -240,10 +238,13 @@ var webWindow;
     }
 
     button.clicked.connect(onClicked);
+
+    button.clicked.connect(onClicked);
     
     Script.scriptEnding.connect(function () {
 
         MyAvatar.removeAnimationStateHandler(handlerId);
+
         if (webWindow) {
             webWindow.close();
         }

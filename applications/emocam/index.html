@@ -228,6 +228,40 @@
         .slider.round:before {
             border-radius: 50%;
         }
+
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+        position: relative;
+        display: inline-block;
+        height: 26px;
+        white-space: nowrap;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        max-height: 400px; 
+        overflow: scroll;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+        color: black;
+        margin-top: 5px;
+        padding: 8px 16px 8px ;
+        text-decoration: none;
+        }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover {background-color: #ddd;}
+
+        /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+        .show {display:block;}
+        #v {display:inline; width:3px; padding-left:5px;color:black;}       
     </style>
 
     <script>
@@ -247,14 +281,13 @@
 </head>
 <body bgcolor="white">
 
-
 <div id="liveView" class="videoView">
     <table width="320px">
         <tr>
             <td>
-                <button id="webcamButton" class="mdc-button mdc-button--raised">
+                <button id="webcamButton" style="white-space:nowrap;width:100px" class="mdc-button mdc-button--raised">
                     <span class="mdc-button__ripple"></span>
-                    <span class="mdc-button__label">ENABLE PREDICTIONS</span>
+                    <span class="mdc-button__label">VIDEO ON</span>
                 </button>
             </td>
             <td>
@@ -270,19 +303,31 @@
                 </label>
             </td>
         </tr>
-    </table>
+        <tr><td colspan="4">
+            <div hidden class="select">
+                    <select hidden id="videoSource"></select>
+            </div>
+            <div class="dropdown" onclick="deviceFunction()">
+                <label>Video source: </label><input style="width:200px" type="text" id="videoDropdown"></input><font id="v"><b>&#8595;</b></font>
+                <div id="vid_list" class="dropdown-content"></div>
+            </div>                
+        </td></tr>
+    </table><br>
     <div style="position: relative;">
         <video id="webcam" autoplay playsinline></video>
         <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
     </div>
 </div>
-
-<div>
-    <select id="landmarkDropdown" onchange="handleLandmarkChange()">
-        <!-- Options for the dropdown will be populated in the script -->
-    </select>
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+<!-- <div>  -->
+    <!-- Options for the dropdown will be populated in the script -->
+    <!-- <select id="landmarkDropdown" onchange="handleLandmarkChange()">
+    </select> -->
+<div class="dropdown" onclick="myFunction()">
+    <label>Morph Targets: </label><input style="width:200px" type="text" id="landmarkDropdown"  onchange="handleLandmarkChange()"></input><font id="v"><b>&#8595;</b></font>
+    <div id="myDropdown" class="dropdown-content"></div>
 </div>
-
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
 <div>
     <input type="text" id="maxY" value="100"/>
     <button onclick="increaseY()">Increase</button>
@@ -303,11 +348,11 @@
 <!--/body>
 </html-->
 
-<script src="jquery.min.js"></script>
+<script src="js/jquery.min.js"></script>
 <script>
 
     var channel = "org.overte.application.emocam";
-
+    var vidopttrigger = false;
     // Graph max range adjust
     var maxY = 100; // Default Y max value
 
@@ -328,10 +373,7 @@
     }
 
     function updateChartMaxY() {
-
-        var dropdown = document.getElementById("landmarkDropdown");
-        var selectedLandmark = dropdown.options[dropdown.selectedIndex].value;
-
+        var selectedLandmark = $("#landmarkDropdown").val();
         // update the data for the chart
         var mapping = landmarkMappings[selectedLandmark];
 
@@ -367,7 +409,28 @@
         return {x_data, y_data_1};
     }
 
-
+/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  $("#myDropdown").toggle();
+}
+function deviceFunction() {
+  $("#vid_list").toggle();
+}  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Close the dropdown menu if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+} 
     // Initialize landmarks
     var landmarks = [
         "browDownLeft",
@@ -434,9 +497,7 @@
 
     // Handle dropdown change
     function handleLandmarkChange() {
-        var dropdown = document.getElementById("landmarkDropdown");
-        var selectedLandmark = dropdown.options[dropdown.selectedIndex].value;
-
+        var selectedLandmark = $("#landmarkDropdown").val();
         // update the data for the chart
         var mapping = landmarkMappings[selectedLandmark];
 
@@ -544,22 +605,26 @@
         canvas.onpointermove = null;
 
         // Populate dropdown with landmarks
-        var dropdown = document.getElementById("landmarkDropdown");
         for (var i = 0; i < landmarks.length; i++) {
-            var option = document.createElement("option");
-            option.text = landmarks[i];
-            option.value = landmarks[i];
-            dropdown.add(option);
+            text = landmarks[i];
+            // option.value = landmarks[i];
+            $("#myDropdown").append("<a class='morph_link' href='#' id='morph"+i+"'>" + text + "</a>");
         }
-
+            var first_morph = $("#myDropdown a:first-child").attr("id");
+            var first_href = $("#"+first_morph).text();
+            $("#landmarkDropdown").val(first_href);
     };
-
 
     // MinMax map value to other coordinate system
     function map(value, start1, stop1, start2, stop2) {
         return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))
     };
 
+    $(document).on("click", ".morph_link", function (event) {
+            var hrefValue = $(this).text();
+            $("#landmarkDropdown").val(hrefValue);
+            handleLandmarkChange();
+    });    
 
     function monotoneCubicSplineInterpolation(x, y) {
         var size = x.length;
@@ -673,6 +738,7 @@
     var yawC = 0;
     var pitchC = 0;
     var rollC = 0;
+    var hrefValue;
     // Before we can use HandLandmarker class we must wait for it to finish
     // loading. Machine Learning models can be large and take a moment to
     // get everything needed to run.
@@ -697,7 +763,7 @@
     const video = document.getElementById("webcam");
     const canvasElement = document.getElementById("output_canvas");
     const canvasCtx = canvasElement.getContext("2d");
-
+    var state;
     // Check if webcam access is supported.
     function hasGetUserMedia() {
         return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -711,31 +777,109 @@
     } else {
         console.warn("getUserMedia() is not supported by your browser");
     }
-
+    $(document).on("click", ".vid_link", function (event) {
+        var videoElement = document.querySelector('video');
+        hrefValue = $(this).text();
+        var idValue = $(this).attr('id');
+        vidopttrigger = true;
+        document.querySelector("#videoSource").value=idValue;
+        $("#videoSource").val(idValue).prop('selected', true);
+        $("#videoSource").val(idValue).change();
+        $("#videoDropdown").val(hrefValue);
+        MyAvatar.removeAnimationStateHandler(handlerId);
+        MyAvatar.restoreAnimation();
+    });  
     // Enable the live webcam view and start detection.
     function enableCam(event) {
+        var videoElement = document.querySelector('video');
+        var videoSelect = document.querySelector('select#videoSource');
+        videoSelect.onchange = getStream;
         if (!faceLandmarker) {
             console.log("Wait! faceLandmarker not loaded yet.");
             return;
         }
+
         if (webcamRunning === true) {
             webcamRunning = false;
-            enableWebcamButton.innerText = "ENABLE PREDICTIONS";
+            enableWebcamButton.innerText = "VIDEO ON";        
+            $('#vid_list').empty();  
+            $('#videoSource').empty();   
+            window.stream.getTracks().forEach(track => {
+                track.stop();
+                state = "off";
+            });          
         } else {
+            getStream().then(getDevices).then(gotDevices);    
             webcamRunning = true;
-            enableWebcamButton.innerText = "DISABLE PREDICTIONS";
+            enableWebcamButton.innerText = "VIDEO OFF";   
+            state = "on";      
+            video.addEventListener("loadeddata", predictWebcam);           
         }
-        // getUsermedia parameters.
-        const constraints = {
-            video: true
-        };
-        // Activate the webcam stream.
-        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-            video.srcObject = stream;
-            video.addEventListener("loadeddata", predictWebcam);
-        });
-    }
+        vidopttrigger = false;
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Copyright 2017 Google Inc.
+
+        // Licensed under the Apache License, Version 2.0 (the "License");
+        // you may not use this file except in compliance with the License.
+        // You may obtain a copy of the License at
+
+        //     http://www.apache.org/licenses/LICENSE-2.0
+
+        // Unless required by applicable law or agreed to in writing, software
+        // distributed under the License is distributed on an "AS IS" BASIS,
+        // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        // See the License for the specific language governing permissions and
+        // limitations under the License.    
+
+        function getDevices() {
+        // AFAICT in Safari this only gets default devices until gUM is called :/
+            return navigator.mediaDevices.enumerateDevices();
+        }
+
+        function gotDevices(deviceInfos) {
+            window.deviceInfos = deviceInfos; // make available to console
+            console.log('Available input and output devices:', deviceInfos);
+            for (const deviceInfo of deviceInfos) {
+                const option = document.createElement('option');
+                option.value = deviceInfo.deviceId;
+                if (deviceInfo.kind === 'videoinput') {
+                    option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+                    videoSelect.appendChild(option);
+                    $("#vid_list").append("<a class='vid_link' href='#' id='"+option.value+"'>" + option.text + "</a>");
+                }
+            }
+        }
+
+        function getStream() {
+            if (window.stream) {
+                window.stream.getTracks().forEach(track => {
+                track.stop();
+            });
+            }
+
+            const videoSource = videoSelect.value;
+            const constraints = {
+                video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+            };
+            return navigator.mediaDevices.getUserMedia(constraints).
+                then(gotStream).catch(handleError);
+        }
+
+        function gotStream(stream) {
+            window.stream = stream; // make stream available to console
+            videoSelect.selectedIndex = [...videoSelect.options].
+                findIndex(option => option.text === stream.getVideoTracks()[0].label);
+            videoElement.srcObject = stream;
+        }
+
+        function handleError(error) {
+            console.error('Error: ', error);
+        }
+}
+////////////////////////////////////////////////////////////////////////////
+        
     let lastVideoTime = -1;
     let results = undefined;
     const drawingUtils = new DrawingUtils(canvasCtx);
@@ -927,9 +1071,13 @@
                 "roll": rollDegrees
             }
         }
+        var $bootvid = $("#videoSource :selected").text();
+        $("#videoDropdown").val($bootvid);
 
         EventBridge.emitWebEvent(JSON.stringify(send));
     }
+
+
 
 </script>
 
