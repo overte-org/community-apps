@@ -33,7 +33,9 @@ var webWindow;
     var yaw = 0;
     var roll = 0;
     var headTransform = null;
-    var lastDataArrived = Date.now();
+    var lastDataArrived = Date.now() - 3000;
+    // Caching this value is a good idea because API calls are expensive
+    var isProceduralblinkingEnabled = true;
 
     button = tablet.addButton({
         icon: ROOT + "images/face.png",
@@ -84,11 +86,19 @@ var webWindow;
     var propList = ["headRotation", "headType"];
     handlerId = MyAvatar.addAnimationStateHandler(function (props) {
         if (Date.now() - lastDataArrived < 2000) {
+            if (isProceduralblinkingEnabled) {
+                MyAvatar.hasProceduralBlinkFaceMovement = false;
+                isProceduralblinkingEnabled = false;
+            }
             return {
                 headRotation: headTransform,
                 headType: 4
             };
         } else {
+            if (!isProceduralblinkingEnabled) {
+                MyAvatar.hasProceduralBlinkFaceMovement = true;
+                isProceduralblinkingEnabled = true;
+            }
             return props;
         }
     }, propList);
@@ -219,18 +229,6 @@ var webWindow;
                 }
                 lastDataArrived = Date.now();
             }
-        }
-    }
-
-    function setEmotion(currentEmotion) {
-        if (emotion !== lastEmotionUsed) {
-            lastEmotionUsed = emotion;
-        }
-        if (currentEmotion !== lastEmotionUsed) {
-            changingEmotionPercentage = 0.0;
-            emotion = currentEmotion;
-            isChangingEmotion = true;
-            MyAvatar.hasScriptedBlendshapes = true;
         }
     }
 
