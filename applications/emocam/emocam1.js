@@ -33,9 +33,11 @@ var webWindow;
     var yaw = 0;
     var roll = 0;
     var headTransform = null;
-    var lastDataArrived = Date.now() - 3000;
+    var lastDataArrived = 0;
+    const POSE_TIMEOUT_MS = 2000;
+    var proceduralBlinkingPreviousState = MyAvatar.hasProceduralBlinkFaceMovement;
     // Caching this value is a good idea because API calls are expensive
-    var isProceduralblinkingEnabled = true;
+    var isProceduralBlinkingAllowed = true;
 
     button = tablet.addButton({
         icon: ROOT + "images/face.png",
@@ -85,19 +87,20 @@ var webWindow;
 
     var propList = ["headRotation", "headType"];
     handlerId = MyAvatar.addAnimationStateHandler(function (props) {
-        if (Date.now() - lastDataArrived < 2000) {
-            if (isProceduralblinkingEnabled) {
+        // Just pass through the animation state without modifying it when pose times out
+        if (Date.now() - lastDataArrived < POSE_TIMEOUT_MS) {
+            if (isProceduralBlinkingAllowed) {
                 MyAvatar.hasProceduralBlinkFaceMovement = false;
-                isProceduralblinkingEnabled = false;
+                isProceduralBlinkingAllowed = false;
             }
             return {
                 headRotation: headTransform,
                 headType: 4
             };
         } else {
-            if (!isProceduralblinkingEnabled) {
-                MyAvatar.hasProceduralBlinkFaceMovement = true;
-                isProceduralblinkingEnabled = true;
+            if (!isProceduralBlinkingAllowed) {
+                MyAvatar.hasProceduralBlinkFaceMovement = proceduralBlinkingPreviousState;
+                isProceduralBlinkingAllowed = true;
             }
             return props;
         }
@@ -250,6 +253,7 @@ var webWindow;
             tablet.removeButton(button);
         }
 
+        MyAvatar.hasProceduralBlinkFaceMovement = proceduralBlinkingPreviousState;
         MyAvatar.restoreAnimation();
         mapping.disable();
     });
