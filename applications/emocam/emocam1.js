@@ -33,7 +33,11 @@ var webWindow;
     var yaw = 0;
     var roll = 0;
     var headTransform = null;
-    var lastDataArrived = Date.now();
+    var lastDataArrived = 0;
+    const POSE_TIMEOUT_MS = 2000;
+    var proceduralBlinkingPreviousState = MyAvatar.hasProceduralBlinkFaceMovement;
+    // Caching this value is a good idea because API calls are expensive
+    var isProceduralBlinkingAllowed = true;
 
     button = tablet.addButton({
         icon: ROOT + "images/face.png",
@@ -83,12 +87,21 @@ var webWindow;
 
     var propList = ["headRotation", "headType"];
     handlerId = MyAvatar.addAnimationStateHandler(function (props) {
-        if (Date.now() - lastDataArrived < 2000) {
+        // Just pass through the animation state without modifying it when pose times out
+        if (Date.now() - lastDataArrived < POSE_TIMEOUT_MS) {
+            if (isProceduralBlinkingAllowed) {
+                MyAvatar.hasProceduralBlinkFaceMovement = false;
+                isProceduralBlinkingAllowed = false;
+            }
             return {
                 headRotation: headTransform,
                 headType: 4
             };
         } else {
+            if (!isProceduralBlinkingAllowed) {
+                MyAvatar.hasProceduralBlinkFaceMovement = proceduralBlinkingPreviousState;
+                isProceduralBlinkingAllowed = true;
+            }
             return props;
         }
     }, propList);
@@ -222,18 +235,6 @@ var webWindow;
         }
     }
 
-    function setEmotion(currentEmotion) {
-        if (emotion !== lastEmotionUsed) {
-            lastEmotionUsed = emotion;
-        }
-        if (currentEmotion !== lastEmotionUsed) {
-            changingEmotionPercentage = 0.0;
-            emotion = currentEmotion;
-            isChangingEmotion = true;
-            MyAvatar.hasScriptedBlendshapes = true;
-        }
-    }
-
     function onWindowClosed() {
         webWindow = null;
         button.editProperties({isActive: false});
@@ -252,6 +253,7 @@ var webWindow;
             tablet.removeButton(button);
         }
 
+        MyAvatar.hasProceduralBlinkFaceMovement = proceduralBlinkingPreviousState;
         MyAvatar.restoreAnimation();
         mapping.disable();
     });
