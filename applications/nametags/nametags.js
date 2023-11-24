@@ -18,6 +18,7 @@ const logs = (info) => console.log("[NAMETAGS] " + info);
 AvatarManager.avatarAddedEvent.connect(reset);
 
 function reset() {
+  if (!visible) return;
   clear();
   startup();
 }
@@ -130,19 +131,6 @@ function scriptEnding() {
   clear();
   tablet.removeButton(tabletButton);
   Menu.removeMenuItem("View", "Nametags");
-}
-function setVisible(visible) {
-  if (visible !== isVisible) {
-    isVisible = visible;
-    if (isVisible) {
-      startUpdating();
-    } else {
-      stopUpdating();
-    }
-    if (button) {
-      button.editProperties({ isActive: isVisible });
-    }
-  }
 }
 function toggleState() {
   visible = !visible;
