@@ -722,8 +722,6 @@
         $("#videoSource").val(idValue).prop('selected', true);
         $("#videoSource").val(idValue).change();
         $("#videoDropdown").val(hrefValue);
-        MyAvatar.removeAnimationStateHandler(handlerId);
-        MyAvatar.restoreAnimation();
     });
     // Enable the live webcam view and start detection.
     function enableCam(event) {
@@ -782,13 +780,13 @@
         }
 
         function getStream() {
-            if (window.stream) {
-                window.stream.getTracks().forEach(track => {
-                track.stop();
-            });
+                if (window.stream) {
+                    window.stream.getTracks().forEach(track => {
+                    track.stop();
+                });
             }
 
-            const videoSource = videoSelect.value;
+        const videoSource = videoSelect.value;
         const constraints = {
             video: {deviceId: videoSource ? {exact: videoSource} : undefined}
         };
