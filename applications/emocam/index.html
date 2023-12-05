@@ -235,7 +235,6 @@
         };
     </script>
 
-
     <meta charset="utf-8">
     <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -247,14 +246,13 @@
 </head>
 <body bgcolor="white">
 
-
 <div id="liveView" class="videoView">
     <table width="320px">
         <tr>
             <td>
-                <button id="webcamButton" class="mdc-button mdc-button--raised">
+                <button id="webcamButton" style="white-space:nowrap;width:100px" class="mdc-button mdc-button--raised">
                     <span class="mdc-button__ripple"></span>
-                    <span class="mdc-button__label">ENABLE PREDICTIONS</span>
+                    <span class="mdc-button__label">VIDEO ON</span>
                 </button>
             </td>
             <td>
@@ -270,14 +268,18 @@
                 </label>
             </td>
         </tr>
-    </table>
+        <tr><td colspan="4">
+            <div class="select">
+                    <select id="videoSource"></select>
+            </div>              
+        </td></tr>
+    </table><br>
     <div style="position: relative;">
         <video id="webcam" autoplay playsinline></video>
         <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
     </div>
 </div>
 
-<div>
     <select id="landmarkDropdown" onchange="handleLandmarkChange()">
         <!-- Options for the dropdown will be populated in the script -->
     </select>
@@ -654,10 +656,8 @@
     // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     // See the License for the specific language governing permissions and
     // limitations under the License.
-    
-    // This is where we start to have problems... module does not like to load locally
-    // js/tasks-vision.js has links to js/wasm/vision_wasm_internal.js and js/wasm/vision_wasm_internal.wasm
-    import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+
+    import vision from "./@mediapipe/tasks-vision/vision_bundle.js";
 
     const {FaceLandmarker, FilesetResolver, DrawingUtils} = vision;
     const demosSection = document.getElementById("demos");
@@ -680,10 +680,10 @@
     // get everything needed to run.
     async function runDemo() {
         // Read more `CopyWebpackPlugin`, copy wasm set from "https://cdn.skypack.dev/node_modules" to `/wasm`
-        const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+        const filesetResolver = await FilesetResolver.forVisionTasks("./@mediapipe/tasks-vision/wasm");
         faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+                modelAssetPath: "./@mediapipe/face_landmarker.task",
                 delegate: "GPU"
             },
             outputFaceBlendshapes: true,
@@ -713,29 +713,97 @@
     } else {
         console.warn("getUserMedia() is not supported by your browser");
     }
-
+   $(document).on("click", ".vid_link", function (event) {
+        var videoElement = document.querySelector('video');
+        hrefValue = $(this).text();
+        var idValue = $(this).attr('id');
+        vidopttrigger = true;
+        document.querySelector("#videoSource").value=idValue;
+        $("#videoSource").val(idValue).prop('selected', true);
+        $("#videoSource").val(idValue).change();
+        $("#videoDropdown").val(hrefValue);
+    });
     // Enable the live webcam view and start detection.
     function enableCam(event) {
+        var videoElement = document.querySelector('video');
+        var videoSelect = document.querySelector('select#videoSource');
+        videoSelect.onchange = getStream;
         if (!faceLandmarker) {
             console.log("Wait! faceLandmarker not loaded yet.");
             return;
         }
         if (webcamRunning === true) {
             webcamRunning = false;
-            enableWebcamButton.innerText = "ENABLE PREDICTIONS";
+            enableWebcamButton.innerText = "VIDEO ON";          
+            $('#videoSource').empty();   
+            window.stream.getTracks().forEach(track => {
+                track.stop();
+            });          
         } else {
+            getStream().then(getDevices).then(gotDevices);    
             webcamRunning = true;
-            enableWebcamButton.innerText = "DISABLE PREDICTIONS";
+            enableWebcamButton.innerText = "VIDEO OFF";        
+            video.addEventListener("loadeddata", predictWebcam);           
         }
         // getUsermedia parameters.
+        // Copyright 2017 Google Inc.
+
+        // Licensed under the Apache License, Version 2.0 (the "License");
+        // you may not use this file except in compliance with the License.
+        // You may obtain a copy of the License at
+
+        //     http://www.apache.org/licenses/LICENSE-2.0
+
+        // Unless required by applicable law or agreed to in writing, software
+        // distributed under the License is distributed on an "AS IS" BASIS,
+        // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        // See the License for the specific language governing permissions and
+        // limitations under the License.    
+
+        function getDevices() {
+        // AFAICT in Safari this only gets default devices until gUM is called :/
+            return navigator.mediaDevices.enumerateDevices();
+        }
+
+        function gotDevices(deviceInfos) {
+            window.deviceInfos = deviceInfos; // make available to console
+            console.log('Available input and output devices:', deviceInfos);
+            for (const deviceInfo of deviceInfos) {
+                const option = document.createElement('option');
+                option.value = deviceInfo.deviceId;
+                if (deviceInfo.kind === 'videoinput') {
+                    option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+                    videoSelect.appendChild(option);
+                    $("#vid_list").append("<a class='vid_link' href='#' id='"+option.value+"'>" + option.text + "</a>");
+                }
+            }
+        }
+
+        function getStream() {
+                if (window.stream) {
+                    window.stream.getTracks().forEach(track => {
+                    track.stop();
+                });
+            }
+
+        const videoSource = videoSelect.value;
         const constraints = {
-            video: true
+            video: {deviceId: videoSource ? {exact: videoSource} : undefined}
         };
-        // Activate the webcam stream.
-        navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-            video.srcObject = stream;
-            video.addEventListener("loadeddata", predictWebcam);
-        });
+            return navigator.mediaDevices.getUserMedia(constraints).
+                then(gotStream).catch(handleError);
+        }
+
+        function gotStream(stream) {
+            window.stream = stream; // make stream available to console
+            videoSelect.selectedIndex = [...videoSelect.options].
+                findIndex(option => option.text === stream.getVideoTracks()[0].label);
+            videoElement.srcObject = stream;
+        }
+
+        function handleError(error) {
+            console.error('Error: ', error);
+        }
     }
 
     let lastVideoTime = -1;
