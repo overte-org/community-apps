@@ -269,6 +269,15 @@ var metadata = { "applications":
             "jsfile": "inventory-app/dist/inventory.js",
             "icon": "inventory-app/dist/inventory-i.svg",
             "caption": "INVENTORY"
+        },
+        {
+            "isActive": true,
+            "directory": "flyAvatar",
+            "name": "Fly Avatar",
+            "description": "This application replaces your avatar for a specific one when you are flying. It reverts automatically the original avatar as soon as you land.",
+            "jsfile": "flyAvatar/app-flyAvatar.js",
+            "icon": "flyAvatar/icon_inactive.png",
+            "caption": "FLY-AV"
         }
     ]
 };
