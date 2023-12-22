@@ -272,12 +272,21 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "flyAvatar",
+            "name": "Fly Avatar",
+            "description": "This application replaces your avatar for a specific one when you are flying. It reverts automatically the original avatar as soon as you land.",
+            "jsfile": "flyAvatar/app-flyAvatar.js",
+            "icon": "flyAvatar/icon_inactive.png",
+            "caption": "FLY-AV"
+        },
+        {
+            "isActive": true,
             "directory": "flyCam",
             "name": "Action Camera",
             "description": "The Action Camera is attached to your avatar, allowing you to capture video while moving, walking, or flying. Fully adjustable around your avatar, this camera is invisible and ensures optimal capture. It also includes most of the features found in the Spectator Camera.",
             "jsfile": "flyCam/flyCamera.js",
             "icon": "flyCam/flyCam-i.png",
             "caption": "FLY-CAM"
-        },
+        }
     ]
 };

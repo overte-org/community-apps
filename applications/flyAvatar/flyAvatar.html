@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+    flyAvatar.html
+
+    Created by Alezia Kurdis, December 16th 2023.
+    Copyright 2023 Overte e.V.
+
+    HTML ui for flyAvatar app.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script>
+            var channel = "overte.application.more.flyAvatar";
+            
+            //Paths
+            var thisPageName = "flyAvatar.html";
+            var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            var ROOTPATH = currentPath.replace(thisPageName, "");
+            var flyAvatarUrl = "";
+
+            EventBridge.scriptEventReceived.connect(function(message){
+                messageObj = JSON.parse(message);
+                if (messageObj.channel === channel) {
+                    if (messageObj.action === "FLY-AVATAR-URL") {
+                        flyAvatarUrl = messageObj.url;
+                        document.getElementById("avatarUrl").value = flyAvatarUrl;
+                    }
+                }
+            });
+            
+
+        </script>
+        <style>
+            @font-face {
+                font-family: FiraSans-SemiBold;
+                src: url(fonts/FiraSans-SemiBold.ttf);
+            }
+
+            @font-face {
+                font-family: FiraSans-Regular;
+                src: url(fonts/FiraSans-Regular.ttf);
+            }
+
+            html {
+                width: 100%;
+                height: 100%;
+            }
+
+            body {
+                background: #454545;
+                font-family: FiraSans-Regular;
+                font-size: 12px;
+                color: #FFFFFF;
+                text-decoration: none;
+                font-style: normal;
+                font-variant: normal;
+                text-transform: none;
+            }
+            
+            #uninstall {
+                font-family: FiraSans-SemiBold;
+                background-color: #222222;
+                font-size: 9px;
+                color: #cccccc;
+                border-radius: 3px;
+                border: 0px solid #000000;
+                transition-duration: 0.2s;
+                width: 100px;
+                padding: 3px;
+            }
+
+            #uninstall:hover {
+                background-color: #000000;
+                color: #ffffff;
+            }
+
+            #uninstall:focus {
+                outline: none;
+            }
+            
+            #avatarUrl {
+                width: 98%;
+            }
+            
+            #avatarUrl:focus {
+                outline: none;
+            }
+            #formContainer {
+                width: 100%;
+                height: 590px;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <h1>FLY AVATAR</h1>
+        <div id="formContainer"><br><br>
+        Avatar Url to use while flying:<br>
+        <input type = "text" id="avatarUrl" oninput = "updateAvatarUrl();"><br>
+        </div><hr>
+
+        <div style="text-align: right; width:100%;">
+            <button id="uninstall" onClick = "uninstall();">Uninstall this app</button>
+        </div>
+        <script>
+            //UI functions here
+            
+            
+            //UI Action function here
+            function uninstall() { //Example of a action called to the application (.js) (you can add the property you need to this, but minimally the channel and the action.
+                var message = {
+                    "channel": channel,
+                    "action": "SELF_UNINSTALL"
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            function updateAvatarUrl() {
+                flyAvatarUrl = document.getElementById("avatarUrl").value;
+                var message = {
+                    "channel": channel,
+                    "action": "UPDATE_URL",
+                    "url": flyAvatarUrl
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            function requestInitialData() {
+            
+                var message = {
+                    "channel": channel,
+                    "action": "REQUEST_INITIAL_DATA"
+                };
+                EventBridge.emitWebEvent(JSON.stringify(message));
+            }
+            
+            requestInitialData();
+        </script>
+    </body>
+</html>
