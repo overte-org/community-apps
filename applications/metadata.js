@@ -272,6 +272,15 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "calibration",
+            "name": "Calibration - Full body Tracking",
+            "description": "This adds a shortcut button in your tablet to open directly the Full Body Tracking 'Calibration' settings. This is mainly for people doing Full Body Tracking for whom it is a frequent use to do the calibration.",
+            "jsfile": "calibration/app-calibration.js",
+            "icon": "calibration/icon_inactive.png",
+            "caption": "CALIBRATE"
+        },
+        {
+            "isActive": true,
             "directory": "roomScaleMarker",
             "name": "Room Scale Marker",
             "description": "Designed for enthusiasts of 'Full Body Tracking,' this application prioritizes safety and performance precision by generating a central marker (local entity). Unlike the standard chaperone system in VR, which tends to signal boundaries reactively, this central marker enhances real-world reference awareness, enabling users to plan their moves more effectively to never reach those boundaries. Perfect for dancing. This marker self-delete as soon it stop matching the reality.",
