@@ -273,7 +273,7 @@ var metadata = { "applications":
         {
             "isActive": true,
             "directory": "calibration",
-            "name": "Calibration - Full body Traking",
+            "name": "Calibration - Full body Tracking",
             "description": "This adds a shortcut button in your tablet to open directly the Full Body Tracking 'Calibration' settings. This is mainly for people doing Full Body Tracking for whom it is a frequent use to do the calibration.",
             "jsfile": "calibration/app-calibration.js",
             "icon": "calibration/icon_inactive.png",
