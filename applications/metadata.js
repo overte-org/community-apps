@@ -278,6 +278,33 @@ var metadata = { "applications":
             "jsfile": "calibration/app-calibration.js",
             "icon": "calibration/icon_inactive.png",
             "caption": "CALIBRATE"
+        },
+        {
+            "isActive": true,
+            "directory": "roomScaleMarker",
+            "name": "Room Scale Marker",
+            "description": "Designed for enthusiasts of 'Full Body Tracking,' this application prioritizes safety and performance precision by generating a central marker (local entity). Unlike the standard chaperone system in VR, which tends to signal boundaries reactively, this central marker enhances real-world reference awareness, enabling users to plan their moves more effectively to never reach those boundaries. Perfect for dancing. This marker self-delete as soon it stop matching the reality.",
+            "jsfile": "roomScaleMarker/app-roomScaleMarker.js",
+            "icon": "roomScaleMarker/icon_inactive.png",
+            "caption": "RS-MARKER"
+        },
+        {
+            "isActive": true,
+            "directory": "flyAvatar",
+            "name": "Fly Avatar",
+            "description": "This application replaces your avatar for a specific one when you are flying. It reverts automatically the original avatar as soon as you land.",
+            "jsfile": "flyAvatar/app-flyAvatar.js",
+            "icon": "flyAvatar/icon_inactive.png",
+            "caption": "FLY-AV"
+        },
+        {
+            "isActive": true,
+            "directory": "flyCam",
+            "name": "Action Camera",
+            "description": "The Action Camera is attached to your avatar, allowing you to capture video while moving, walking, or flying. Fully adjustable around your avatar, this camera is invisible and ensures optimal capture. It also includes most of the features found in the Spectator Camera.",
+            "jsfile": "flyCam/flyCamera.js",
+            "icon": "flyCam/flyCam-i.png",
+            "caption": "FLY-CAM"
         }
     ]
 };
