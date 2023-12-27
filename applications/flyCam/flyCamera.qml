@@ -351,7 +351,7 @@ Rectangle {
             HifiControlsUit.Button {
                 id: takeSnapshotButton;
                 enabled: masterSwitch.checked;
-                text: "SNAP PICTURE";
+                text: "SNAPSHOT";
                 colorScheme: hifi.colorSchemes.light;
                 color: hifi.buttons.white;
                 anchors.bottom: parent.bottom;
@@ -883,7 +883,7 @@ Rectangle {
 
                 HifiControlsUit.Button {
                     id: flyCamSettingButton;
-                    text: "Snapshot Settings";
+                    text: "Settings";
                     colorScheme: hifi.colorSchemes.dark;
                     color: hifi.buttons.none;
                     anchors.top: parent.top;
