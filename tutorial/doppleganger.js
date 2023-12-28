@@ -172,7 +172,7 @@ Doppleganger.prototype = {
         }
 
         this.frame = 0;
-        this.position = options.feetPosition || Vec3.sum(avatar.feetPosition, Quat.getForward(avatar.orientation));
+        this.position = options.position || Vec3.sum(avatar.feetPosition, Quat.getForward(avatar.orientation));
         this.orientation = options.orientation || avatar.orientation;
         this.skeletonModelURL = avatar.skeletonModelURL;
         this.jointStateCount = 0;
