@@ -305,6 +305,15 @@ var metadata = { "applications":
             "jsfile": "flyCam/flyCamera.js",
             "icon": "flyCam/flyCam-i.png",
             "caption": "FLY-CAM"
+        },
+        {
+            "isActive": true,
+            "directory": "replica",
+            "name": "Replica",
+            "description": "Specifically for users who do 'Full Body Tracking', this application generates a double of your avatar that only you can see. This is useful to master your avatar moves. Good to have for dancing.",
+            "jsfile": "replica/replica-app.js",
+            "icon": "replica/replica-i.png",
+            "caption": "REPLICA"
         }
     ]
 };
