@@ -15,7 +15,9 @@
     
     var APP_NAME = "FLY-AV";
     var APP_URL = ROOT + "flyAvatar.html";
-    var APP_ICON_INACTIVE = ROOT + "icon_inactive.png";
+    var APP_ICON_INACTIVE_ON = ROOT + "icon_inactive_on.png";
+    var APP_ICON_INACTIVE_OFF = ROOT + "icon_inactive_off.png";
+    var inactiveIcon = APP_ICON_INACTIVE_ON;
     var APP_ICON_ACTIVE = ROOT + "icon_active.png"; // BLACK on
     var ICON_CAPTION_COLOR = "#FFFFFF";
     var appStatus = false;
@@ -23,6 +25,8 @@
     var timestamp = 0;
     var INTERCALL_DELAY = 200; //0.3 sec
     var FLY_AVATAR_SETTING_KEY = "overte.application.more.flyAvatar.avatarUrl";
+    var FLY_AVATAR_SWITCH_SETTING_KEY = "overte.application.more.flyAvatar.switch";
+    var flyAvatarSwitch = true;
     var flyAvatarUrl = "";
     var originalAvatarUrl = "";
     var isFlying = false;
@@ -35,7 +39,7 @@
 
     var button = tablet.addButton({
         text: APP_NAME,
-        icon: APP_ICON_INACTIVE,
+        icon: APP_ICON_INACTIVE_ON,
         activeIcon: APP_ICON_ACTIVE,
         captionColor: ICON_CAPTION_COLOR
     });
@@ -50,7 +54,7 @@
             appStatus = false;
         }else{
             //Launching the Application UI.
-            tablet.gotoWebScreen(APP_URL); // <== Data can be transmitted at opening of teh UI by using GET method, through paramater in the URL. + "?parameter=value"
+            tablet.gotoWebScreen(APP_URL);
             tablet.webEventReceived.connect(onAppWebEventReceived);
             colorCaption = "#000000";
             appStatus = true;
@@ -79,8 +83,16 @@
                     sendCurrentFlyAvatarUrlToUI();
                 } else if (instruction.action === "UPDATE_URL") {
                     flyAvatarUrl = instruction.url;
+                    flyAvatarSwitch = instruction.mainSwitch;
                     Settings.setValue( FLY_AVATAR_SETTING_KEY, flyAvatarUrl);
+                    Settings.setValue( FLY_AVATAR_SWITCH_SETTING_KEY, flyAvatarSwitch);
                     updateAvatar();
+                    if (flyAvatarSwitch) {
+                        inactiveIcon = APP_ICON_INACTIVE_ON;
+                    } else {
+                        inactiveIcon = APP_ICON_INACTIVE_OFF;
+                    }
+                    button.editProperties({icon: inactiveIcon});
                 } else if (instruction.action === "SELF_UNINSTALL" && (n - timestamp) > INTERCALL_DELAY) { //<== This is a good practice to add a "Uninstall this app" button for rarely used app. (toolbar has a limit in size) 
                     d = new Date();
                     timestamp = d.getTime();
@@ -91,7 +103,7 @@
     }
     
     function updateAvatar() {
-        if (MyAvatar.isFlying()) {
+        if (MyAvatar.isFlying() && flyAvatarSwitch) {
             MyAvatar.useFullAvatarURL(flyAvatarUrl);
         } else {
             if (MyAvatar.skeletonModelURL === flyAvatarUrl) {
@@ -124,7 +136,8 @@
         var message = {
             "channel": channel,
             "action": "FLY-AVATAR-URL",
-            "url": flyAvatarUrl
+            "url": flyAvatarUrl,
+            "mainSwitch": flyAvatarSwitch
         };
         tablet.emitScriptEvent(JSON.stringify(message));
     }
@@ -159,5 +172,12 @@
     Script.scriptEnding.connect(cleanup);
     originalAvatarUrl = MyAvatar.skeletonModelURL;
     flyAvatarUrl = Settings.getValue( FLY_AVATAR_SETTING_KEY, "" );
+    flyAvatarSwitch = Settings.getValue( FLY_AVATAR_SWITCH_SETTING_KEY, true );
+    if (flyAvatarSwitch) {
+        inactiveIcon = APP_ICON_INACTIVE_ON;
+    } else {
+        inactiveIcon = APP_ICON_INACTIVE_OFF;
+    }
+    button.editProperties({icon: inactiveIcon});
     Script.update.connect(myTimer);
 }());
