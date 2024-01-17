@@ -21,12 +21,15 @@
             var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
             var ROOTPATH = currentPath.replace(thisPageName, "");
             var flyAvatarUrl = "";
+            var flyAvatarSwitch = true;
 
             EventBridge.scriptEventReceived.connect(function(message){
                 messageObj = JSON.parse(message);
                 if (messageObj.channel === channel) {
                     if (messageObj.action === "FLY-AVATAR-URL") {
                         flyAvatarUrl = messageObj.url;
+                        flyAvatarSwitch = messageObj.mainSwitch;
+                        document.getElementById("mainSwitch").checked = flyAvatarSwitch;
                         document.getElementById("avatarUrl").value = flyAvatarUrl;
                     }
                 }
@@ -99,6 +102,8 @@
         
         <h1>FLY AVATAR</h1>
         <div id="formContainer"><br><br>
+        <input type="checkbox" id="mainSwitch" name="mainSwitch" value="true" oninput = "updateAvatarUrl();"><label for="mainSwitch"> Replace avatar when flying.</label>
+        <br><br>
         Avatar Url to use while flying:<br>
         <input type = "text" id="avatarUrl" oninput = "updateAvatarUrl();"><br>
         </div><hr>
@@ -121,10 +126,12 @@
             
             function updateAvatarUrl() {
                 flyAvatarUrl = document.getElementById("avatarUrl").value;
+                flyAvatarSwitch = document.getElementById("mainSwitch").checked;
                 var message = {
                     "channel": channel,
                     "action": "UPDATE_URL",
-                    "url": flyAvatarUrl
+                    "url": flyAvatarUrl,
+                    "mainSwitch": flyAvatarSwitch
                 };
                 EventBridge.emitWebEvent(JSON.stringify(message));
             }
