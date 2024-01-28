@@ -16,6 +16,8 @@ const logs = (info) => console.log("[NAMETAGS] " + info);
 
 // New user connected
 AvatarManager.avatarAddedEvent.connect(reset);
+// User disconnected
+AvatarManager.avatarRemovedEvent.connect(reset);
 
 function reset() {
   if (!visible) return;
