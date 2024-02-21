@@ -60,6 +60,10 @@
           <span>Compact Mode</span>
           <input id="compact-message-toggle" type="checkbox" />
         </div>
+        <div class="setting setting-toggle">
+          <span>External Window</span>
+          <input id="external-window-toggle" type="checkbox" />
+        </div>
       </div>
     </div>
 
@@ -78,6 +82,7 @@
   const qsa = (target) => document.querySelectorAll(target);
   var scroll_distance = 100000; // The scroll distance for the chat window to automatically scroll down with.
   var compact_mode = false; // Compact messages
+  var external_window = false;
 
   // Add event listeners to all nav-buttons
   qsa(".header button").forEach((button) => {
@@ -114,7 +119,7 @@
         JSON.stringify({
           app: "ArmoredChat",
           action: "change_page",
-          message: button.dataset.target.replace("-chat", "")
+          message: button.dataset.target.replace("-chat", ""),
         })
       );
     }
@@ -129,7 +134,7 @@
     var clickEvent = {
       app: "ArmoredChat",
       message: qs("#message-entry").value,
-      action: "send_chat_message"
+      action: "send_chat_message",
     };
 
     EventBridge.emitWebEvent(JSON.stringify(clickEvent));
@@ -137,36 +142,54 @@
   });
 
   // Start listening for new messages
-  EventBridge.scriptEventReceived.connect(function (message) {
+  EventBridge.scriptEventReceived.connect((message) => {
     message = JSON.parse(message);
-    newMessage(message);
+    switch (message.action) {
+      case "send_chat_message":
+        newMessage(message);
+        break;
+      case "change_setting":
+        newSetting(message);
+        break;
+    }
   });
 
   // Settings
-  // qs("#vr-safe-mode-toggle").addEventListener("change", function () {
-  //   var clickEvent = {
-  //     app: "ArmoredChat",
-  //     message: { setting: "vr_safe_mode", value: qs("#vr-safe-mode-toggle").value == "on" ? true : false },
-  //     action: "change_setting"
-  //   };
-
-  //   EventBridge.emitWebEvent(JSON.stringify(clickEvent));
-  // });
-
-  // Settings
   qs("#compact-message-toggle").addEventListener("change", function () {
+    _toggleCompactMode();
+    _sendSettingUpdate({
+      setting_name: "compact_chat",
+      setting_value: compact_mode,
+    });
+  });
+
+  function _toggleCompactMode() {
     compact_mode = !compact_mode;
     if (compact_mode) {
       // Add the stylesheet to the head
-      document.head.insertAdjacentHTML(
-        "beforeend",
-        '<link id="compact-messages-ss" rel="stylesheet" href="compact-messages.css" />'
-      );
+      document.head.insertAdjacentHTML("beforeend", '<link id="compact-messages-ss" rel="stylesheet" href="compact-messages.css" />');
     } else {
       // Remove the compact messages stylesheet
       qs("#compact-messages-ss").remove();
     }
+  }
+
+  qs("#external-window-toggle").addEventListener("change", function () {
+    external_window = !external_window;
+    _sendSettingUpdate({
+      setting_name: "external_window",
+      setting_value: external_window,
+    });
   });
+
+  function _sendSettingUpdate(obj = { setting_name, setting_value }) {
+    var obj_packet = {
+      app: "ArmoredChat",
+      message: { setting: obj.setting_name, value: obj.setting_value },
+      action: "change_setting",
+    };
+    EventBridge.emitWebEvent(JSON.stringify(obj_packet));
+  }
 
   // TODO: Dynamic scrolling: Make it so each message increases the scrollTop value to make sure it continues to work for future messages.
   // TODO: Limit embeds to 3.
@@ -179,27 +202,20 @@
       let message_clone = message_template.content.cloneNode(true);
 
       // Youtube embeds
-      let yt_url = message.message.match(
-        /(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([^& \n<]+)(?:[^ \n<]+)?/g
-      );
+      let yt_url = message.message.match(/(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([^& \n<]+)(?:[^ \n<]+)?/g);
       if (yt_url) {
         message.message = message.message.replace(
           yt_url,
           `${yt_url}
           <br>
-          <iframe class="z-depth-2" width='420' height='236' src='https://www.youtube.com/embed/${
-            yt_url.toString().split("/")[3]
-          }' frameborder='0'></iframe>`
+          <iframe class="z-depth-2" width='420' height='236' src='https://www.youtube.com/embed/${yt_url.toString().split("/")[3]}' frameborder='0'></iframe>`
         );
       }
 
       // Image embeds
       let image_link = message.message.match(/.+.(png|jpg|jpeg|webp)/g);
       if (image_link) {
-        message.message = message.message.replace(
-          image_link,
-          `${image_link}<br><span class='image-container'><img src='${image_link}'></span>`
-        );
+        message.message = message.message.replace(image_link, `${image_link}<br><span class='image-container'><img src='${image_link}'></span>`);
       }
 
       // Linkify links
@@ -216,7 +232,7 @@
       message_clone.querySelector(".timestamp").innerText = new Date().toLocaleTimeString(undefined, { hour12: false });
       message_clone.querySelector(".timestamp").title = new Date().toLocaleDateString(undefined, {
         month: "long",
-        day: "numeric"
+        day: "numeric",
       });
       message_clone.querySelector(".body").innerHTML = message.message;
       // Append to the message list
@@ -230,6 +246,19 @@
 
   function openExternal(url) {
     EventBridge.emitWebEvent(JSON.stringify({ app: "ArmoredChat", action: "open_url", message: url }));
+  }
+
+  function newSetting(message) {
+    switch (message.setting_name) {
+      case "compact-chat":
+        qs("#compact-message-toggle").checked = true;
+        _toggleCompactMode();
+        break;
+      case "external_window":
+        qs("#external-window-toggle").checked = true;
+        external_window = true;
+        break;
+    }
   }
 </script>
 
