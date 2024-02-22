@@ -78,16 +78,28 @@
 
 <script>
   "use strict";
+
+  _emitEvent({ type: "initialized" }); // Tell the script we are ready
+
   const qs = (target) => document.querySelector(target);
   const qsa = (target) => document.querySelectorAll(target);
   var scroll_distance = 100000; // The scroll distance for the chat window to automatically scroll down with.
   var compact_mode = false; // Compact messages
   var external_window = false;
 
+  // Start listening for new messages
+  EventBridge.scriptEventReceived.connect(_newScriptEvent);
+
+  // HTML Event listeners
+  qs("#send-message").addEventListener("click", _sendMessage);
+  qs("#message-entry").addEventListener("keyup", (event) => {
+    if (event.keyCode === 13) _sendMessage(); // Enter key, send message
+  });
+
   // Add event listeners to all nav-buttons
   qsa(".header button").forEach((button) => {
     button.addEventListener("click", () => {
-      switchPage(button.dataset.target, button);
+      _switchPage(button.dataset.target, button);
       if (button.dataset.target === "settings") {
         qs(".footer.text-entry").classList.add("hidden");
       } else {
@@ -95,8 +107,7 @@
       }
     });
   });
-
-  function switchPage(target, button) {
+  function _switchPage(target, button) {
     // Hide all pages
     qsa(".page").forEach((page) => page.classList.add("hidden"));
     // Deactivate all nav-buttons
@@ -115,52 +126,41 @@
       button.querySelector("img").src = button.querySelector("img").src.replace("_black", "_white");
       button.classList.add("active");
       button.blur();
-      EventBridge.emitWebEvent(
-        JSON.stringify({
-          app: "ArmoredChat",
-          action: "change_page",
-          message: button.dataset.target.replace("-chat", ""),
-        })
-      );
+
+      // Tell script where we are at
+      _emitEvent({ type: "page_update", page: button.dataset.target.replace("-chat", "") });
     }
   }
-
-  // Send an event when user click on each of the gemstone buttons
-  qs("#send-message").addEventListener("click", function () {
+  function _sendMessage() {
     qs("#send-message").blur();
+
     // Don't send empty messages.
     if (qs("#message-entry").value.length === 0) return;
 
-    var clickEvent = {
-      app: "ArmoredChat",
-      message: qs("#message-entry").value,
-      action: "send_chat_message",
-    };
+    // Send what is in the text area as a message
+    _emitEvent({ type: "send_message", message: qs("#message-entry").value });
 
-    EventBridge.emitWebEvent(JSON.stringify(clickEvent));
+    // Clear the message area
     qs("#message-entry").value = "";
-  });
+  }
 
-  // Start listening for new messages
-  EventBridge.scriptEventReceived.connect((message) => {
+  function _newScriptEvent(message) {
     message = JSON.parse(message);
-    switch (message.action) {
-      case "send_chat_message":
-        newMessage(message);
+
+    switch (message.type) {
+      case "show_message":
+        _showMessage(message);
         break;
-      case "change_setting":
-        newSetting(message);
+      case "setting_update":
+        _newSetting(message);
         break;
     }
-  });
+  }
 
   // Settings
   qs("#compact-message-toggle").addEventListener("change", function () {
     _toggleCompactMode();
-    _sendSettingUpdate({
-      setting_name: "compact_chat",
-      setting_value: compact_mode,
-    });
+    _emitEvent({ type: "setting_update", setting_name: "compact_chat", setting_value: compact_mode });
   });
 
   function _toggleCompactMode() {
@@ -176,89 +176,82 @@
 
   qs("#external-window-toggle").addEventListener("change", function () {
     external_window = !external_window;
-    _sendSettingUpdate({
-      setting_name: "external_window",
-      setting_value: external_window,
-    });
+    _emitEvent({ type: "setting_update", setting_name: "external_window", setting_value: external_window });
   });
 
-  function _sendSettingUpdate(obj = { setting_name, setting_value }) {
-    var obj_packet = {
-      app: "ArmoredChat",
-      message: { setting: obj.setting_name, value: obj.setting_value },
-      action: "change_setting",
-    };
-    EventBridge.emitWebEvent(JSON.stringify(obj_packet));
-  }
-
-  // TODO: Dynamic scrolling: Make it so each message increases the scrollTop value to make sure it continues to work for future messages.
   // TODO: Limit embeds to 3.
-  function newMessage(message) {
-    _newMessage(message, message.channel + "-chat");
+  function _showMessage(message) {
+    var target = message.channel + "-chat";
 
-    function _newMessage(message, target) {
-      // Clone template message
-      let message_template = qs("#message-listing");
-      let message_clone = message_template.content.cloneNode(true);
+    // Clone template message
+    let message_template = qs("#message-listing");
+    let message_clone = message_template.content.cloneNode(true);
 
-      // Youtube embeds
-      let yt_url = message.message.match(/(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([^& \n<]+)(?:[^ \n<]+)?/g);
-      if (yt_url) {
-        message.message = message.message.replace(
-          yt_url,
-          `${yt_url}
+    // Youtube embeds
+    let yt_url = message.message.match(/(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([^& \n<]+)(?:[^ \n<]+)?/g);
+    if (yt_url) {
+      message.message = message.message.replace(
+        yt_url,
+        `${yt_url}
           <br>
           <iframe class="z-depth-2" width='420' height='236' src='https://www.youtube.com/embed/${yt_url.toString().split("/")[3]}' frameborder='0'></iframe>`
-        );
-      }
-
-      // Image embeds
-      let image_link = message.message.match(/.+.(png|jpg|jpeg|webp)/g);
-      if (image_link) {
-        message.message = message.message.replace(image_link, `${image_link}<br><span class='image-container'><img src='${image_link}'></span>`);
-      }
-
-      // Linkify links
-      let link_regex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm;
-
-      if (message.message.match(link_regex)) {
-        message.message = message.message.replace(link_regex, (match) => {
-          return `<a href='#' onclick='openExternal("${match.toString()}")'>${match}</a>`;
-        });
-      }
-
-      // Update template data to message data
-      message_clone.querySelector(".name").innerText = message.displayName;
-      message_clone.querySelector(".timestamp").innerText = new Date().toLocaleTimeString(undefined, { hour12: false });
-      message_clone.querySelector(".timestamp").title = new Date().toLocaleDateString(undefined, {
-        month: "long",
-        day: "numeric",
-      });
-      message_clone.querySelector(".body").innerHTML = message.message;
-      // Append to the message list
-      qs("#" + target + " .message-list").appendChild(message_clone);
-      // Scroll to the bottom of the page
-      qs("#" + target + " .message-list").scrollTop = scroll_distance;
-      // Increase scroll distance so it will continue to work for future messages.
-      scroll_distance = scroll_distance + 100000;
+      );
     }
-  }
 
-  function openExternal(url) {
-    EventBridge.emitWebEvent(JSON.stringify({ app: "ArmoredChat", action: "open_url", message: url }));
-  }
+    // Image embeds
+    let image_link = message.message.match(/.+.(png|jpg|jpeg|webp)/g);
+    if (image_link) {
+      message.message = message.message.replace(image_link, `${image_link}<br><span class='image-container'><img src='${image_link}'></span>`);
+    }
 
-  function newSetting(message) {
+    // Linkify links
+    let link_regex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm;
+
+    if (message.message.match(link_regex)) {
+      message.message = message.message.replace(link_regex, (match) => {
+        return `<a href='#' onclick='_emitEvent({type:"open_url", url: match.toString()})'>${match}</a>`;
+      });
+    }
+
+    // Update template data to message data
+    message_clone.querySelector(".name").innerText = message.displayName;
+    message_clone.querySelector(".timestamp").innerText = new Date().toLocaleTimeString(undefined, { hour12: false });
+    message_clone.querySelector(".timestamp").title = new Date().toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+    });
+    message_clone.querySelector(".body").innerHTML = message.message;
+    // Append to the message list
+    qs("#" + target + " .message-list").appendChild(message_clone);
+    // Scroll to the bottom of the page
+    qs("#" + target + " .message-list").scrollTop = scroll_distance;
+    // Increase scroll distance so it will continue to work for future messages.
+    scroll_distance = scroll_distance + 100000;
+  }
+  /**
+   * Called when the script is initialized and we are loading the user settings
+   */
+  function _newSetting(message) {
     switch (message.setting_name) {
-      case "compact-chat":
+      case "compact_chat":
         qs("#compact-message-toggle").checked = true;
         _toggleCompactMode();
         break;
+
       case "external_window":
         qs("#external-window-toggle").checked = true;
         external_window = true;
         break;
     }
+  }
+
+  /**
+   * Emit a packet to the HTML front end. Easy communication!
+   * @param {Object} packet - The Object packet to emit to the HTML
+   * @param {("setting_update"|"send_message"|"page_update"|"open_url"|"initialized")} packet.type - The type of packet it is
+   */
+  function _emitEvent(packet = { type: "" }) {
+    EventBridge.emitWebEvent(JSON.stringify(packet));
   }
 </script>
 
