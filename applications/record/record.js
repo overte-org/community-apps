@@ -1,10 +1,10 @@
 "use strict";
-
 //
 //  record.js
 //
-//  Created by David Rowe on 5 Apr 2017.
+//  Created by David Rowe on April 5th, 2017.
 //  Copyright 2017 High Fidelity, Inc.
+//  Copyright 2024, Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -20,12 +20,10 @@
         tablet,
         button,
         isConnected,
-
         RecordingIndicator,
         Recorder,
         Player,
         Dialog,
-
         SCRIPT_STARTUP_DELAY = 3000;  // 3s
 
     function log(message) {
@@ -58,35 +56,36 @@
                 CAMERA_JOINT_INDEX = -7;
 
             if (HMD.active) {
-                // 3D overlay attached to avatar.
-                hmdOverlay = Overlays.addOverlay("text3d", {
-                    text: recordingText,
-                    dimensions: { x: 3 * HMD_FONT_SIZE, y: HMD_FONT_SIZE },
-                    parentID: MyAvatar.sessionUUID,
-                    parentJointIndex: CAMERA_JOINT_INDEX,
-                    localPosition: { x: 0.95, y: 0.95, z: -2.0 },
-                    color: { red: 255, green: 0, blue: 0 },
-                    alpha: 0.9,
-                    lineHeight: HMD_FONT_SIZE,
-                    backgroundAlpha: 0,
-                    ignoreRayIntersection: true,
-                    isFacingAvatar: true,
-                    drawInFront: true,
-                    visible: true
-                });
+                // Local Entity attached to avatar.
+                hmdOverlay = Entities.addEntity({
+                    "type": "Text",
+                    "text": recordingText,
+                    "dimensions": { "x": 3 * HMD_FONT_SIZE, "y": HMD_FONT_SIZE },
+                    "parentID": MyAvatar.sessionUUID,
+                    "parentJointIndex": CAMERA_JOINT_INDEX,
+                    "localPosition": { "x": 0.95, "y": 0.95, "z": -2.0 },
+                    "textColor": { "red": 255, "green": 0, "blue": 0 },
+                    "textAlpha": 0.9,
+                    "lineHeight": HMD_FONT_SIZE,
+                    "backgroundAlpha": 0,
+                    "ignorePickIntersection": true,
+                    "billboardMode": "full",
+                    "renderLayer": "front",
+                    "visible": true
+                }, "local");
             } else {
                 // 2D overlay on desktop.
                 desktopOverlay = Overlays.addOverlay("text", {
-                    text: recordingText,
-                    width: 3 * DESKTOP_FONT_SIZE,
-                    height: DESKTOP_FONT_SIZE,
-                    x: screenSize.x - 4 * DESKTOP_FONT_SIZE,
-                    y: DESKTOP_FONT_SIZE,
-                    font: { size: DESKTOP_FONT_SIZE },
-                    color: { red: 255, green: 8, blue: 8 },
-                    alpha: 1.0,
-                    backgroundAlpha: 0,
-                    visible: true
+                    "text": recordingText,
+                    "width": 3 * DESKTOP_FONT_SIZE,
+                    "height": DESKTOP_FONT_SIZE,
+                    "x": screenSize.x - 4 * DESKTOP_FONT_SIZE,
+                    "y": DESKTOP_FONT_SIZE,
+                    "font": { "size": DESKTOP_FONT_SIZE },
+                    "color": { "red": 255, "green": 8, "blue": 8 },
+                    "alpha": 1.0,
+                    "backgroundAlpha": 0,
+                    "visible": true
                 });
             }
         }
@@ -96,13 +95,13 @@
                 Overlays.deleteOverlay(desktopOverlay);
             }
             if (hmdOverlay) {
-                Overlays.deleteOverlay(hmdOverlay);
+                Entities.deleteEntity(hmdOverlay);
             }
         }
 
         return {
-            show: show,
-            hide: hide
+            "show": show,
+            "hide": hide
         };
     }());
 
@@ -116,11 +115,9 @@
             startPosition,
             startOrientation,
             play,
-
             countdownTimer,
             countdownSeconds,
             COUNTDOWN_SECONDS = 3,
-
             tickSound,
             startRecordingSound,
             finishRecordingSound,
@@ -261,16 +258,16 @@
         }
 
         return {
-            startCountdown: startCountdown,
-            cancelCountdown: cancelCountdown,
-            startRecording: startRecording,
-            cancelRecording: cancelRecording,
-            finishRecording: finishRecording,
-            isIdle: isIdle,
-            isCountingDown: isCountingDown,
-            isRecording: isRecording,
-            setUp: setUp,
-            tearDown: tearDown
+            "startCountdown": startCountdown,
+            "cancelCountdown": cancelCountdown,
+            "startRecording": startRecording,
+            "cancelRecording": cancelRecording,
+            "finishRecording": finishRecording,
+            "isIdle": isIdle,
+            "isCountingDown": isCountingDown,
+            "isRecording": isRecording,
+            "setUp": setUp,
+            "tearDown": tearDown
         };
     }());
 
@@ -333,18 +330,18 @@
             }
 
             Messages.sendMessage(HIFI_PLAYER_CHANNEL, JSON.stringify({
-                player: playerIDs[index],
-                command: PLAYER_COMMAND_PLAY,
-                recording: recording,
-                position: position,
-                orientation: orientation
+                "player": playerIDs[index],
+                "command": PLAYER_COMMAND_PLAY,
+                "recording": recording,
+                "position": position,
+                "orientation": orientation
             }));
         }
 
         function stopPlayingRecording(playerID) {
             Messages.sendMessage(HIFI_PLAYER_CHANNEL, JSON.stringify({
-                player: playerID,
-                command: PLAYER_COMMAND_STOP
+                "player": playerID,
+                "command": PLAYER_COMMAND_STOP
             }));
         }
 
@@ -399,12 +396,12 @@
         }
 
         return {
-            playRecording: playRecording,
-            stopPlayingRecording: stopPlayingRecording,
-            numberOfPlayers: numberOfPlayers,
-            reset: reset,
-            setUp: setUp,
-            tearDown: tearDown
+            "playRecording": playRecording,
+            "stopPlayingRecording": stopPlayingRecording,
+            "numberOfPlayers": numberOfPlayers,
+            "reset": reset,
+            "setUp": setUp,
+            "tearDown": tearDown
         };
     }());
 
@@ -432,18 +429,18 @@
         function updateRecordingStatus(isRecording) {
             if (isRecording) {
                 tablet.emitScriptEvent(JSON.stringify({
-                    type: EVENT_BRIDGE_TYPE,
-                    action: START_RECORDING_ACTION
+                    "type": EVENT_BRIDGE_TYPE,
+                    "action": START_RECORDING_ACTION
                 }));
                 tablet.emitScriptEvent(JSON.stringify({
-                    type: EVENT_BRIDGE_TYPE,
-                    action: SET_COUNTDOWN_NUMBER_ACTION,
-                    value: countdownNumber
+                    "type": EVENT_BRIDGE_TYPE,
+                    "action": SET_COUNTDOWN_NUMBER_ACTION,
+                    "value": countdownNumber
                 }));
             } else {
                 tablet.emitScriptEvent(JSON.stringify({
-                    type: EVENT_BRIDGE_TYPE,
-                    action: STOP_RECORDING_ACTION
+                    "type": EVENT_BRIDGE_TYPE,
+                    "action": STOP_RECORDING_ACTION
                 }));
             }
         }
@@ -456,30 +453,30 @@
             for (i = 0, length = playerIsPlayings.length; i < length; i += 1) {
                 if (playerIsPlayings[i]) {
                     recordingsBeingPlayed.push({
-                        filename: playerRecordings[i],
-                        playerID: playerIDs[i]
+                        "filename": playerRecordings[i],
+                        "playerID": playerIDs[i]
                     });
                 }
             }
             tablet.emitScriptEvent(JSON.stringify({
-                type: EVENT_BRIDGE_TYPE,
-                action: RECORDINGS_BEING_PLAYED_ACTION,
-                value: JSON.stringify(recordingsBeingPlayed)
+                "type": EVENT_BRIDGE_TYPE,
+                "action": RECORDINGS_BEING_PLAYED_ACTION,
+                "value": JSON.stringify(recordingsBeingPlayed)
             }));
 
             tablet.emitScriptEvent(JSON.stringify({
-                type: EVENT_BRIDGE_TYPE,
-                action: NUMBER_OF_PLAYERS_ACTION,
-                value: playerIsPlayings.length
+                "type": EVENT_BRIDGE_TYPE,
+                "action": NUMBER_OF_PLAYERS_ACTION,
+                "value": playerIsPlayings.length
             }));
         }
 
         function setCountdownNumber(number) {
             countdownNumber = number;
             tablet.emitScriptEvent(JSON.stringify({
-                type: EVENT_BRIDGE_TYPE,
-                action: SET_COUNTDOWN_NUMBER_ACTION,
-                value: countdownNumber
+                "type": EVENT_BRIDGE_TYPE,
+                "action": SET_COUNTDOWN_NUMBER_ACTION,
+                "value": countdownNumber
             }));
         }
 
@@ -506,19 +503,19 @@
                 case BODY_LOADED_ACTION:
                     // Dialog's ready; initialize its state.
                     tablet.emitScriptEvent(JSON.stringify({
-                        type: EVENT_BRIDGE_TYPE,
-                        action: USING_TOOLBAR_ACTION,
-                        value: isUsingToolbar()
+                        "type": EVENT_BRIDGE_TYPE,
+                        "action": USING_TOOLBAR_ACTION,
+                        "value": isUsingToolbar()
                     }));
                     tablet.emitScriptEvent(JSON.stringify({
-                        type: EVENT_BRIDGE_TYPE,
-                        action: FINISH_ON_OPEN_ACTION,
-                        value: isFinishOnOpen
+                        "type": EVENT_BRIDGE_TYPE,
+                        "action": FINISH_ON_OPEN_ACTION,
+                        "value": isFinishOnOpen
                     }));
                     tablet.emitScriptEvent(JSON.stringify({
-                        type: EVENT_BRIDGE_TYPE,
-                        action: NUMBER_OF_PLAYERS_ACTION,
-                        value: Player.numberOfPlayers()
+                        "type": EVENT_BRIDGE_TYPE,
+                        "action": NUMBER_OF_PLAYERS_ACTION,
+                        "value": Player.numberOfPlayers()
                     }));
                     updateRecordingStatus(!Recorder.isIdle());
                     UserActivityLogger.logAction("record_open_dialog", logDetails());
@@ -566,12 +563,12 @@
         }
 
         return {
-            updatePlayerDetails: updatePlayerDetails,
-            updateRecordingStatus: updateRecordingStatus,
-            setCountdownNumber: setCountdownNumber,
-            finishOnOpen: finishOnOpen,
-            setUp: setUp,
-            tearDown: tearDown
+            "updatePlayerDetails": updatePlayerDetails,
+            "updateRecordingStatus": updateRecordingStatus,
+            "setCountdownNumber": setCountdownNumber,
+            "finishOnOpen": finishOnOpen,
+            "setUp": setUp,
+            "tearDown": tearDown
         };
     }());
 
@@ -639,10 +636,10 @@
 
         // Tablet/toolbar button.
         button = tablet.addButton({
-            icon: APP_ICON_INACTIVE,
-            activeIcon: APP_ICON_ACTIVE,
-            text: APP_NAME,
-            isActive: false
+            "icon": APP_ICON_INACTIVE,
+            "activeIcon": APP_ICON_ACTIVE,
+            "text": APP_NAME,
+            "isActive": false
         });
         if (button) {
             button.clicked.connect(onButtonClicked);
