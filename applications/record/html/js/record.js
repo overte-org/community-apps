@@ -1,10 +1,10 @@
 "use strict";
-
 //
 //  record.js
 //
-//  Created by David Rowe on 5 Apr 2017.
+//  Created by David Rowe on April 5th, 2017.
 //  Copyright 2017 High Fidelity, Inc.
+//  Copyright 2024, Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -288,6 +288,10 @@ function onBodyLoaded() {
     elFinishOnOpen.onclick = onFinishOnOpenClicked;
 
     elFinishOnOpenLabel = document.getElementById("finish-on-open-label");
+
+    var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    var ROOT = currentPath.replace("html/record.html", ""); //<=== Could be useful
+    document.getElementById("aCscriptUrl").value = ROOT + "playRecordingAC.js";
 
     signalBodyLoaded();
 }
