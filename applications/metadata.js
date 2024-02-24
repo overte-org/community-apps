@@ -314,6 +314,15 @@ var metadata = { "applications":
             "jsfile": "replica/replica-app.js",
             "icon": "replica/replica-i.png",
             "caption": "REPLICA"
+        },
+        {
+            "isActive": true,
+            "directory": "armored-chat",
+            "name": "Chat",
+            "description": "Chat application",
+            "jsfile": "armored-chat/armored_chat.js",
+            "icon": "armored-chat/img/icon.png",
+            "caption": "CHAT"
         }
     ]
 };
