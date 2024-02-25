@@ -10,6 +10,7 @@
 (function () {
   "use strict";
   // TODO: Encryption + PMs
+  // TODO: Open in external web browser
 
   var app_is_visible = false;
   var settings = {
@@ -62,7 +63,7 @@
   }
   function _openWindow() {
     chat_overlay_window = new Desktop.createWindow(Script.resourcesPath() + "qml/hifi/tablet/DynamicWebview.qml", {
-      title: "Overte Chat",
+      title: "Chat",
       size: { x: 550, y: 400 },
       additionalFlags: Desktop.ALWAYS_ON_TOP,
       visible: app_is_visible, // FIXME Invalid?
@@ -135,7 +136,8 @@
         break;
 
       case "open_url":
-        Window.openUrl(parsed.message.toString());
+        new OverlayWebWindow({ source: parsed.url.toString(), width: 500, height: 400 });
+        // Window.openUrl(parsed.url.toString());
         break;
 
       case "setting_update":

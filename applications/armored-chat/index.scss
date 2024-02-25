@@ -95,6 +95,10 @@ body {
           word-wrap: anywhere;
           overflow-x: hidden;
 
+          a {
+            color: white;
+          }
+
           .image-container {
             width: 100%;
             max-width: 400px;
@@ -104,8 +108,33 @@ body {
               width: auto;
               height: 100%;
 
+              // max-width: 400px;
+              // max-height: 300px;
+            }
+          }
+        }
+
+        .embeds {
+          width: 100%;
+
+          overflow-x: hidden;
+          a {
+            color: white;
+          }
+
+          .image-container {
+            width: 100%;
+            max-width: 400px;
+            max-height: 300px;
+
+            img {
+              // width: auto;
+              // height: 100%;
               max-width: 400px;
               max-height: 300px;
+
+              // max-width: 400px;
+              // max-height: 300px;
             }
           }
         }
