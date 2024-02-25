@@ -26,6 +26,7 @@
     var INTERCALL_DELAY = 200; //0.3 sec
     var FLY_AVATAR_SETTING_KEY = "overte.application.more.flyAvatar.avatarUrl";
     var FLY_AVATAR_SWITCH_SETTING_KEY = "overte.application.more.flyAvatar.switch";
+    var FLY_AVATAR_ORIGINAL_AVATAR_SETTING_KEY = "overte.application.more.flyAvatar.originalAvatarUrl";
     var flyAvatarSwitch = true;
     var flyAvatarUrl = "";
     var originalAvatarUrl = "";
@@ -115,6 +116,7 @@
     MyAvatar.skeletonModelURLChanged.connect(function () {
         if (!MyAvatar.isFlying() && MyAvatar.skeletonModelURL !== flyAvatarUrl) {
             originalAvatarUrl = MyAvatar.skeletonModelURL;
+            Settings.setValue( FLY_AVATAR_ORIGINAL_AVATAR_SETTING_KEY, originalAvatarUrl);
         }
     });
 
@@ -173,6 +175,12 @@
     originalAvatarUrl = MyAvatar.skeletonModelURL;
     flyAvatarUrl = Settings.getValue( FLY_AVATAR_SETTING_KEY, "" );
     flyAvatarSwitch = Settings.getValue( FLY_AVATAR_SWITCH_SETTING_KEY, true );
+    if (originalAvatarUrl === flyAvatarUrl) {
+        var lastRecordedOriginalAvatar = Settings.getValue( FLY_AVATAR_ORIGINAL_AVATAR_SETTING_KEY, "" );
+        if (lastRecordedOriginalAvatar !== "") {
+            originalAvatarUrl = lastRecordedOriginalAvatar;
+        }
+    }
     if (flyAvatarSwitch) {
         inactiveIcon = APP_ICON_INACTIVE_ON;
     } else {
