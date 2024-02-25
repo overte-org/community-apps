@@ -82,11 +82,11 @@
   Messages.messageReceived.connect(receivedMessage);
 
   function receivedMessage(channel, message) {
-    console.log(`Received message:\n${message}`);
-    var message = JSON.parse(message);
-
     channel = channel.toLowerCase();
     if (channel !== "chat") return;
+
+    console.log(`Received message:\n${message}`);
+    var message = JSON.parse(message);
 
     message.channel = message.channel.toLowerCase();
 
@@ -98,7 +98,6 @@
     // Check the channel is valid
     if (!channels.includes(message.channel)) return;
 
-    // FIXME: Not doing distance check?
     // If message is local, and if player is too far away from location, don't do anything
     if (channel === "local" && Vec3.distance(MyAvatar.position, message.position) < max_local_distance) return;
 
