@@ -79,6 +79,7 @@
         topMargin: 0.025,
         alignment: "center",
         lineHeight: 0.1,
+        canCastShadow: false,
       },
       "local"
     );
@@ -93,6 +94,7 @@
         parentID: user_nametags[user_uuid].text,
         billboardMode: "full",
         imageURL: Script.resolvePath("./assets/badge.svg"),
+        canCastShadow: false,
       },
       "local"
     );
