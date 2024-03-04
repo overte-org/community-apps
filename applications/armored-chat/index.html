@@ -195,7 +195,6 @@
     if (yt_url) {
       yt_url.forEach((url) => {
         message_embeds += `<iframe class="z-depth-2" width='420' height='236' src='https://www.youtube.com/embed/${url.toString().split("/")[3]}' frameborder='0'></iframe><br>`;
-        // message.message = message.message.replace(url, "");
       });
     }
 
@@ -204,7 +203,6 @@
     if (image_link) {
       image_link.forEach((image) => {
         message_embeds += `<span class='image-container'><img src='${image}'></span><br>`;
-        // message.message = message.message.replace(image, "");
       });
     }
 

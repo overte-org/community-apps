@@ -137,7 +137,6 @@
 
       case "open_url":
         new OverlayWebWindow({ source: parsed.url.toString(), width: 500, height: 400 });
-        // Window.openUrl(parsed.url.toString());
         break;
 
       case "setting_update":
