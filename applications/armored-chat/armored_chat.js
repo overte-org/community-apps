@@ -10,7 +10,7 @@
 (function () {
   "use strict";
   // TODO: Encryption + PMs
-  // TODO: Find window init event method
+  // TODO: Open in external web browser
 
   var app_is_visible = false;
   var settings = {
@@ -25,6 +25,7 @@
   var app_button;
   const channels = ["domain", "local", "system"];
   var max_local_distance = 20; // Maximum range for the local chat
+  var message_history = Settings.getValue("ArmoredChat-Messages", []);
 
   startup();
 
@@ -62,7 +63,7 @@
   }
   function _openWindow() {
     chat_overlay_window = new Desktop.createWindow(Script.resourcesPath() + "qml/hifi/tablet/DynamicWebview.qml", {
-      title: "Overte Chat",
+      title: "Chat",
       size: { x: 550, y: 400 },
       additionalFlags: Desktop.ALWAYS_ON_TOP,
       visible: app_is_visible, // FIXME Invalid?
@@ -72,8 +73,6 @@
 
     chat_overlay_window.closed.connect(toggleMainChatWindow);
     chat_overlay_window.sendToQml({ url: Script.resolvePath("./index.html") });
-    // FIXME: Loadsettings need to happen after the window is initialized?
-    // Script.setTimeout(_loadSettings, 1000);
     chat_overlay_window.webEventReceived.connect(onWebEventReceived);
   }
 
@@ -84,11 +83,11 @@
   Messages.messageReceived.connect(receivedMessage);
 
   function receivedMessage(channel, message) {
-    console.log(`Received message:\n${message}`);
-    var message = JSON.parse(message);
-
     channel = channel.toLowerCase();
     if (channel !== "chat") return;
+
+    console.log(`Received message:\n${message}`);
+    var message = JSON.parse(message);
 
     message.channel = message.channel.toLowerCase();
 
@@ -100,15 +99,21 @@
     // Check the channel is valid
     if (!channels.includes(message.channel)) return;
 
-    // FIXME: Not doing distance check?
     // If message is local, and if player is too far away from location, don't do anything
     if (channel === "local" && Vec3.distance(MyAvatar.position, message.position) < max_local_distance) return;
 
-    // Floof chat compatibility.
-    if (message.type) delete message.type;
+    // NOTE: Floof chat compatibility.
+    message.type = "show_message";
 
     // Update web view of to new message
     _emitEvent({ type: "show_message", ...message });
+
+    // Save message to our history
+    let saved_message = message;
+    delete saved_message.position;
+    message_history.push(message);
+    if (message_history.length > settings.max_history) message_history.shift();
+    Settings.setValue("ArmoredChat-Messages", message_history);
 
     // Display on popup chat area
     _overlayMessage({ sender: message.displayName, message: message });
@@ -121,9 +126,6 @@
 
     var parsed = JSON.parse(event);
 
-    // Not our app? Not our problem!
-    // if (parsed.app !== "ArmoredChat") return;
-
     switch (parsed.type) {
       case "page_update":
         app_data.current_page = parsed.page;
@@ -134,7 +136,7 @@
         break;
 
       case "open_url":
-        Window.openUrl(parsed.message.toString());
+        new OverlayWebWindow({ source: parsed.url.toString(), width: 500, height: 400 });
         break;
 
       case "setting_update":
@@ -218,6 +220,13 @@
       chat_overlay_window.presentationMode = settings.external_window ? Desktop.PresentationMode.NATIVE : Desktop.PresentationMode.VIRTUAL;
       _emitEvent({ type: "setting_update", setting_name: "external_window", setting_value: true });
     }
+
+    // Refill the history with the saved messages
+    message_history.forEach((message) => {
+      delete message.action;
+      console.log(`Prefilling ${JSON.stringify(message)}`);
+      _emitEvent({ type: "show_message", ...message });
+    });
   }
   function _saveSettings() {
     console.log("Saving config");

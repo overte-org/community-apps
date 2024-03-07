@@ -1,10 +1,9 @@
 # Armored Chat
 
-Armored Chat is a light-weight alternative chat application that extends the existing chat features.
+Armored Chat is a light-weight chat application that allows members of a world to communicate with text.
 
 ## Features
 
-- (wip) Drop-in replacement for Fluffy chat
 - (wip) E2EE Direct messages
 - (wip) Group chats
 
@@ -14,7 +13,6 @@ Armored Chat is a light-weight alternative chat application that extends the exi
 
 TODO:
 
-- Algorithm
 - Key exchange
 - When and where
 - How

@@ -186,30 +186,32 @@
     // Clone template message
     let message_template = qs("#message-listing");
     let message_clone = message_template.content.cloneNode(true);
+    let message_embeds = "";
+    message_clone.querySelector(".body").innerHTML = "";
+    message_clone.querySelector(".embeds").innerHTML = "";
 
     // Youtube embeds
     let yt_url = message.message.match(/(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([^& \n<]+)(?:[^ \n<]+)?/g);
     if (yt_url) {
-      message.message = message.message.replace(
-        yt_url,
-        `${yt_url}
-          <br>
-          <iframe class="z-depth-2" width='420' height='236' src='https://www.youtube.com/embed/${yt_url.toString().split("/")[3]}' frameborder='0'></iframe>`
-      );
+      yt_url.forEach((url) => {
+        message_embeds += `<iframe class="z-depth-2" width='420' height='236' src='https://www.youtube.com/embed/${url.toString().split("/")[3]}' frameborder='0'></iframe><br>`;
+      });
     }
 
     // Image embeds
     let image_link = message.message.match(/.+.(png|jpg|jpeg|webp)/g);
     if (image_link) {
-      message.message = message.message.replace(image_link, `${image_link}<br><span class='image-container'><img src='${image_link}'></span>`);
+      image_link.forEach((image) => {
+        message_embeds += `<span class='image-container'><img src='${image}'></span><br>`;
+      });
     }
 
     // Linkify links
-    let link_regex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/gm;
-
-    if (message.message.match(link_regex)) {
-      message.message = message.message.replace(link_regex, (match) => {
-        return `<a href='#' onclick='_emitEvent({type:"open_url", url: match.toString()})'>${match}</a>`;
+    let link_url = message.message.match(/(?:^|\s)(https?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+(?:\/[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]*)?(?=\s|$)/g);
+    if (link_url) {
+      link_url.forEach((link) => {
+        message_embeds += `<a href='#' onclick='_emitEvent({type:"open_url", url: "${link}" })'>${link}</a><br>`;
+        message.message = message.message.replace(link, "");
       });
     }
 
@@ -220,7 +222,9 @@
       month: "long",
       day: "numeric",
     });
-    message_clone.querySelector(".body").innerHTML = message.message;
+
+    message_clone.querySelector(".embeds").innerHTML = message_embeds;
+    message_clone.querySelector(".body").innerText = message.message;
     // Append to the message list
     qs("#" + target + " .message-list").appendChild(message_clone);
     // Scroll to the bottom of the page
@@ -260,6 +264,7 @@
     <div class="pfp"><img src="./img/ui/user_white.png" /></div>
     <div class="name">[NAME]</div>
     <div class="timestamp" title="[DATE]">[TIMESTAMP]</div>
+    <div class="embeds">[EMBEDS]</div>
     <div class="body">[CONTENT]</div>
   </div>
 </template>

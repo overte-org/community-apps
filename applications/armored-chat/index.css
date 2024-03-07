@@ -85,6 +85,9 @@ body .page .content.message-list .message .body {
   word-wrap: anywhere;
   overflow-x: hidden;
 }
+body .page .content.message-list .message .body a {
+  color: white;
+}
 body .page .content.message-list .message .body .image-container {
   width: 100%;
   max-width: 400px;
@@ -93,6 +96,20 @@ body .page .content.message-list .message .body .image-container {
 body .page .content.message-list .message .body .image-container img {
   width: auto;
   height: 100%;
+}
+body .page .content.message-list .message .embeds {
+  width: 100%;
+  overflow-x: hidden;
+}
+body .page .content.message-list .message .embeds a {
+  color: white;
+}
+body .page .content.message-list .message .embeds .image-container {
+  width: 100%;
+  max-width: 400px;
+  max-height: 300px;
+}
+body .page .content.message-list .message .embeds .image-container img {
   max-width: 400px;
   max-height: 300px;
 }
