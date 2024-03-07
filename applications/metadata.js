@@ -323,6 +323,15 @@ var metadata = { "applications":
             "jsfile": "armored-chat/armored_chat.js",
             "icon": "armored-chat/img/icon.png",
             "caption": "CHAT"
+        },
+        {
+            "isActive": true,
+            "directory": "domainMapper",
+            "name": "Domain Mapper",
+            "description": "Generate a 3D miniature representation of your domain's zones. Useful if you have many 'Places' in your domain and are trying to visualize where you can add new ones. The domain overview  can also be used in parallel with the 'Create' application to help you adjust kilometers wide zones. (It refreshes every 5 seconds.)",
+            "jsfile": "domainMapper/app-domainMapper.js",
+            "icon": "domainMapper/icon_inactive_white.png",
+            "caption": "DOMAP"
         }
     ]
 };
