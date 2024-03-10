@@ -1,10 +1,10 @@
 "use strict";
-
 //
 //  playRecordingAC.js
 //
-//  Created by David Rowe on 7 Apr 2017.
+//  Created by David Rowe on April 7th, 2017.
 //  Copyright 2017 High Fidelity, Inc.
+//  Copyright 2024, Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
@@ -24,7 +24,6 @@
         AUTOPLAY_SEARCH_INTERVAL = 5000,
         AUTOPLAY_ERROR_INTERVAL = 30000,  // 30s
         scriptUUID,
-
         Entity,
         Player;
 
@@ -39,8 +38,8 @@
             updateTimestampTimer = null,
             ENTITY_NAME = "Recording",
             ENTITY_DESCRIPTION = "Avatar recording to play back",
-            ENTITIY_POSITION = { x: -16382, y: -16382, z: -16382 },  // Near but not right on domain corner.
-            ENTITY_SEARCH_DELTA = { x: 1, y: 1, z: 1 },  // Allow for position imprecision.
+            ENTITIY_POSITION = { "x": -16382, "y": -16382, "z": -16382 },  // Near but not right on domain corner.
+            ENTITY_SEARCH_DELTA = { "x": 1, "y": 1, "z": 1 },  // Allow for position imprecision.
             SEARCH_IDLE = 0,
             SEARCH_SEARCHING = 1,
             SEARCH_CLAIMING = 2,
@@ -50,7 +49,6 @@
             otherPlayersPlayingCounts,
             pauseCount,
             isDestroyLater = false,
-
             destroy;
 
         function onUpdateTimestamp() {
@@ -60,7 +58,7 @@
             }
 
             userData.timestamp = Date.now();
-            Entities.editEntity(entityID, { userData: JSON.stringify(userData) });
+            Entities.editEntity(entityID, { "userData": JSON.stringify(userData) });
             EntityViewer.queryOctree();  // Keep up to date ready for find().
         }
 
@@ -104,20 +102,20 @@
             searchState = SEARCH_IDLE;
 
             userData = {
-                recording: filename,
-                position: position,
-                orientation: orientation,
-                scriptUUID: scriptUUID,
-                timestamp: Date.now()
+                "recording": filename,
+                "position": position,
+                "orientation": orientation,
+                "scriptUUID": scriptUUID,
+                "timestamp": Date.now()
             };
 
             properties = {
-                type: "Box",
-                name: ENTITY_NAME,
-                description: ENTITY_DESCRIPTION,
-                position: ENTITIY_POSITION,
-                visible: false,
-                userData: JSON.stringify(userData)
+                "type": "Box",
+                "name": ENTITY_NAME,
+                "description": ENTITY_DESCRIPTION,
+                "position": ENTITIY_POSITION,
+                "visible": false,
+                "userData": JSON.stringify(userData)
             };
 
             entityID = Entities.addEntity(properties);
@@ -162,75 +160,74 @@
                 result = null;
 
             switch (searchState) {
-
-            case SEARCH_IDLE:
-                log("Start searching");
-                otherPlayersPlaying = [];
-                otherPlayersPlayingCounts = [];
-                Messages.subscribe(HIFI_RECORDER_CHANNEL);
-                Messages.messageReceived.connect(onMessageReceived);
-                searchState = SEARCH_SEARCHING;
-                break;
-
-            case SEARCH_SEARCHING:
-                // Find an entity that isn't being played or claimed.
-                entityIDs = Entities.findEntities(ENTITIY_POSITION, ENTITY_SEARCH_DELTA.x);
-                if (entityIDs.length > 0) {
-                    index = -1;
-                    while (!found && index < entityIDs.length - 1) {
-                        index += 1;
-                        if (otherPlayersPlaying.indexOf(entityIDs[index]) === -1) {
-                            properties = Entities.getEntityProperties(entityIDs[index], ["name", "userData"]);
-                            userData = JSON.parse(properties.userData);
-                            found = properties.name === ENTITY_NAME && userData.recording !== undefined;
-                        }
-                    }
-                }
-
-                // Claim entity if found.
-                if (found) {
-                    log("Claim entity " + entityIDs[index]);
-                    entityID = entityIDs[index];
-                    searchState = SEARCH_CLAIMING;
-                }
-                break;
-
-            case SEARCH_CLAIMING:
-                // How many other players are claiming (or playing) this entity?
-                index = otherPlayersPlaying.indexOf(entityID);
-                numberOfClaims = index !== -1 ? otherPlayersPlayingCounts[index] : 0;
-
-                // Have found an entity to play if no other players are also claiming it.
-                if (numberOfClaims === 0) {
-                    log("Complete claim " + entityID);
-                    Messages.messageReceived.disconnect(onMessageReceived);
-                    Messages.unsubscribe(HIFI_RECORDER_CHANNEL);
-                    searchState = SEARCH_IDLE;
-                    userData.scriptUUID = scriptUUID;
-                    userData.timestamp = Date.now();
-                    Entities.editEntity(entityID, { userData: JSON.stringify(userData) });
-                    updateTimestampTimer = Script.setInterval(onUpdateTimestamp, TIMESTAMP_UPDATE_INTERVAL);
-                    result = { recording: userData.recording, position: userData.position, orientation: userData.orientation };
-                    break;
-                }
-
-                // Otherwise back off for a bit before resuming search.
-                log("Release claim " + entityID + " and pause searching");
-                entityID = null;
-                pauseCount = randomInt(0, otherPlayersPlaying.length);
-                searchState = SEARCH_PAUSING;
-                break;
-
-            case SEARCH_PAUSING:
-                // Resume searching if have paused long enough.
-                pauseCount -= 1;
-                if (pauseCount < 0) {
-                    log("Resume searching");
+                case SEARCH_IDLE:
+                    log("Start searching");
                     otherPlayersPlaying = [];
                     otherPlayersPlayingCounts = [];
+                    Messages.subscribe(HIFI_RECORDER_CHANNEL);
+                    Messages.messageReceived.connect(onMessageReceived);
                     searchState = SEARCH_SEARCHING;
-                }
-                break;
+                    break;
+
+                case SEARCH_SEARCHING:
+                    // Find an entity that isn't being played or claimed.
+                    entityIDs = Entities.findEntities(ENTITIY_POSITION, ENTITY_SEARCH_DELTA.x);
+                    if (entityIDs.length > 0) {
+                        index = -1;
+                        while (!found && index < entityIDs.length - 1) {
+                            index += 1;
+                            if (otherPlayersPlaying.indexOf(entityIDs[index]) === -1) {
+                                properties = Entities.getEntityProperties(entityIDs[index], ["name", "userData"]);
+                                userData = JSON.parse(properties.userData);
+                                found = properties.name === ENTITY_NAME && userData.recording !== undefined;
+                            }
+                        }
+                    }
+
+                    // Claim entity if found.
+                    if (found) {
+                        log("Claim entity " + entityIDs[index]);
+                        entityID = entityIDs[index];
+                        searchState = SEARCH_CLAIMING;
+                    }
+                    break;
+
+                case SEARCH_CLAIMING:
+                    // How many other players are claiming (or playing) this entity?
+                    index = otherPlayersPlaying.indexOf(entityID);
+                    numberOfClaims = index !== -1 ? otherPlayersPlayingCounts[index] : 0;
+
+                    // Have found an entity to play if no other players are also claiming it.
+                    if (numberOfClaims === 0) {
+                        log("Complete claim " + entityID);
+                        Messages.messageReceived.disconnect(onMessageReceived);
+                        Messages.unsubscribe(HIFI_RECORDER_CHANNEL);
+                        searchState = SEARCH_IDLE;
+                        userData.scriptUUID = scriptUUID;
+                        userData.timestamp = Date.now();
+                        Entities.editEntity(entityID, { userData: JSON.stringify(userData) });
+                        updateTimestampTimer = Script.setInterval(onUpdateTimestamp, TIMESTAMP_UPDATE_INTERVAL);
+                        result = { recording: userData.recording, position: userData.position, orientation: userData.orientation };
+                        break;
+                    }
+
+                    // Otherwise back off for a bit before resuming search.
+                    log("Release claim " + entityID + " and pause searching");
+                    entityID = null;
+                    pauseCount = randomInt(0, otherPlayersPlaying.length);
+                    searchState = SEARCH_PAUSING;
+                    break;
+
+                case SEARCH_PAUSING:
+                    // Resume searching if have paused long enough.
+                    pauseCount -= 1;
+                    if (pauseCount < 0) {
+                        log("Resume searching");
+                        otherPlayersPlaying = [];
+                        otherPlayersPlayingCounts = [];
+                        searchState = SEARCH_SEARCHING;
+                    }
+                    break;
             }
 
             EntityViewer.queryOctree();
@@ -269,13 +266,13 @@
         }
 
         return {
-            id: id,
-            create: create,
-            find: find,
-            destroy: destroy,
-            destroyLater: destroyLater,
-            setUp: setUp,
-            tearDown: tearDown
+            "id": id,
+            "create": create,
+            "find": find,
+            "destroy": destroy,
+            "destroyLater": destroyLater,
+            "setUp": setUp,
+            "tearDown": tearDown
         };
     }());
 
@@ -285,16 +282,15 @@
             isPlayingRecording = false,
             recordingFilename = "",
             autoPlayTimer = null,
-
             autoPlay,
             playRecording;
 
         function error(message) {
             // Send error message to user.
             Messages.sendMessage(HIFI_RECORDER_CHANNEL, JSON.stringify({
-                command: RECORDER_COMMAND_ERROR,
-                user: userID,
-                message: message
+                "command": RECORDER_COMMAND_ERROR,
+                "user": userID,
+                "message": message
             }));
         }
 
@@ -422,21 +418,21 @@
         }
 
         return {
-            autoPlay: autoPlay,
-            play: play,
-            stop: stop,
-            isPlaying: isPlaying,
-            recording: recording,
-            setUp: setUp,
-            tearDown: tearDown
+            "autoPlay": autoPlay,
+            "play": play,
+            "stop": stop,
+            "isPlaying": isPlaying,
+            "recording": recording,
+            "setUp": setUp,
+            "tearDown": tearDown
         };
     }());
 
     function sendHeartbeat() {
         Messages.sendMessage(HIFI_RECORDER_CHANNEL, JSON.stringify({
-            playing: Player.isPlaying(),
-            recording: Player.recording(),
-            entity: Entity.id()
+            "playing": Player.isPlaying(),
+            "recording": Player.recording(),
+            "entity": Entity.id()
         }));
     }
 
