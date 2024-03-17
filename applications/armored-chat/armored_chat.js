@@ -69,7 +69,6 @@
       visible: app_is_visible, // FIXME Invalid?
       presentationMode: Desktop.PresentationMode.VIRTUAL,
     });
-    chat_overlay_window.visible = app_is_visible; // The "visible" field in the Desktop.createWindow does not seem to work. Force set it to false
 
     chat_overlay_window.closed.connect(toggleMainChatWindow);
     chat_overlay_window.sendToQml({ url: Script.resolvePath("./index.html") });
@@ -163,6 +162,8 @@
         break;
 
       case "initialized":
+        // https://github.com/overte-org/overte/issues/824
+        chat_overlay_window.visible = app_is_visible; // The "visible" field in the Desktop.createWindow does not seem to work. Force set it to the initial state (false)
         _loadSettings();
         break;
       case "action":
