@@ -111,7 +111,13 @@
     // Save message to our history
     let saved_message = message;
     delete saved_message.position;
-    message_history.push(message);
+
+    saved_message.timeString = new Date().toLocaleTimeString(undefined, { hour12: false });
+    saved_message.dateString = new Date().toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+    });
+    message_history.push(saved_message);
     if (message_history.length > settings.max_history) message_history.shift();
     Settings.setValue("ArmoredChat-Messages", message_history);
 

@@ -235,11 +235,16 @@
 
     // Update template data to message data
     message_clone.querySelector(".name").innerText = message.displayName;
-    message_clone.querySelector(".timestamp").innerText = new Date().toLocaleTimeString(undefined, { hour12: false });
-    message_clone.querySelector(".timestamp").title = new Date().toLocaleDateString(undefined, {
-      month: "long",
-      day: "numeric",
-    });
+    if (!message.timeString) {
+      message_clone.querySelector(".timestamp").innerText = new Date().toLocaleTimeString(undefined, { hour12: false });
+      message_clone.querySelector(".timestamp").title = new Date().toLocaleDateString(undefined, {
+        month: "long",
+        day: "numeric",
+      });
+    } else {
+      message_clone.querySelector(".timestamp").innerText = message.timeString;
+      message_clone.querySelector(".timestamp").title = message.dateString;
+    }
 
     message_clone.querySelector(".embeds").innerHTML = message_embeds;
     message_clone.querySelector(".body").innerText = message.message;
