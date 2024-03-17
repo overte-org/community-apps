@@ -33,7 +33,8 @@
     ac_tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 
     app_button = ac_tablet.addButton({
-      icon: Script.resolvePath("./img/icon.png"),
+      icon: Script.resolvePath("./img/icon_white.png"),
+      activeIcon: Script.resolvePath("./img/icon_black.png"),
       text: "CHAT",
       isActive: app_is_visible,
     });
@@ -69,7 +70,6 @@
       visible: app_is_visible, // FIXME Invalid?
       presentationMode: Desktop.PresentationMode.VIRTUAL,
     });
-    chat_overlay_window.visible = app_is_visible; // The "visible" field in the Desktop.createWindow does not seem to work. Force set it to false
 
     chat_overlay_window.closed.connect(toggleMainChatWindow);
     chat_overlay_window.sendToQml({ url: Script.resolvePath("./index.html") });
@@ -111,7 +111,13 @@
     // Save message to our history
     let saved_message = message;
     delete saved_message.position;
-    message_history.push(message);
+
+    saved_message.timeString = new Date().toLocaleTimeString(undefined, { hour12: false });
+    saved_message.dateString = new Date().toLocaleDateString(undefined, {
+      month: "long",
+      day: "numeric",
+    });
+    message_history.push(saved_message);
     if (message_history.length > settings.max_history) message_history.shift();
     Settings.setValue("ArmoredChat-Messages", message_history);
 
@@ -147,15 +153,26 @@
 
         switch (parsed.setting_name) {
           case "external_window":
-            console.log(parsed.setting_value);
             chat_overlay_window.presentationMode = parsed.setting_value ? Desktop.PresentationMode.NATIVE : Desktop.PresentationMode.VIRTUAL;
+            break;
+          case "max_history":
+            let new_history = message_history.splice(0, message_history.length - settings.max_history);
+            Settings.setValue("ArmoredChat-Messages", new_history);
             break;
         }
         break;
 
       case "initialized":
+        // https://github.com/overte-org/overte/issues/824
+        chat_overlay_window.visible = app_is_visible; // The "visible" field in the Desktop.createWindow does not seem to work. Force set it to the initial state (false)
         _loadSettings();
         break;
+      case "action":
+        switch (parsed.action) {
+          case "clear_history":
+            Settings.setValue("ArmoredChat-Messages", []);
+            break;
+        }
     }
   }
   //
@@ -205,10 +222,9 @@
     );
   }
   function _loadSettings() {
-    console.log("Loading config");
     settings = Settings.getValue("ArmoredChat-Config", settings);
-    console.log("\nSettings follow:");
-    console.log(JSON.stringify(settings, " ", 4));
+
+    _emitEvent({ type: "setting_update", setting_name: "max_history", setting_value: Number(settings.max_history) });
 
     // Compact chat
     if (settings.compact_chat) {
@@ -224,7 +240,6 @@
     // Refill the history with the saved messages
     message_history.forEach((message) => {
       delete message.action;
-      console.log(`Prefilling ${JSON.stringify(message)}`);
       _emitEvent({ type: "show_message", ...message });
     });
   }

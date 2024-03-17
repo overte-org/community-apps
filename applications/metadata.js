@@ -321,7 +321,7 @@ var metadata = { "applications":
             "name": "Chat",
             "description": "Chat application",
             "jsfile": "armored-chat/armored_chat.js",
-            "icon": "armored-chat/img/icon.png",
+            "icon": "armored-chat/img/icon_black.png",
             "caption": "CHAT"
         },
         {
