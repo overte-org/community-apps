@@ -146,12 +146,25 @@ body {
         display: flex;
         padding: 0.5rem 0.25rem;
         box-sizing: border-box;
+
+        input{
+          margin: auto 0 auto auto;
+          height: 20px;
+        }
+      }
+      .setting-button{
+        input {
+          width: 100px;
+        }
+      }
+      .setting-value{
+        input {
+          width: 70px;
+        }
       }
       .setting-toggle {
         input {
-          margin: auto 0 auto auto;
           width: 20px;
-          height: 20px;
         }
       }
       .setting:nth-child(even) {

@@ -147,8 +147,11 @@
 
         switch (parsed.setting_name) {
           case "external_window":
-            console.log(parsed.setting_value);
             chat_overlay_window.presentationMode = parsed.setting_value ? Desktop.PresentationMode.NATIVE : Desktop.PresentationMode.VIRTUAL;
+            break;
+          case "max_history":
+            let new_history = message_history.splice(0, message_history.length - settings.max_history);
+            Settings.setValue("ArmoredChat-Messages", new_history);
             break;
         }
         break;
@@ -156,6 +159,12 @@
       case "initialized":
         _loadSettings();
         break;
+      case "action":
+        switch (parsed.action) {
+          case "clear_history":
+            Settings.setValue("ArmoredChat-Messages", []);
+            break;
+        }
     }
   }
   //
@@ -205,10 +214,9 @@
     );
   }
   function _loadSettings() {
-    console.log("Loading config");
     settings = Settings.getValue("ArmoredChat-Config", settings);
-    console.log("\nSettings follow:");
-    console.log(JSON.stringify(settings, " ", 4));
+
+    _emitEvent({ type: "setting_update", setting_name: "max_history", setting_value: Number(settings.max_history) });
 
     // Compact chat
     if (settings.compact_chat) {
@@ -224,7 +232,6 @@
     // Refill the history with the saved messages
     message_history.forEach((message) => {
       delete message.action;
-      console.log(`Prefilling ${JSON.stringify(message)}`);
       _emitEvent({ type: "show_message", ...message });
     });
   }

@@ -125,10 +125,18 @@ body .page .content.settings .setting {
   padding: 0.5rem 0.25rem;
   box-sizing: border-box;
 }
-body .page .content.settings .setting-toggle input {
+body .page .content.settings .setting input {
   margin: auto 0 auto auto;
-  width: 20px;
   height: 20px;
+}
+body .page .content.settings .setting-button input {
+  width: 100px;
+}
+body .page .content.settings .setting-value input {
+  width: 70px;
+}
+body .page .content.settings .setting-toggle input {
+  width: 20px;
 }
 body .page .content.settings .setting:nth-child(even) {
   background-color: #1a1a1a;

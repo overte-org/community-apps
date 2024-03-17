@@ -64,6 +64,14 @@
           <span>External Window</span>
           <input id="external-window-toggle" type="checkbox" />
         </div>
+        <div class="setting setting-button">
+          <span>Erase history</span>
+          <input id="erase-history" type="button" title="Clear" value="Clear" />
+        </div>
+        <div class="setting setting-value">
+          <span>Max history</span>
+          <input id="max-history" type="number" title="Maximum entires to store" />
+        </div>
       </div>
     </div>
 
@@ -179,6 +187,16 @@
     _emitEvent({ type: "setting_update", setting_name: "external_window", setting_value: external_window });
   });
 
+  qs("#erase-history").addEventListener("click", () => {
+    let response = confirm("Are you sure you want to erase all messages?");
+    if (response) _emitEvent({ type: "action", action: "clear_history" });
+    // _emitEvent({ type: "setting_update", setting_name: "max_history", setting_value: compact_mode });
+  });
+
+  qs("#max-history").addEventListener("change", () => {
+    _emitEvent({ type: "setting_update", setting_name: "max_history", setting_value: qs("#max-history").value });
+  });
+
   // TODO: Limit embeds to 3.
   function _showMessage(message) {
     var target = message.channel + "-chat";
@@ -245,6 +263,10 @@
       case "external_window":
         qs("#external-window-toggle").checked = true;
         external_window = true;
+        break;
+
+      case "max_history":
+        qs(`#max-history`).value = message.setting_value;
         break;
     }
   }
