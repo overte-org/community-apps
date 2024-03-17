@@ -33,7 +33,8 @@
     ac_tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 
     app_button = ac_tablet.addButton({
-      icon: Script.resolvePath("./img/icon.png"),
+      icon: Script.resolvePath("./img/icon_white.png"),
+      activeIcon: Script.resolvePath("./img/icon_black.png"),
       text: "CHAT",
       isActive: app_is_visible,
     });
