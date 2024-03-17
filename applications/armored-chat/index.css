@@ -99,6 +99,8 @@ body .page .content.message-list .message .body .image-container img {
 }
 body .page .content.message-list .message .embeds {
   width: 100%;
+  word-wrap: anywhere;
+  overflow-x: hidden;
   overflow-x: hidden;
 }
 body .page .content.message-list .message .embeds a {
