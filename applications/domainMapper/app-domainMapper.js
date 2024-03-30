@@ -95,6 +95,7 @@
         if (domainName === "") {
             domainName = "SERVERLESS";
         }
+
         
         var zones = Entities.findEntitiesByType("Zone", {"x": 0, "y": 0, "z": 0}, FULL_DOMAIN_SCAN_RADIUS);
         if (displayPosition === null) {
@@ -387,7 +388,64 @@
                 }, "local");
             }
         }
-        
+
+        var avatarIDs = AvatarManager.getAvatarsInRange({"x": 0, "y": 0, "z": 0}, FULL_DOMAIN_SCAN_RADIUS);
+        if (avatarIDs.length > 0) {
+            var avatarColor, avatarName;
+            for (i = 0; i < avatarIDs.length; i++) {
+                properties = AvatarManager.getAvatar(avatarIDs[i]);
+                avatarColor = {"red": 0, "green": 128, "blue": 255};
+                avatarName = properties.sessionDisplayName;
+                if (properties.sessionUUID === MyAvatar.sessionUUID) {
+                    avatarName = "YOU";
+                    avatarColor = {"red": 255, "green": 32, "blue": 0};
+                }
+                
+                id = Entities.addEntity({
+                    "name": "AVATAR - " + avatarName,
+                    "type": "Shape",
+                    "parentID": domainMapID,
+                    "shape": "Sphere",
+                    "grab": {"grabbable": false },
+                    "dimensions": {"x": 0.003, "y": 0.003, "z": 0.003},
+                    "localPosition": {"x": (DOMAIN_MAP_SIZE/2) * (properties.position.x/(DOMAIN_SIZE/2)), "y": (DOMAIN_MAP_SIZE/2) * (properties.position.y/(DOMAIN_SIZE/2)), "z": (DOMAIN_MAP_SIZE/2) * (properties.position.z/(DOMAIN_SIZE/2)) },
+                    "color": avatarColor,
+                    "alpha": 0.8,
+                    "canCastShadow": false,
+                    "collisionless": true,
+                    "primitiveMode": "solid"
+                }, "local");
+                makeUnlit(id);
+                
+                lineHight = 0.006;
+                margins = 0;
+                id = Entities.addEntity({
+                    "name": "Avatar Name - " + avatarName,
+                    "type": "Text",
+                    "parentID": domainMapID,
+                    "grab": {"grabbable": false },
+                    "dimensions": {"x": 4, "y": 0.01, "z": 0.01},
+                    "localPosition": {
+                        "x": (DOMAIN_MAP_SIZE/2) * (properties.position.x/(DOMAIN_SIZE/2)), 
+                        "y": ((DOMAIN_MAP_SIZE/2) * (properties.position.y/(DOMAIN_SIZE/2))) + lineHight, 
+                        "z": (DOMAIN_MAP_SIZE/2) * (properties.position.z/(DOMAIN_SIZE/2)) 
+                    },
+                    "text": avatarName,
+                    "lineHeight": lineHight,
+                    "textColor": avatarColor,
+                    "textAlpha": 0.8,
+                    "backgroundAlpha": 0,
+                    "topMargin": margins,
+                    "bottomMargin": margins,
+                    "unlit": true,
+                    "alignment": "center",
+                    "billboardMode": "full",
+                    "canCastShadow": false,
+                    "collisionless": true
+                }, "local");
+                
+            }
+        }
     }
 
     function getTheLargestAxisDimension(dimensions) {
