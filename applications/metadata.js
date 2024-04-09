@@ -328,7 +328,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "domainMapper",
             "name": "Domain Mapper",
-            "description": "Generate a 3D miniature representation of your domain's zones. Useful if you have many 'Places' in your domain and are trying to visualize where you can add new ones. The domain overview  can also be used in parallel with the 'Create' application to help you adjust kilometers wide zones. (It refreshes every 5 seconds.)",
+            "description": "Generate a 3D miniature representation of your domain's zones. Useful if you have many 'Places' in your domain and are trying to visualize where you can add new ones. The domain overview  can also be used in parallel with the 'Create' application to help you adjust kilometers wide zones. This tool also displays where are the avatars in the domain. (It refreshes every 5 seconds.)",
             "jsfile": "domainMapper/app-domainMapper.js",
             "icon": "domainMapper/icon_inactive_white.png",
             "caption": "DOMAP"
