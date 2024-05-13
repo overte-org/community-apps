@@ -332,6 +332,15 @@ var metadata = { "applications":
             "jsfile": "domainMapper/app-domainMapper.js",
             "icon": "domainMapper/icon_inactive_white.png",
             "caption": "DOMAP"
+        },
+        {
+            "isActive": true,
+            "directory": "hmd3rdPerson",
+            "name": "HMD 3rd Person View",
+            "description": "This application adds a button on your tablet to toggle rapidly between 1st and 3rd person view in HMD. It also prevents the distance of the 3rd person camera to be reset as the 'View' menu does. This application is only visible in HMD. It can be useful for people who want to capture their avatar performance in HMD while they are in movement.",
+            "jsfile": "hmd3rdPerson/app-hmd3rdPerson.js",
+            "icon": "hmd3rdPerson/icon_inactive_white.png",
+            "caption": "3rd PERS"
         }
     ]
 };
