@@ -60,10 +60,10 @@
                 hmdOverlay = Entities.addEntity({
                     "type": "Text",
                     "text": recordingText,
-                    "dimensions": { "x": 3 * HMD_FONT_SIZE, "y": HMD_FONT_SIZE },
+                    "dimensions": { "x": 4 * HMD_FONT_SIZE, "y": 2 * HMD_FONT_SIZE },
                     "parentID": MyAvatar.sessionUUID,
                     "parentJointIndex": CAMERA_JOINT_INDEX,
-                    "localPosition": { "x": 0.95, "y": 0.95, "z": -2.0 },
+                    "localPosition": { "x": 0.35, "y": 0.25, "z": -0.9 },
                     "textColor": { "red": 255, "green": 0, "blue": 0 },
                     "textAlpha": 0.9,
                     "lineHeight": HMD_FONT_SIZE,
@@ -71,7 +71,8 @@
                     "ignorePickIntersection": true,
                     "billboardMode": "full",
                     "renderLayer": "front",
-                    "visible": true
+                    "visible": true,
+                    "unlit": true
                 }, "local");
             } else {
                 // 2D overlay on desktop.
