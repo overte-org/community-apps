@@ -80,6 +80,9 @@
         alignment: "center",
         lineHeight: 0.1,
         canCastShadow: false,
+        grab: {
+          grabbable: false
+        }
       },
       "local"
     );
@@ -95,6 +98,9 @@
         billboardMode: "full",
         imageURL: Script.resolvePath("./assets/badge.svg"),
         canCastShadow: false,
+        grab: {
+          grabbable: false
+        }
       },
       "local"
     );
