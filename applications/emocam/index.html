@@ -27,7 +27,11 @@
             --mdc-theme-primary: #007f8b;
             --mdc-theme-on-primary: #f1f3f4;
         }
-
+        br {
+            display: block; /* makes it have a width */
+            content: ""; /* clears default height */
+            margin-top: 5px; /* change this to whatever height you want it */
+        }
         h1 {
             font-style: italic;
             color: #ff6f00;
@@ -240,9 +244,9 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <link href="css/material-components-web.min.css" rel="stylesheet">
+    <script src="js/material-components-web.min.js"></script>
+    <script src="js/Chart.min.js"></script>
 </head>
 <body bgcolor="white">
 
@@ -279,25 +283,29 @@
         <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
     </div>
 </div>
-
     <select id="landmarkDropdown" onchange="handleLandmarkChange()">
         <!-- Options for the dropdown will be populated in the script -->
     </select>
 </div>
-
-<div>
+<!-- canvas element in a container -->
+<div class="wrapper">
+    <canvas id="canvas" width="480" height="480"></canvas><br>
     <input type="text" id="maxY" value="100"/>
     <button onclick="increaseY()">Increase</button>
     <button onclick="decreaseY()">Decrease</button>
-</div>
-
-
-<!-- canvas element in a container -->
-<div class="wrapper">
-    <canvas id="canvas" width="480" height="480"></canvas>
-</div>
-
+    <br>
+    <input type="textbox" id="avatarset" value="Default"/>
+    <button onclick="saveMappings()">Save</button>
+    <button onclick="loadMappings()">Load Values</button>
+    <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)"/>
+    <hr>
+    <div style="display: block" id="presets"></div>
+</div>  
+<!-- Create and import presets here -->
+<hr>
 <p id="output"></p>
+	<div id="message"></div><hr>
+	<div id="jso" ></div>
 <div class="blend-shapes">
     <ul class="blend-shapes-list" id="video-blend-shapes"></ul>
 </div>
@@ -305,14 +313,12 @@
 <!--/body>
 </html-->
 
-<script src="jquery.min.js"></script>
+<script src="js/jquery.min.js"></script>
 <script>
 
     var channel = "org.overte.application.emocam";
-
-    // Graph max range adjust
     var maxY = 100; // Default Y max value
-
+    var avatarList = [];
     function increaseY() {
         if (maxY < 100) {
             maxY += 25;
@@ -503,8 +509,9 @@
         ;
     };
 
-    // Draw a line chart on the canvas context
+
     window.onload = function () {
+        // Draw a line chart on the canvas context
         var ctx = document.getElementById("canvas").getContext("2d");
         var canvas = document.getElementById("canvas");
         var mapping = landmarkMappings[landmarks[0]]; // start with first landmark
@@ -643,6 +650,72 @@
         return mappedValues;
     }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	function saveMappings() {
+		const data = { landmarkMappings, maxY };
+        const jsonString = JSON.stringify(data);
+        //get the user supplied string id="avatarset"
+        var avatarSet = $("#avatarset").val();
+        //TODO:  We create a setting with the user supplied preset name as a key
+		var send = {
+			"channel": channel,
+			"type": "preset",
+            "name": "emocam/" + avatarSet,
+			"data": jsonString
+		};
+		EventBridge.emitWebEvent(JSON.stringify(send));    
+        // Write to presets list select or delete -needs work
+        var fieldset = "<div class='table p"+ avatarSet +"' style='table-layout: fixed;width:90%;border-bottom: 1px solid #ffffff; margin-left: 10px; margin-top: 5px;margin-bottom: 5px'>" +
+                            "<div class='row' style='table-layout: fixed;width:100%'>" +
+                                "<div class='cell'  style='table-layout: fixed;width:90%;margin-top: 5px;margin-bottom: 5px'><a class='cngpreset' name='"+ avatarSet + "' href='#" + avatarSet + "'>" + avatarSet + "</a></div>" +
+                                "<div class='cell'  style='table-layout: fixed;width:128px;margin-top: 5px;margin-bottom: 5px'>" +
+                                "<img src='/pics/delete.png' align='right' class='presets delpreset' id='" + avatarSet + "' style='display: inline-block;cursor:pointer;align: bottom; height:15px; width:15px'></div>"+
+                        "</div>";   
+        // We push the user supplied preset name into an array
+        avatarList.push("emocam/"+avatarSet);
+        // We push the array of user supplied preset names into settings with the key "avatarList"
+        var send = {
+			"channel": channel,
+			"type": "preset_list",
+            "name": "emocam/preset_list",
+			"data": avatarList
+		};
+		EventBridge.emitWebEvent(JSON.stringify(send)); 
+        // Write the data to the bottom of the page for copy
+		document.getElementById("message").innerHTML = "Please copy the following json, paste it in notepad and save it as filename.json. You can load the saved values using Load Values button. ";
+		document.getElementById("jso").innerHTML = jsonString;
+        $("#presets").append(fieldset);
+
+    }
+
+	function loadMappings() {
+        document.getElementById('fileInput').click();
+    }
+    
+    function handleFileSelect(event) {
+        if (this.event.target.id != "fileInput"){return 0;}
+        const file = event.target.files[0];
+        if (file.size < 1){return 0;}
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = JSON.parse(e.target.result);
+                landmarkMappings = data.landmarkMappings;
+                maxY = data.maxY;
+                document.getElementById('maxY').value = maxY;
+                updateChartMaxY(); // You might need to adjust this for your setup
+            };
+            reader.readAsText(file);
+        }
+    }
+
+
+
+    // function applyMapping(value, x_data, y_data_1) {
+    //     var cubicSpline = monotoneCubicSplineInterpolation(x_data, y_data_1);
+    //     var yValue = cubicSpline(value);
+    //     return yValue;
+    // }
 
 </script>
 <script id="rendered-js" type="module">
@@ -657,7 +730,7 @@
     // See the License for the specific language governing permissions and
     // limitations under the License.
 
-    import vision from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0";
+    import vision from "./@mediapipe/tasks-vision/vision_bundle.js";
 
     const {FaceLandmarker, FilesetResolver, DrawingUtils} = vision;
     const demosSection = document.getElementById("demos");
@@ -680,10 +753,10 @@
     // get everything needed to run.
     async function runDemo() {
         // Read more `CopyWebpackPlugin`, copy wasm set from "https://cdn.skypack.dev/node_modules" to `/wasm`
-        const filesetResolver = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
+        const filesetResolver = await FilesetResolver.forVisionTasks("./@mediapipe/tasks-vision/wasm");
         faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
             baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+                modelAssetPath: "./@mediapipe/face_landmarker.task",
                 delegate: "GPU"
             },
             outputFaceBlendshapes: true,
