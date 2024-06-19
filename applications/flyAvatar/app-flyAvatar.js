@@ -25,10 +25,11 @@
     var timestamp = 0;
     var INTERCALL_DELAY = 200; //0.3 sec
     var FLY_AVATAR_SETTING_KEY = "overte.application.more.flyAvatar.avatarUrl";
+    var FLY_AVATAR_SETTING_KEY_2 = "overte.application.more.flyAvatar.avatarUrl.2";
     var FLY_AVATAR_SWITCH_SETTING_KEY = "overte.application.more.flyAvatar.switch";
     var FLY_AVATAR_ORIGINAL_AVATAR_SETTING_KEY = "overte.application.more.flyAvatar.originalAvatarUrl";
     var flyAvatarSwitch = true;
-    var flyAvatarUrl = "";
+    var flyAvatarUrl = []; //must be an array of {"avatarUrl": "", "flyAvatarUrl": ""}
     var originalAvatarUrl = "";
     var isFlying = false;
     var UPDATE_TIMER_INTERVAL = 500; // 5 sec 
@@ -54,7 +55,6 @@
             colorCaption = ICON_CAPTION_COLOR;
             appStatus = false;
         }else{
-            //Launching the Application UI.
             tablet.gotoWebScreen(APP_URL);
             tablet.webEventReceived.connect(onAppWebEventReceived);
             colorCaption = "#000000";
@@ -69,23 +69,18 @@
 
     button.clicked.connect(clicked);
 
-    //This recieved the message from the UI(html) for a specific actions
     function onAppWebEventReceived(message) {
         if (typeof message === "string") {
             var d = new Date();
             var n = d.getTime();
             var instruction = JSON.parse(message);
             if (instruction.channel === channel) {
-                if (instruction.action === "HUMAN_CALLED_ACTION_NAME" && (n - timestamp) > INTERCALL_DELAY) { //<== Use this for action trigger by a human (button or any ui control). The delay prevent multiple call to destabilize everything. 
-                    d = new Date();
-                    timestamp = d.getTime();
-                    //Call a function to do something here
-                } else if (instruction.action === "REQUEST_INITIAL_DATA") {
+                if (instruction.action === "REQUEST_INITIAL_DATA") {
                     sendCurrentFlyAvatarUrlToUI();
                 } else if (instruction.action === "UPDATE_URL") {
                     flyAvatarUrl = instruction.url;
                     flyAvatarSwitch = instruction.mainSwitch;
-                    Settings.setValue( FLY_AVATAR_SETTING_KEY, flyAvatarUrl);
+                    Settings.setValue( FLY_AVATAR_SETTING_KEY_2, flyAvatarUrl);
                     Settings.setValue( FLY_AVATAR_SWITCH_SETTING_KEY, flyAvatarSwitch);
                     updateAvatar();
                     if (flyAvatarSwitch) {
@@ -94,7 +89,7 @@
                         inactiveIcon = APP_ICON_INACTIVE_OFF;
                     }
                     button.editProperties({icon: inactiveIcon});
-                } else if (instruction.action === "SELF_UNINSTALL" && (n - timestamp) > INTERCALL_DELAY) { //<== This is a good practice to add a "Uninstall this app" button for rarely used app. (toolbar has a limit in size) 
+                } else if (instruction.action === "SELF_UNINSTALL" && (n - timestamp) > INTERCALL_DELAY) {
                     d = new Date();
                     timestamp = d.getTime();
                     ScriptDiscoveryService.stopScript(Script.resolvePath(''), false);
@@ -102,19 +97,51 @@
             }
         }
     }
-    
+
+    function getFlyAvatarOfAvatar(avatarUrl) {
+        let i;
+        let url = "";
+        if (flyAvatarUrl.length > 0) {
+            for (i = 0; i < flyAvatarUrl.length; i++) {
+                if (flyAvatarUrl[i].avatarUrl === avatarUrl) {
+                    url = flyAvatarUrl[i].flyAvatarUrl;
+                    break;
+                }
+            }
+        }
+        return url;
+    }
+
+    function getIndexOfFlyAvatar(urlOfFlyAvatar) {
+        let i;
+        let index = -1;
+        if (flyAvatarUrl.length > 0) {
+            for (i = 0; i < flyAvatarUrl.length; i++) {
+                if (flyAvatarUrl[i].flyAvatarUrl === urlOfFlyAvatar) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        return index;
+    }
+
     function updateAvatar() {
         if (MyAvatar.isFlying() && flyAvatarSwitch) {
-            MyAvatar.useFullAvatarURL(flyAvatarUrl);
+            let replacement = getFlyAvatarOfAvatar(originalAvatarUrl);
+            if (replacement !== "") {
+                MyAvatar.useFullAvatarURL(replacement);
+            }
         } else {
-            if (MyAvatar.skeletonModelURL === flyAvatarUrl) {
-                MyAvatar.useFullAvatarURL(originalAvatarUrl);
+            let index = getIndexOfFlyAvatar(MyAvatar.skeletonModelURL);
+            if (index !== -1) {
+                MyAvatar.useFullAvatarURL(flyAvatarUrl[index].avatarUrl);
             }
         }
     }
 
     MyAvatar.skeletonModelURLChanged.connect(function () {
-        if (!MyAvatar.isFlying() && MyAvatar.skeletonModelURL !== flyAvatarUrl) {
+        if (!MyAvatar.isFlying() && getIndexOfFlyAvatar(MyAvatar.skeletonModelURL) === -1) { 
             originalAvatarUrl = MyAvatar.skeletonModelURL;
             Settings.setValue( FLY_AVATAR_ORIGINAL_AVATAR_SETTING_KEY, originalAvatarUrl);
         }
@@ -139,6 +166,7 @@
             "channel": channel,
             "action": "FLY-AVATAR-URL",
             "url": flyAvatarUrl,
+            "bookmarks": AvatarBookmarks.getBookmarks(),
             "mainSwitch": flyAvatarSwitch
         };
         tablet.emitScriptEvent(JSON.stringify(message));
@@ -159,6 +187,20 @@
         });
     }
 
+    function isFlyAvatar(url) {
+        let i;
+        let isFlyAv = false;
+        if (flyAvatarUrl.length > 0) {
+            for (i = 0; i < flyAvatarUrl.length; i++) {
+                if (flyAvatarUrl[i].flyAvatarUrl === url) {
+                    isFlyAv = true;
+                    break;
+                }
+            }
+        }
+        return isFlyAv;
+    }
+
     function cleanup() {
 
         if (appStatus) {
@@ -173,9 +215,12 @@
 
     Script.scriptEnding.connect(cleanup);
     originalAvatarUrl = MyAvatar.skeletonModelURL;
-    flyAvatarUrl = Settings.getValue( FLY_AVATAR_SETTING_KEY, "" );
+    if (Settings.getValue( FLY_AVATAR_SETTING_KEY, "" ) !== "") { //Clear Old Settings if present
+        Settings.setValue( FLY_AVATAR_SETTING_KEY, "");
+    }
+    flyAvatarUrl = Settings.getValue( FLY_AVATAR_SETTING_KEY_2, "" );
     flyAvatarSwitch = Settings.getValue( FLY_AVATAR_SWITCH_SETTING_KEY, true );
-    if (originalAvatarUrl === flyAvatarUrl) {
+    if (isFlyAvatar(originalAvatarUrl)) {
         var lastRecordedOriginalAvatar = Settings.getValue( FLY_AVATAR_ORIGINAL_AVATAR_SETTING_KEY, "" );
         if (lastRecordedOriginalAvatar !== "") {
             originalAvatarUrl = lastRecordedOriginalAvatar;
