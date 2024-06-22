@@ -20,7 +20,8 @@
             var thisPageName = "flyAvatar.html";
             var currentPath = window.location.protocol + "//" + window.location.host + window.location.pathname;
             var ROOTPATH = currentPath.replace(thisPageName, "");
-            var flyAvatarUrl = "";
+            var flyAvatarUrl = [];
+            var bookmarks = [];
             var flyAvatarSwitch = true;
 
             EventBridge.scriptEventReceived.connect(function(message){
@@ -28,9 +29,11 @@
                 if (messageObj.channel === channel) {
                     if (messageObj.action === "FLY-AVATAR-URL") {
                         flyAvatarUrl = messageObj.url;
+                        bookmarks = messageObj.bookmarks;
                         flyAvatarSwitch = messageObj.mainSwitch;
                         document.getElementById("mainSwitch").checked = flyAvatarSwitch;
-                        document.getElementById("avatarUrl").value = flyAvatarUrl;
+                        genBookmarkMenu();
+                        genAvatarList();
                     }
                 }
             });
@@ -86,7 +89,12 @@
             }
             
             #avatarUrl {
-                width: 98%;
+                width: 75%;
+                font-size: 11px;
+                font-family: FiraSans-SemiBold;
+                background-color: #222222;
+                color: #bbbbbb;
+                border: 1px solid #bbbbbb;
             }
             
             #avatarUrl:focus {
@@ -94,29 +102,142 @@
             }
             #formContainer {
                 width: 100%;
-                height: 590px;
+            }
+            #bookmarkPanel {
+                height: 690px;
+                width: 100%;
+                position: fixed;
+                z-index: 1;
+                top: 0px;
+                left: 0px;
+                background-color: #cccccc;
+                overflow-x: hidden;
+                overflow-y: auto;
+                transition: 0.5s;
+                display: none;
+            }
+            button.menuItem {
+                border: 0px;
+                border-bottom: 1px solid #222222;
+                text-align: left;
+                color: #000000;
+                width: 100%;
+                background-color: #bbbbbb;
+                font-size: 12px;
+                font-family: FiraSans-SemiBold;
+            }
+            button.menuItem:hover {
+                width: 100%;
+                background-color: #333333;
+                color: #bbbbbb;
+            }
+            #closeMenuBtn {
+                text-align: right;
+                width:100%;
+                color: #000000;
+                font-size: 18px;
+                font-family: FiraSans-SemiBold;
+                border-bottom: 1px solid #222222;
+            }
+            input:focus {
+                outline: none;
+            }
+            button:focus {
+                outline: none;
+            }
+            #bookmarks {
+                font-family: FiraSans-SemiBold;
+                background-color: #222222;
+                font-size: 11px;
+                color: #cccccc;
+                border-radius: 5px;
+                border: 0px solid #000000;
+                transition-duration: 0.2s;
+                padding: 3px 10px 3px 10px;
+                margin-top: 3px;
+                margin-bottom: 3px;
+            }
+            #bookmarks:hover {
+                background-color: #111111;
+                color: #ffffff;
+            }
+            #avatarList {
+                height: 470px;
+                width: 100%;
+                background-color: #222222;
+                overflow-x: hidden;
+                overflow-y: auto;
+                color: #bbbbbb;
+                font-size: 8px;
+                font-family: FiraSans-Regular;
+                margin-bottom: 5px;
+            }
+            #addContainer {
+                border: 1px solid #bbbbbb;
+                width: 97%;
+                padding: 5px;
+            }
+            font.formTitle {
+                font-size: 14px;
+                font-family: FiraSans-SemiBold;
+            }
+            #addBtn {
+                font-family: FiraSans-SemiBold;
+                background-color: #0066ff;
+                background-image: linear-gradient(to bottom, #0066ff, #0020a1);
+                font-size: 11px;
+                color: #cccccc;
+                border-radius: 5px;
+                border: 0px solid #000000;
+                transition-duration: 0.2s;
+                padding: 3px 17px 3px 17px;
+                margin-top: 5px;
+            }
+            #addBtn:hover {
+                background-color: #26a1ff;
+                background-image: linear-gradient(to bottom, #26a1ff, #0060d6);
+                color: #ffffff;
+            }
+            span.removeBtn {
+                font-family: FiraSans-SemiBold;
+                font-size: 16px;
+                color: #c27a7a;
+            }
+            table.grid {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+            td {
+                border: 1px solid #888888;
+                color: #bbbbbb;
+                font-size: 10px;
+                font-family: FiraSans-Regular;
+                word-wrap: break-word;
+                padding: 3px;
+            }
+            tr {
+                vertical-align: top;
             }
         </style>
     </head>
     <body>
-        
+        <div id="formContainer">
         <h1>FLY AVATAR</h1>
-        <div id="formContainer"><br><br>
         <input type="checkbox" id="mainSwitch" name="mainSwitch" value="true" oninput = "updateAvatarUrl();"><label for="mainSwitch"> Replace avatar when flying.</label>
-        <br><br>
-        Avatar Url to use while flying:<br>
-        <input type = "text" id="avatarUrl" oninput = "updateAvatarUrl();"><br>
-        </div><hr>
+        <br><br><div id = "addContainer">
+        <font class="formTitle">Link Avatar Url to use while flying to a specific avatar:</font><br>
+        Avatar: <button id="bookmarks" onClick="openAvatarBookmarkMenu();">-Select-</button><div id="bookmarkPanel"></div><br>
+        Flying Avatar Url: <input type = "text" id="avatarUrl"><br>
+        <div style="text-align:right; width:97%;"><button id="addBtn" onclick = "updateAvatarUrl();">+ Add</button></div>
+        </div></div><br>
+        <div id="avatarList"></div>
 
         <div style="text-align: right; width:100%;">
             <button id="uninstall" onClick = "uninstall();">Uninstall this app</button>
         </div>
         <script>
-            //UI functions here
-            
-            
-            //UI Action function here
-            function uninstall() { //Example of a action called to the application (.js) (you can add the property you need to this, but minimally the channel and the action.
+            function uninstall() {
                 var message = {
                     "channel": channel,
                     "action": "SELF_UNINSTALL"
@@ -124,8 +245,69 @@
                 EventBridge.emitWebEvent(JSON.stringify(message));
             }
             
-            function updateAvatarUrl() {
-                flyAvatarUrl = document.getElementById("avatarUrl").value;
+            function genAvatarList() {
+                let i;
+                let avatarlist = "";
+                if (flyAvatarUrl.length > 0) {
+                    avatarlist = "<table class='grid'>";
+                    avatarlist = avatarlist + "<tr><td style='background-color: #000000; color:#ffffff; width: 25%;'>AVATAR</td>";
+                    avatarlist = avatarlist + "<td style='background-color: #000000; color:#ffffff; width: 70%;'>FLYING AVATAR URL</td>";
+                    avatarlist = avatarlist + "<td style='background-color: #000000; color:#ffffff; text-align: center; width: 5%;'>&nbsp;</td></tr>";                    
+                    for (i = 0; i < flyAvatarUrl.length; i++) {
+                        avatarlist = avatarlist + "<tr><td style='width: 25%;'>" + getBookmarkName(flyAvatarUrl[i].avatarUrl) + "</td>";
+                        avatarlist = avatarlist + "<td style='width: 70%;'>" + flyAvatarUrl[i].flyAvatarUrl + "</td>";
+                        avatarlist = avatarlist + "<td style='text-align: center; width: 5%;'>";
+                        avatarlist = avatarlist + "<span class='removeBtn' onClick='removeEntry(" + i + ")'>&#11198;</span></td></tr>";
+                    }
+                    avatarlist = avatarlist + "</table>";
+                }
+                document.getElementById("avatarList").innerHTML = avatarlist;
+            }
+            
+            function openAvatarBookmarkMenu() {
+                document.getElementById("bookmarkPanel").style.display = "block";
+            }
+            
+            function closeAvatarBookmarkMenu() {
+                document.getElementById("bookmarkPanel").style.display = "none";
+            }
+            
+            function genBookmarkMenu() {
+                let opt = "<div id='closeMenuBtn' onClick = 'closeAvatarBookmarkMenu();'>&#128473;&nbsp;</div>";
+                let key;
+                let panel = document.getElementById('bookmarkPanel');
+                for (key in bookmarks) {
+                    opt = opt + "<button class = 'menuItem' onclick = 'selectBookMark(" + '"' + key + '"' + ");'>" + key + "</button><br>";
+                }
+                panel.innerHTML = opt;
+            }
+            
+            function getBookmarkName(url) {
+                let key;
+                let name = "Unknown";
+                for (key in bookmarks) {
+                    if (bookmarks[key].avatarUrl === url) {
+                        name = key;
+                        break;
+                    }
+                }
+                return name;
+            }
+
+            function getBookmarkUrlFromName(name) {
+                let key;
+                let url = "";
+                for (key in bookmarks) {
+                    if (key === name) {
+                        url = bookmarks[key].avatarUrl;
+                        break;
+                    }
+                }
+                return url;
+            }
+            
+            function removeEntry(index) {
+                flyAvatarUrl.splice(index,1);
                 flyAvatarSwitch = document.getElementById("mainSwitch").checked;
                 var message = {
                     "channel": channel,
@@ -134,6 +316,37 @@
                     "mainSwitch": flyAvatarSwitch
                 };
                 EventBridge.emitWebEvent(JSON.stringify(message));
+                genAvatarList();
+            }
+            
+            function selectBookMark(name) {
+                document.getElementById('bookmarks').innerText = name;
+                closeAvatarBookmarkMenu();
+            }
+            
+            function updateAvatarUrl() {
+                let avUrl = getBookmarkUrlFromName(document.getElementById('bookmarks').innerText);
+                let flyAv = document.getElementById("avatarUrl").value;
+                
+                if (avUrl !== "" && flyAv !== "") {
+                    
+                    let link = {
+                            "avatarUrl": avUrl,
+                            "flyAvatarUrl": flyAv
+                        };
+                    flyAvatarUrl.push(link);
+                    flyAvatarSwitch = document.getElementById("mainSwitch").checked;
+                    var message = {
+                        "channel": channel,
+                        "action": "UPDATE_URL",
+                        "url": flyAvatarUrl,
+                        "mainSwitch": flyAvatarSwitch
+                    };
+                    EventBridge.emitWebEvent(JSON.stringify(message));
+                    document.getElementById('bookmarks').innerText = "-Select-";
+                    document.getElementById("avatarUrl").value = "";
+                    genAvatarList();
+                }
             }
             
             function requestInitialData() {
