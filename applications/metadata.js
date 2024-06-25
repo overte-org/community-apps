@@ -332,6 +332,15 @@ var metadata = { "applications":
             "jsfile": "domainMapper/app-domainMapper.js",
             "icon": "domainMapper/icon_inactive_white.png",
             "caption": "DOMAP"
+        },
+        {
+            "isActive": true,
+            "directory": "more",
+            "name": "MoreNG",
+            "description": "More app rewrite in QML. Please see documentation https://github.com/overte-org/community-apps/tree/master/applications/more for more information",
+            "jsfile": "more/more.js",
+            "icon": "more/img/icon_white.png",
+            "caption": "MORE-NG"
         }
     ]
 };
