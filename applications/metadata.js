@@ -335,6 +335,15 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
+            "directory": "more",
+            "name": "MoreNG",
+            "description": "More app rewrite in QML. Please see documentation https://github.com/overte-org/community-apps/tree/master/applications/more for more information",
+            "jsfile": "more/more.js",
+            "icon": "more/img/icon_white.png",
+            "caption": "MORE-NG"
+        },
+        {
+            "isActive": true,
             "directory": "hmd3rdPerson",
             "name": "HMD 3rd Person View",
             "description": "This application adds a button on your tablet to toggle rapidly between 1st and 3rd person view in HMD. It also prevents the distance of the 3rd person camera to be reset as the 'View' menu does. This application is only visible in HMD. It can be useful for people who want to capture their avatar performance in HMD while they are in movement.",
