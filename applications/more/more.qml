@@ -69,7 +69,6 @@ Rectangle {
                             onExited: parent.parent.children[1].x = 5
 
                             onClicked: (mouse) => {
-                                mouse.accepted = false
                                 parent.forceActiveFocus() // Hack? Maybe see if this can be better done another way
                             }
                         }
@@ -208,6 +207,17 @@ Rectangle {
                             font.pointSize: 12
                             anchors.centerIn: parent
                             id: repo_url
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: parent.parent.children[1].x = 15
+                                onExited: parent.parent.children[1].x = 5
+
+                                onClicked: (mouse) => {
+                                    parent.forceActiveFocus() // Hack? Maybe see if this can be better done another way
+                                }
+                            }
                         }
 
                         Text {
@@ -218,6 +228,11 @@ Rectangle {
                             text: "Add a manifest.json url"
                             font.italic: true
                             visible: parent.children[0].text == ""
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 100
+                                }
+                            }
                         }
                     }
 
@@ -238,7 +253,10 @@ Rectangle {
 
                         MouseArea {
                             anchors.fill: parent
-
+                            hoverEnabled: true
+                            onEntered:  parent.color = "#004D00"
+                            onExited: parent.color = "green"
+                            
                             onClicked: {
                                 installNewRepository(repo_url.text);
                                 repo_url.text = "";
@@ -303,6 +321,10 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
 
+                    hoverEnabled: true
+                    onEntered: parent.color = "#471111"
+                    onExited: parent.color = "#771d1d"
+                    
                     onClicked: {
                         current_page = "app_list"
                     }
@@ -487,6 +509,10 @@ Rectangle {
                         MouseArea {
                             anchors.fill: parent
 
+                            hoverEnabled: true
+                            onEntered: parent.color = "#471111"
+                            onExited: parent.color = "#771d1d"
+
                             onClicked: {
                                 removeApp(url);
                             }
@@ -510,6 +536,10 @@ Rectangle {
                         MouseArea {
                             anchors.fill: parent
 
+                            hoverEnabled: true
+                            onEntered: parent.color = "#005809"
+                            onExited: parent.color = "#00930f"
+
                             onClicked: {
                                 installNewApp(title, url, repo, description, icon);
                             }
@@ -531,6 +561,10 @@ Rectangle {
 
                         MouseArea {
                             anchors.fill: parent
+
+                            hoverEnabled: true
+                            onEntered: parent.color = "#303150"
+                            onExited: parent.color = "#505186"
 
                             onClicked: {
                                 openAppDetails(title, url, repo, description, icon);
@@ -628,7 +662,7 @@ Rectangle {
                         radius: 5
                         color: "#771d1d"
 
-                        Text{
+                        Text {
                             text: "Remove"
                             anchors.centerIn: parent
                             color:"white"
@@ -636,6 +670,10 @@ Rectangle {
 
                         MouseArea {
                             anchors.fill: parent
+
+                            hoverEnabled: true
+                            onEntered: parent.color = "#471111"
+                            onExited: parent.color = "#771d1d"
 
                             onClicked: {
                                 removeRepository(url);
@@ -664,7 +702,7 @@ Rectangle {
                         return;
                     }
 
-                    registered_repo_list.index_selected = index
+                    registered_repo_list.index_selected = index;
                 }
             }
 
