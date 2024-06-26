@@ -1,7 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.3
-import controlsUit 1.0 as HifiControlsUit
 
 Rectangle {
     color: Qt.rgba(0.1,0.1,0.1,1)
@@ -63,6 +62,17 @@ Rectangle {
                                 return;
                             }
                         }
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: parent.parent.children[1].x = 15
+                            onExited: parent.parent.children[1].x = 5
+
+                            onClicked: (mouse) => {
+                                mouse.accepted = false
+                                parent.forceActiveFocus() // Hack? Maybe see if this can be better done another way
+                            }
+                        }
                     }
 
                     Text {
@@ -73,7 +83,15 @@ Rectangle {
                         text: "Search..."
                         font.italic: true
                         visible: parent.children[0].text == ""
+
+                        Behavior on x {
+                            NumberAnimation {
+                                duration: 100
+                            }
+                        }
+
                     }
+
                 }
 
                 Rectangle {
@@ -93,6 +111,10 @@ Rectangle {
 
                     MouseArea {
                         anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: parent.color = "#122F41"
+                        onExited: parent.color = "#296992"
+
                         onClicked: {
                             if (root.current_page == "app_list") {
                                 root.current_page = "repos" 
@@ -125,7 +147,6 @@ Rectangle {
                 height: parent.height - 60
                 clip: true
                 interactive: true
-                spacing: 5
                 id: installed_apps_list
                 model: installed_apps
 
@@ -522,6 +543,14 @@ Rectangle {
                     width: parent.width
                     height: 60
 
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.parent.color = "#111111"
+                    }
+                    onExited: {
+                        parent.parent.color = parent.parent.index % 2 === 0 ? "transparent" : Qt.rgba(0.15,0.15,0.15,1)
+                    }
+
                     onClicked: {
                         if (installed_apps_list.index_selected == index){
                             installed_apps_list.index_selected = -1;
@@ -620,6 +649,15 @@ Rectangle {
             MouseArea {
                 width: parent.width
                 height: 40
+
+                hoverEnabled: true
+                onEntered: {
+                    parent.color = "#111111"
+                }
+                onExited: {
+                    parent.color = parent.index % 2 === 0 ? "transparent" : Qt.rgba(0.15,0.15,0.15,1)
+                }
+
                 onClicked: {
                     if (registered_repo_list.index_selected == index){
                         registered_repo_list.index_selected = -1;
