@@ -32,7 +32,7 @@ Rectangle {
             width: parent.width
             height: 60
             color: Qt.rgba(0,0,0,1)
-            visible: ["app_list", "repos"].includes(current_page) ? true : false
+            visible: current_page == "app_list"
 
             Item {
                 anchors.centerIn: parent
@@ -115,16 +115,46 @@ Rectangle {
                         onExited: parent.color = "#296992"
 
                         onClicked: {
-                            if (root.current_page == "app_list") {
-                                root.current_page = "repos" 
-                                return;
-                            }
-                            
-                            if (root.current_page == "repos") {
-                                root.current_page = "app_list"
-                                return;
-                            }
+                            root.current_page = "page_selection"
                         }
+                    }
+                }
+            }
+        }
+
+        // Go back button from app details
+        Rectangle {
+            id: go_back_button
+            width: parent.width
+            height: 60
+            color: Qt.rgba(0,0,0,1)
+            visible: current_page != "app_list"
+
+            Rectangle {
+                width: parent.width - 20
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 35
+                radius: 5
+                color: "#771d1d"
+
+                Text {
+                    color: "white"
+                    font.pointSize: 12
+                    anchors.centerIn: parent
+                    text: "Back"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    hoverEnabled: true
+                    onEntered: parent.color = "#471111"
+                    onExited: parent.color = "#771d1d"
+                    
+                    onClicked: {
+                        if (current_page == "page_selection") return current_page = "app_list";
+                        current_page = "page_selection"
                     }
                 }
             }
@@ -167,6 +197,128 @@ Rectangle {
             ListModel {
                 id: installed_apps
             }
+        }
+
+        // Page selection
+        Item {
+            width: parent.width
+            height: parent.height - 40
+            anchors.top: navigation_bar.bottom
+            visible: current_page == "page_selection"
+
+          	// Installed Apps
+            ListView {
+                property int index_selected: -1
+                width: parent.width
+                height: parent.height - 60
+                clip: true
+                interactive: true
+                model:  ListModel {
+
+                // TODO:
+                // ListElement {
+                //     name: "Installed Apps"
+                //     description: "View a list of applications installed"
+                //     page_name: "installed_apps"
+                // }
+                ListElement {
+                    name: "Repository Manager"
+                    description: "Manage your list of repositories"
+                    page_name: "repos"
+                }
+            }
+
+                delegate: Component {
+                    Rectangle {
+                        width: parent.width
+                        height: 60
+                        color: index % 2 === 0 ? "transparent" : Qt.rgba(0.15,0.15,0.15,1)
+
+                        Item {
+                            height: parent.height
+                            width: parent.width - 40
+
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 150
+                                }
+                            }
+
+                            Text {
+                                width: parent.width - 50
+                                y: 5
+                                height: 30
+                                text: name
+                                font.pixelSize: 16
+                                color: "white"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                font.italic: true
+                            }
+                            Text {
+                                width: parent.width - 50
+                                height: 15
+                                anchors.top: parent.children[0].bottom
+                                text: description
+                                font.pixelSize: 12
+                                color: "white"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                font.italic: true
+                            }
+                        }
+
+                        Text {
+                            width: 50
+                            height: parent.height
+                            text: ">"
+                            color: "transparent"
+                            x: parent.width - 150
+                            font.pixelSize: 40
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Behavior on x {
+                                NumberAnimation {
+                                    duration: 150
+                                }
+                            }
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: 150
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+
+                            onEntered: {
+                                parent.color = "#111111"
+
+                                parent.children[0].x = parent.children[0].x + 20
+
+                                // Arrow
+                                parent.children[1].x = parent.width - 50
+                                parent.children[1].color = "white"
+                            }
+                            onExited: {
+                                parent.color = index % 2 === 0 ? "transparent" : Qt.rgba(0.15,0.15,0.15,1)
+
+                                parent.children[0].x = 0
+
+                                // Arrow
+                                parent.children[1].x = parent.width - 150
+                                parent.children[1].color = "transparent"
+                            }
+
+                            onClicked: (mouse) => {
+                                current_page = page_name
+                            }
+                        }
+                    }
+                }
+            }
+            
+
         }
 
         // Repository Manager
@@ -295,42 +447,7 @@ Rectangle {
         }
 
 
-        // Go back button from app details
-        Rectangle {
-            id: go_back_button
-            width: parent.width
-            height: 60
-            color: Qt.rgba(0,0,0,1)
-            visible: current_page == "details"
 
-            Rectangle {
-                width: parent.width - 20
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: 35
-                radius: 5
-                color: "#771d1d"
-
-                Text {
-                    color: "white"
-                    font.pointSize: 12
-                    anchors.centerIn: parent
-                    text: "Back"
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-
-                    hoverEnabled: true
-                    onEntered: parent.color = "#471111"
-                    onExited: parent.color = "#771d1d"
-                    
-                    onClicked: {
-                        current_page = "app_list"
-                    }
-                }
-            }
-        }
 
         // App Details
         Item {
