@@ -154,6 +154,7 @@ Rectangle {
                     
                     onClicked: {
                         if (current_page == "page_selection") return current_page = "app_list";
+                        if (current_page == "details") return current_page = "app_list";
                         current_page = "page_selection"
                     }
                 }
@@ -162,12 +163,49 @@ Rectangle {
 
         // Pages ----
 
-        // Installed Apps
+        // Apps Listing
         Item {
             width: parent.width
             height: parent.height - 40
             anchors.top: navigation_bar.bottom
             visible: current_page == "app_list"
+
+          	// Installed Apps
+            ListView {
+                property int index_selected: -1
+                width: parent.width
+                height: parent.height - 60
+                clip: true
+                interactive: true
+                id: app_listing_list
+                model: app_listings
+
+                delegate: Loader {
+                    property int delegateIndex: index
+                    property string delegateTitle: model.title
+                    property string delegateRepository: model.repository
+                    property string delegateDescription: model.description
+                    property string delegateIcon: model.icon
+                    property string delegateURL: model.url
+                    property bool delegateInstalled: model.installed
+                    property bool delegateIsVisible: model.is_visible
+                    width: app_listing_list.width
+
+                    sourceComponent: app_listing
+                }
+            }
+            
+            ListModel {
+                id: app_listings
+            }
+        }
+
+        // Installed Apps
+        Item {
+            width: parent.width
+            height: parent.height - 40
+            anchors.top: navigation_bar.bottom
+            visible: current_page == "installed_app_list"
 
           	// Installed Apps
             ListView {
@@ -215,18 +253,20 @@ Rectangle {
                 interactive: true
                 model:  ListModel {
 
-                // TODO:
-                // ListElement {
-                //     name: "Installed Apps"
-                //     description: "View a list of applications installed"
-                //     page_name: "installed_apps"
-                // }
-                ListElement {
-                    name: "Repository Manager"
-                    description: "Manage your list of repositories"
-                    page_name: "repos"
+                    // TODO:
+                    ListElement {
+                        name: "Installed Apps"
+                        description: "View a list of applications installed"
+                        page_name: "installed_app_list"
+                    }
+                    ListElement {
+                        name: "Repository Manager"
+                        description: "Manage your list of repositories"
+                        page_name: "repos"
+                    }
+
+                    
                 }
-            }
 
                 delegate: Component {
                     Rectangle {
@@ -317,8 +357,6 @@ Rectangle {
                     }
                 }
             }
-            
-
         }
 
         // Repository Manager
@@ -446,9 +484,6 @@ Rectangle {
             }
         }
 
-
-
-
         // App Details
         Item {
             width: parent.width - 20
@@ -532,7 +567,7 @@ Rectangle {
             property bool installed: delegateInstalled
             property bool is_visible: delegateIsVisible
 
-            property bool selected: (installed_apps_list.index_selected == index)
+            property bool selected: (app_listing_list.index_selected == index)
 
             visible: is_visible
             height: is_visible ? selected ? 100 : 60 : 0
@@ -703,12 +738,12 @@ Rectangle {
                     }
 
                     onClicked: {
-                        if (installed_apps_list.index_selected == index){
-                            installed_apps_list.index_selected = -1;
+                        if (app_listing_list.index_selected == index){
+                            app_listing_list.index_selected = -1;
                             return;
                         }
 
-                        installed_apps_list.index_selected = index
+                        app_listing_list.index_selected = index
                     }
                 }
 
@@ -831,6 +866,7 @@ Rectangle {
 
     }
     function clearApplicationList(){
+        app_listings.clear()
         installed_apps.clear()
     }
     function addRepositoryToList(repo_name, url){
@@ -886,7 +922,13 @@ Rectangle {
         switch (message.type){
             case "installed_apps":
                 clearApplicationList();
-                message.app_list.forEach((app) => installed_apps.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: app.installed || false, is_visible: true }))
+                message.app_list.forEach((app) => {
+                    app_listings.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: app.installed || false, is_visible: true });
+
+                    if (app.installed){
+                        installed_apps.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: true, is_visible: true });
+                    }
+                })
                 break;
             case "installed_repositories":
                 clearRepositoryList();
