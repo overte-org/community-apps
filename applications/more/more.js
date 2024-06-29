@@ -22,6 +22,7 @@
 	var active = false;
 
 	tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
+	tablet.screenChanged.connect(onScreenChanged);
 
 	app_button = tablet.addButton({
 		icon: Script.resolvePath("./img/icon_white.png"),
@@ -182,6 +183,15 @@
 			type: "installed_repositories",
 			repository_list: installed_repositories,
 		});
+	}
+
+	function onScreenChanged(type, url) {
+		if (url != Script.resolvePath("./more.qml")) {
+			active = false;
+			app_button.editProperties({
+				isActive: active,
+			});
+		}
 	}
 
 	async function request(url) {
