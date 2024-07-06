@@ -28,7 +28,7 @@
                 messageObj = JSON.parse(message);
                 if (messageObj.channel === channel) {
                     if (messageObj.action === "FLY-AVATAR-URL") {
-                        flyAvatarUrl = messageObj.url;
+                        flyAvatarUrl = messageObj.url || [];
                         bookmarks = messageObj.bookmarks;
                         flyAvatarSwitch = messageObj.mainSwitch;
                         document.getElementById("mainSwitch").checked = flyAvatarSwitch;
