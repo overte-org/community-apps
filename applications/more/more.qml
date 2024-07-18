@@ -544,6 +544,8 @@ Rectangle {
                 Text{
                     text: ""
                     color: "white";
+					wrapMode: Text.WordWrap
+					width: parent.width
                     font.pointSize: 12
                     y: 20
                     id: details_description
