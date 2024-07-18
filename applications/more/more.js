@@ -136,10 +136,10 @@
 
 		for (let i = 0; installed_repositories.length > i; i++) {
 			let repo = installed_repositories[i];
-			let apps = await request(repo.url);
-			if (!apps) continue; // Failure
+			let repo_content = await request(repo.url);
+			if (!repo_content) continue; // Failure
 
-			apps = apps.application_list || [];
+			let apps = repo_content.application_list || [];
 
 			// Filter to non-installed ones
 			apps = apps.filter((app) => {
@@ -151,7 +151,7 @@
 			});
 
 			apps = apps.map((app) => {
-				let app_root = repo.url.replace(/\/metadata.json/g, "") + `/${app.directory}`;
+				let app_root = repo_content.base_url + `/${app.directory}`;
 
 				let script_url = app_root + `/${app.script}`;
 				let script_icon = app_root + `/${app.icon}`;
@@ -198,6 +198,30 @@
 		var xmlHttp = new XMLHttpRequest();
 		xmlHttp.open("GET", url, false);
 		xmlHttp.send(null);
+
+		// Hardcode support for Overte Community-Apps metadata.js
+		// This can be safely removed at some point in the far future. 7/18/2024
+		if (url === "https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js") {
+			// Scary text formatting to get the metadata.js response object into a JSON object.
+			var formatted_response = xmlHttp.responseText.replace("var metadata = ", "").slice(0, -1).trim();
+
+			// Extract the application list.
+			var application_list = JSON.parse(formatted_response).applications;
+
+			// Convert each entry into a value we expect it to be.
+			application_list = application_list.map((app_entry) => {
+				return {
+					name: app_entry.name,
+					directory: app_entry.directory,
+					script: app_entry.jsfile.replace(`${app_entry.directory}/`, ""),
+					icon: app_entry.icon.replace(`${app_entry.directory}/`, ""),
+					description: app_entry.description,
+				};
+			});
+
+			// Return the formatted list along with extra repository information.
+			return { title: "Overte", base_url: "https://raw.githubusercontent.com/overte-org/community-apps/master/applications", application_list: application_list };
+		}
 
 		// Any request we make is intended to be a JSON response.
 		// If it can not be parsed into JSON then fail.
