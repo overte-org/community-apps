@@ -12,20 +12,19 @@
 (() => {
 	("use strict");
 
-	// TODO: Preinstall Overte community apps by default
-	var installed_scripts = Settings.getValue("ArmoredMore-InstalledScripts", []) || []; // All scripts installed though more.js
-	var installed_repositories = Settings.getValue("ArmoredMore-InstalledRepositories", []) || []; // All repositories installed though more.js
-	var is_first_run = Settings.getValue("ArmoredMore-FirstRun", true); // Check if this app has ran before
+	var installedScripts = Settings.getValue("ArmoredMore-InstalledScripts", []) || []; // All scripts installed though more.js
+	var installedRepositories = Settings.getValue("ArmoredMore-InstalledRepositories", []) || []; // All repositories installed though more.js
+	var isFirstRun = Settings.getValue("ArmoredMore-FirstRun", true); // Check if this app has ran before
 
 	// Global vars
 	var tablet;
-	var app_button;
+	var appButton;
 	var active = false;
 
 	tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 	tablet.screenChanged.connect(onScreenChanged);
 
-	app_button = tablet.addButton({
+	appButton = tablet.addButton({
 		icon: Script.resolvePath("./img/icon_white.png"),
 		activeIcon: Script.resolvePath("./img/icon_black.png"),
 		text: "MORE",
@@ -34,32 +33,32 @@
 	// When script ends, remove itself from tablet
 	Script.scriptEnding.connect(function () {
 		console.log("Shutting Down");
-		tablet.removeButton(app_button);
+		tablet.removeButton(appButton);
 	});
 
 	// Overlay button toggle
-	app_button.clicked.connect(toolbarButtonClicked);
+	appButton.clicked.connect(toolbarButtonClicked);
 
 	tablet.fromQml.connect(fromQML);
 
-	if (is_first_run) {
+	if (isFirstRun) {
 		installRepo("https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js");
 		Settings.setValue("ArmoredMore-FirstRun", false);
-		is_first_run = false;
+		isFirstRun = false;
 	}
 
 	function toolbarButtonClicked() {
 		if (active) {
 			tablet.gotoHomeScreen();
 			active = !active;
-			app_button.editProperties({
+			appButton.editProperties({
 				isActive: active,
 			});
 		} else {
 			getLists();
 			tablet.loadQMLSource(Script.resolvePath("./more.qml"));
 			active = !active;
-			app_button.editProperties({
+			appButton.editProperties({
 				isActive: active,
 			});
 		}
@@ -67,7 +66,7 @@
 
 	function installApp({ title, repository, url, icon, description }) {
 		// Add script to saved list
-		installed_scripts.push({
+		installedScripts.push({
 			title: title,
 			repository: repository,
 			url: url,
@@ -76,7 +75,7 @@
 		});
 
 		// Save new list as setting
-		Settings.setValue("ArmoredMore-InstalledScripts", installed_scripts);
+		Settings.setValue("ArmoredMore-InstalledScripts", installedScripts);
 
 		// Install the script
 		ScriptDiscoveryService.loadScript(url, true); // Force reload the script, do not use cache.
@@ -87,14 +86,14 @@
 
 	function uninstallApp(url) {
 		// Find app in saved list
-		var entry = installed_scripts.filter((app) => app.url == url);
-		const index = installed_scripts.indexOf(entry);
+		var entry = installedScripts.filter((app) => app.url == url);
+		const index = installedScripts.indexOf(entry);
 
 		// Remove it from list
-		installed_scripts.splice(index, 1);
+		installedScripts.splice(index, 1);
 
 		// Save new list as setting
-		Settings.setValue("ArmoredMore-InstalledScripts", installed_scripts);
+		Settings.setValue("ArmoredMore-InstalledScripts", installedScripts);
 
 		// Uninstall the script
 		ScriptDiscoveryService.stopScript(url, false);
@@ -110,27 +109,27 @@
 		if (!repo) return; // Failure
 
 		// Add repo to saved list
-		installed_repositories.push({
+		installedRepositories.push({
 			title: repo.title || "Unnamed repository",
 			url: url,
 		});
 
 		// Save new list as setting
-		Settings.setValue("ArmoredMore-InstalledRepositories", installed_repositories);
+		Settings.setValue("ArmoredMore-InstalledRepositories", installedRepositories);
 
 		// Send updated repository list
 		getLists();
 	}
 	function uninstallRepo(url) {
 		// Find app in saved list
-		var entry = installed_repositories.filter((repo) => repo.url == url);
-		const index = installed_repositories.indexOf(entry);
+		var entry = installedRepositories.filter((repo) => repo.url == url);
+		const index = installedRepositories.indexOf(entry);
 
 		// Remove it from list
-		installed_repositories.splice(index, 1);
+		installedRepositories.splice(index, 1);
 
 		// Save new list as setting
-		Settings.setValue("ArmoredMore-InstalledRepositories", installed_repositories);
+		Settings.setValue("ArmoredMore-InstalledRepositories", installedRepositories);
 
 		// Send updated app list
 		getLists();
@@ -138,64 +137,64 @@
 
 	// Startup populate lists
 	async function getLists() {
-		let application_list = [];
-		let installed_apps_by_url = installed_scripts.map((app) => app.url);
+		let applicationList = [];
+		let installedAppsByUrl = installedScripts.map((app) => app.url);
 
-		for (let i = 0; installed_repositories.length > i; i++) {
-			let repo = installed_repositories[i];
-			let repo_content = await request(repo.url);
-			if (!repo_content) continue; // Failure
+		for (let i = 0; installedRepositories.length > i; i++) {
+			let repo = installedRepositories[i];
+			let repoContent = await request(repo.url);
+			if (!repoContent) continue; // Failure
 
-			let apps = repo_content.application_list || [];
+			let apps = repoContent.application_list || [];
 
 			// Filter to non-installed ones
 			apps = apps.filter((app) => {
-				let app_root = repo.url.replace(/\/metadata.json/g, "") + `/${app.directory}`;
+				let appRoot = repo.url.replace(/\/metadata.json/g, "") + `/${app.directory}`;
 
-				let script_url = app_root + `/${app.script}`;
+				let scriptUrl = appRoot + `/${app.script}`;
 
-				return installed_apps_by_url.indexOf(script_url) == -1;
+				return installedAppsByUrl.indexOf(scriptUrl) == -1;
 			});
 
 			apps = apps.map((app) => {
-				let app_root = repo_content.base_url + `/${app.directory}`;
+				let appRoot = repoContent.base_url + `/${app.directory}`;
 
-				let script_url = app_root + `/${app.script}`;
-				let script_icon = app_root + `/${app.icon}`;
+				let scriptUrl = appRoot + `/${app.script}`;
+				let scriptIcon = appRoot + `/${app.icon}`;
 
 				return {
 					title: app.name,
 					description: app.description,
-					icon: script_icon,
+					icon: scriptIcon,
 					repository: repo.title,
-					url: script_url,
+					url: scriptUrl,
 				};
 			});
 
 			// Add all apps from repo to list
-			application_list.push(...apps);
+			applicationList.push(...apps);
 		}
 
 		_emitEvent({
 			type: "installed_apps",
 			app_list: [
-				...installed_scripts.map((app) => {
+				...installedScripts.map((app) => {
 					return { ...app, installed: true };
 				}),
-				...application_list,
+				...applicationList,
 			],
 		});
 
 		_emitEvent({
 			type: "installed_repositories",
-			repository_list: installed_repositories,
+			repository_list: installedRepositories,
 		});
 	}
 
 	function onScreenChanged(type, url) {
 		if (url != Script.resolvePath("./more.qml")) {
 			active = false;
-			app_button.editProperties({
+			appButton.editProperties({
 				isActive: active,
 			});
 		}
@@ -210,24 +209,24 @@
 		// This can be safely removed at some point in the far future. 7/18/2024
 		if (url === "https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js") {
 			// Scary text formatting to get the metadata.js response object into a JSON object.
-			var formatted_response = xmlHttp.responseText.replace("var metadata = ", "").slice(0, -1).trim();
+			var formattedResponse = xmlHttp.responseText.replace("var metadata = ", "").slice(0, -1).trim();
 
 			// Extract the application list.
-			var application_list = JSON.parse(formatted_response).applications;
+			var applicationList = JSON.parse(formattedResponse).applications;
 
 			// Convert each entry into a value we expect it to be.
-			application_list = application_list.map((app_entry) => {
+			applicationList = applicationList.map((appEntry) => {
 				return {
-					name: app_entry.name,
-					directory: app_entry.directory,
-					script: app_entry.jsfile.replace(`${app_entry.directory}/`, ""),
-					icon: app_entry.icon.replace(`${app_entry.directory}/`, ""),
-					description: app_entry.description,
+					name: appEntry.name,
+					directory: appEntry.directory,
+					script: appEntry.jsfile.replace(`${appEntry.directory}/`, ""),
+					icon: appEntry.icon.replace(`${appEntry.directory}/`, ""),
+					description: appEntry.description,
 				};
 			});
 
 			// Return the formatted list along with extra repository information.
-			return { title: "Overte", base_url: "https://raw.githubusercontent.com/overte-org/community-apps/master/applications", application_list: application_list };
+			return { title: "Overte", base_url: "https://raw.githubusercontent.com/overte-org/community-apps/master/applications", application_list: applicationList };
 		}
 
 		// Any request we make is intended to be a JSON response.
