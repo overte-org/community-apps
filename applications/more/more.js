@@ -226,7 +226,7 @@
 			});
 
 			// Return the formatted list along with extra repository information.
-			return { title: "Overte", base_url: "https://raw.githubusercontent.com/overte-org/community-apps/master/applications", application_list: applicationList };
+			return { title: "Overte", base_url: "https://more.overte.org/applications", application_list: applicationList };
 		}
 
 		// Any request we make is intended to be a JSON response.
