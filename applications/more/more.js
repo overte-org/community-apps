@@ -10,11 +10,12 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 
 (() => {
-	"use strict";
+	("use strict");
 
 	// TODO: Preinstall Overte community apps by default
 	var installed_scripts = Settings.getValue("ArmoredMore-InstalledScripts", []) || []; // All scripts installed though more.js
 	var installed_repositories = Settings.getValue("ArmoredMore-InstalledRepositories", []) || []; // All repositories installed though more.js
+	var is_first_run = Settings.getValue("ArmoredMore-FirstRun", true); // Check if this app has ran before
 
 	// Global vars
 	var tablet;
@@ -40,6 +41,12 @@
 	app_button.clicked.connect(toolbarButtonClicked);
 
 	tablet.fromQml.connect(fromQML);
+
+	if (is_first_run) {
+		installRepo("https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js");
+		Settings.setValue("ArmoredMore-FirstRun", false);
+		is_first_run = false;
+	}
 
 	function toolbarButtonClicked() {
 		if (active) {
