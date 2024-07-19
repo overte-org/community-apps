@@ -166,7 +166,7 @@ Rectangle {
         // Apps Listing
         Item {
             width: parent.width
-            height: parent.height - 40
+            height: parent.height
             anchors.top: navigation_bar.bottom
             visible: current_page == "app_list"
 
