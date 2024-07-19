@@ -789,7 +789,7 @@ Rectangle {
                     text: title
                     color: "white"
                     font.pointSize: 12
-                    wrapMode: Text.noWrap
+                    wrapMode: Text.NoWrap
                     elide: Text.ElideRight
                 }
                 Text {
@@ -799,7 +799,7 @@ Rectangle {
                     text: url
                     color: "gray"
                     font.pointSize: 10
-                    wrapMode: Text.noWrap
+                    wrapMode: Text.NoWrap
                     elide: Text.ElideRight
                 }
 
