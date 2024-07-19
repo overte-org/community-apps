@@ -102,8 +102,10 @@
 		getLists();
 	}
 
-	// TODO: Duplication check
 	async function installRepo(url) {
+		var repoIsInstalled = installedRepositories.find((repo) => repo.url === url) ? true : false;
+		if (repoIsInstalled) return; // Repository URL already in the list, don't add it again.
+
 		// Test repository
 		const repo = await request(url);
 		if (!repo) return; // Failure
