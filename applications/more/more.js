@@ -42,7 +42,7 @@
 	tablet.fromQml.connect(fromQML);
 
 	if (isFirstRun) {
-		installRepo("https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js");
+		installRepo("https://more.overte.org/applications/metadata.js");
 		Settings.setValue("ArmoredMore-FirstRun", false);
 		isFirstRun = false;
 	}
@@ -103,6 +103,10 @@
 	}
 
 	async function installRepo(url) {
+		// Hardcode support for Overte
+		if (url === "https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js") 
+			url = "https://more.overte.org/applications/metadata.js"
+
 		var repoIsInstalled = installedRepositories.find((repo) => repo.url === url) ? true : false;
 		if (repoIsInstalled) return; // Repository URL already in the list, don't add it again.
 
@@ -151,7 +155,7 @@
 
 			// Filter to non-installed ones
 			apps = apps.filter((app) => {
-				let appRoot = repo.url.replace(/\/metadata.json/g, "") + `/${app.directory}`;
+				let appRoot = repo.url.replace(/\/metadata.js(?:on)?/g, "") + `/${app.directory}`;
 
 				let scriptUrl = appRoot + `/${app.script}`;
 
@@ -209,7 +213,7 @@
 
 		// Hardcode support for Overte Community-Apps metadata.js
 		// This can be safely removed at some point in the far future. 7/18/2024
-		if (url === "https://raw.githubusercontent.com/overte-org/community-apps/master/applications/metadata.js") {
+		if (url === "https://more.overte.org/applications/metadata.js") {
 			// Scary text formatting to get the metadata.js response object into a JSON object.
 			var formattedResponse = xmlHttp.responseText.replace("var metadata = ", "").slice(0, -1).trim();
 
