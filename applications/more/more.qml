@@ -862,16 +862,22 @@ Rectangle {
     }
 
     // List population and management
-    function addApplicationToList(name, repo_name, description, installed, url){
+    function addApplicationsToList(message){
+        message.app_list.forEach((app) => {
+            app_listings.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: app.installed || false, is_visible: true });
 
+            if (app.installed){
+                installed_apps.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: true, is_visible: true });
+            }
+        })
     }
     function clearApplicationList(){
         app_listings.clear()
         installed_apps.clear()
         app_listing_list.index_selected = -1;
     }
-    function addRepositoryToList(repo_name, url){
-
+    function addRepositoriesToList(message){
+        message.repository_list.forEach((repo) => repo_list.append({ title: repo.title, url: repo.url, is_visible: true }))
     }
     function clearRepositoryList(){
         repo_list.clear()
@@ -924,17 +930,11 @@ Rectangle {
         switch (message.type){
             case "installed_apps":
                 clearApplicationList();
-                message.app_list.forEach((app) => {
-                    app_listings.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: app.installed || false, is_visible: true });
-
-                    if (app.installed){
-                        installed_apps.append({title: app.title, repository: app.repository, description: app.description, icon: app.icon, url: app.url, installed: true, is_visible: true });
-                    }
-                })
+                addApplicationsToList(message);
                 break;
             case "installed_repositories":
                 clearRepositoryList();
-                message.repository_list.forEach((repo) => repo_list.append({ title: repo.title, url: repo.url, is_visible: true }))
+                addRepositoriesToList(message)
                 break;
             case "clear_messages":
                 break;
