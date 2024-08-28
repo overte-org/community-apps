@@ -341,6 +341,15 @@ var metadata = { "applications":
             "jsfile": "hmd3rdPerson/app-hmd3rdPerson.js",
             "icon": "hmd3rdPerson/icon_inactive_white.png",
             "caption": "3rd PERS"
+        },
+        {
+            "isActive": true,
+            "directory": "flow",
+            "name": "Flow Bones",
+            "description": "Effortlessly tweak and tune avatar flow bones.",
+            "jsfile": "flow/flowAppCpp.js",
+            "icon": "flow/flow-i.svg",
+            "caption": "FLOW"
         }
     ]
 };
