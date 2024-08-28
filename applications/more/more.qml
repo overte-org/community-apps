@@ -54,13 +54,13 @@ Rectangle {
                         id: search_query
                         onAccepted: {
                             if (current_page == "app_list"){
-                                searchList(search_query.text, installed_apps);
+                                searchList(search_query.text, app_listings);
                                 return;
                             }
-                            if (current_page == "repos"){
-                                searchList(search_query.text, repo_list);
-                                return;
-                            }
+                            // if (current_page == "repos"){
+                            //     searchList(search_query.text, repo_list);
+                            //     return;
+                            // }
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -896,7 +896,7 @@ Rectangle {
 
     // Searching
     function searchList(text, element){
-
+        
         for (var i = 0; i < element.count; i++) {
             var app = element.get(i);
 
