@@ -870,12 +870,14 @@ Rectangle {
     function clearApplicationList(){
         app_listings.clear()
         installed_apps.clear()
+        app_listing_list.index_selected = -1;
     }
     function addRepositoryToList(repo_name, url){
 
     }
     function clearRepositoryList(){
         repo_list.clear()
+        registered_repo_list.index_selected = -1;
     }
 
     // Funcionality
