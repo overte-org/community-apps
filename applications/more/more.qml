@@ -10,8 +10,6 @@ Rectangle {
     id: root
 
     property string current_page: "app_list"
-    property string last_message_user: ""
-    property date last_message_time: new Date()
 
     Timer {
         interval: 10
@@ -896,7 +894,7 @@ Rectangle {
 
     // Searching
     function searchList(text, element){
-        
+
         for (var i = 0; i < element.count; i++) {
             var app = element.get(i);
 
