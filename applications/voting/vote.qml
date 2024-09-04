@@ -355,7 +355,7 @@ Rectangle {
             Text {
                 id: prompt_question
                 width: parent.width
-                text: "XXXX as a board member"
+                text: "[No prompt set yet]"
                 color: "white"
                 font.pointSize: 20
                 wrapMode: Text.NoWrap
