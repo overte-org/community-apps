@@ -520,40 +520,21 @@ Rectangle {
                 height: parent.height
                 clip: true
 
-                // TODO: Change with icon
-                // Vote cast notification icon
-                Text {
-                    text: "A"
-                    color: "yellow"
-                    x: parent.x + 15
-                    font.pointSize: 12
-                    // visible: vote_cast
-                }
-                // TODO: Change with icon
-                // Vote confirmed notification icon
-                Text {
-                    text: "B"
-                    color: "green"
-                    x: parent.x + 30
-                    font.pointSize: 12
-                    // visible: vote_confirmed
+                // FIXME: Allow more than 9 options
+                // TODO: Replace cap with total amount of options
+                TextField {
+                    width: 50
+                    height: 50
+                    color: "black"
+                    validator: RegExpValidator { regExp: /^[0-9]$/ } 
+                    inputMethodHints: Qt.ImhDigitsOnly 
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Text {
                     text: option
                     anchors.centerIn: parent
                     color: "white"
-                }
-
-
-                MouseArea {
-                    width: parent.width
-                    height: parent.height
-
-                    onClicked: {
-                        // Send vote packet to the javascript side.
-                        toScript({type: 'cast_vote', option: option})
-                    }
                 }
 
             }
@@ -637,6 +618,8 @@ Rectangle {
             }
             // Set the options
             break;
+
+        // Close the poll and remove it from the list of active polls
         case "close_poll":
             current_page = "poll_list"
 

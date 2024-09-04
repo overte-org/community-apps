@@ -13,6 +13,7 @@
 
 // TODO: Documentation
 // TODO: Save questions and answers locally
+// TODO: Allow more than 9 candidates
 
 (() => {
 	"use strict";
