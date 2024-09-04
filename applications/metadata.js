@@ -341,6 +341,15 @@ var metadata = { "applications":
             "jsfile": "hmd3rdPerson/app-hmd3rdPerson.js",
             "icon": "hmd3rdPerson/icon_inactive_white.png",
             "caption": "3rd PERS"
+        },
+        {
+            "isActive": true,
+            "directory": "voting",
+            "name": "General Assembly Voting",
+            "description": "Vote in the General Assembly",
+            "jsfile": "voting/vote.js",
+            "icon": "voting/icon_white.png",
+            "caption": "VOTE"
         }
     ]
 };
