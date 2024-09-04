@@ -21,7 +21,6 @@
 	var appButton;
 	var active = false;
 	var poll = {id: '', title: '', description: '', host: '', question: '', options: []};
-	var receivedPolls = []; // List of poll ids received. 
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
 	Messages.messageReceived.connect(receivedMessage);
@@ -229,7 +228,7 @@
 			// Received a request to see our poll
 			if (message.type == "populate") {
 				// Send our poll information to the server if we are hosting it
-				if (poll.host == MyAvatar.sessionUUID) {
+				if (poll.host == myUuid) {
 					Messages.sendMessage("ga-polls", JSON.stringify({type: "active_poll", poll: poll}));
 				}
 			}
@@ -238,16 +237,16 @@
 			if (message.type == "active_poll") {
 				// If we are not connected to a poll, list polls in the UI
 				if (poll.id == '') {
-					if (receivedPolls.indexOf(message.poll.id) == -1) {
-						receivedPolls.push(message.poll.id);
-						_emitEvent({type: "new_poll", poll: message.poll});
-					}
+					_emitEvent({type: "new_poll", poll: message.poll});
 				}
 			}
 
 			// Polls closed :)
 			if (message.type == "close_poll") { 
+				// Tell UI to close poll
 				_emitEvent({type: "close_poll", poll: {id: message.poll.id}});
+
+				// Unregister self from poll
 				leavePoll();
 			}
 
