@@ -59,9 +59,8 @@
 		if (url == newUrl) {
 			active = true;
 
-			// TODO: Is this needed?
 			// If we are connected to a poll already, repopulate the screen
-			// if (poll.id != '') return populateScreen();
+			if (poll.id != '') return joinPoll({id: poll.id});
 
 			// Request a list of active polls if we are not already in one
 			if (poll.id == '') return getActivePolls();
