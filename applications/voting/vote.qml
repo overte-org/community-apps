@@ -84,7 +84,6 @@ Rectangle {
             Layout.fillWidth: true
             font.pointSize: 18
             color: "white"
-            // Layout.fillHeight: true
         }
         TextField {
             width: 300
@@ -621,8 +620,6 @@ Rectangle {
 
         // Add poll info to the list of active polls
         case "new_poll":
-            console.log("\n\nWe are doing the thing")
-            console.log(JSON.stringify(message.poll))
             active_polls.append(message.poll)
             break;
         
@@ -642,8 +639,15 @@ Rectangle {
             break;
         case "close_poll":
             current_page = "poll_list"
-            // TODO: Delete poll off of the list
-            // TODO: Clear poll client view?
+
+            // Find the poll with the matching ID and remove it from active polls
+            for (var i = 0; i < active_polls.count; i++) {
+                var element = active_polls.get(i);
+                if (element.id == message.poll.id) {
+                    active_polls.remove(i);
+                }
+            }
+            break;
         }
     }
 

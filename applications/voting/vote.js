@@ -12,13 +12,7 @@
 /* global Script Tablet Messages MyAvatar Uuid*/
 
 // TODO: Documentation
-// TODO: Start poll
-// TODO: View active polls
-// TODO: Join poll
-// TODO: Create poll question and answers
-// TODO: Create pre-fill answers (checkbox?)
 // TODO: Save questions and answers locally
-// TODO: View previous answers
 
 (() => {
 	"use strict";
@@ -115,17 +109,17 @@
 	function deletePoll(){
 		// Check to see if we are hosting the poll
 		if (poll.host != myUuid) return; // We are not the host of this poll
-		
+
 		console.log("Closing active poll");
 
 		// Submit the termination message to all clients
-		Messages.sendMessage("ga-polls", JSON.stringify({type: "close_poll"}));
+		Messages.sendMessage("ga-polls", JSON.stringify({type: "close_poll", poll: {id: poll.id}}));
+
+		// Update the UI screen
+		_emitEvent({type: "close_poll", poll: {id: poll.id}});
 
 		// Clear our active poll data
 		poll = { host: '', title: '', description: '', id: '', question: '', options: []};
-
-		// Update the UI screen
-		_emitEvent({type: "close_poll"});
 	}
 
 	// Join an existing poll hosted by another user
@@ -250,8 +244,8 @@
 
 			// Polls closed :)
 			if (message.type == "close_poll") { 
+				_emitEvent({type: "close_poll", poll: {id: message.poll.id}});
 				leavePoll();
-				_emitEvent({type: "close_poll"});
 			}
 
 			break;
