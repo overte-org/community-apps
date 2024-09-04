@@ -648,6 +648,12 @@ Rectangle {
                 }
             }
             break;
+
+        // Open the host view
+        // Only called when the host closes their tablet and reopens it.
+        case "rehost":
+            current_page = "poll_host_view"
+            break;
         }
     }
 

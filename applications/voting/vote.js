@@ -60,7 +60,10 @@
 			active = true;
 
 			// If we are connected to a poll already, repopulate the screen
-			if (poll.id != '') return joinPoll({id: poll.id});
+			if (poll.id != '' && poll.host != myUuid) return joinPoll({id: poll.id});
+
+			// If we are hosting a poll, switch the screen
+			if (poll.id != '' && poll.host == myUuid) return _emitEvent({type: "rehost"});
 
 			// Request a list of active polls if we are not already in one
 			if (poll.id == '') return getActivePolls();
