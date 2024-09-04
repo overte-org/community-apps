@@ -18,32 +18,36 @@ Rectangle {
     ColumnLayout {
         width: parent.width
         height: parent.height - 40
-        // anchors.top: navigation_bar.bottom
         visible: current_page == "poll_list"
 
         Item {
-            height: 40
-            width: parent.width - 40
+            height: 50
+            width: parent.width
 
             Rectangle {
                 color: "green"
-                width: parent.width
-                height: 30
-            }
+                width: parent.width - 40
+                height: 40
+                y: 10
+                anchors.horizontalCenter: parent.horizontalCenter
 
-            Text {
-                text: "Create Poll"
-                font.pointSize: 20
-            }
+                Text {
+                    anchors.centerIn: parent
+                    text: "Create Poll"
+                    font.pointSize: 18
+                    color: "white"
+                }
 
-            MouseArea {
-                anchors.fill: parent
+                MouseArea {
+                    anchors.fill: parent
 
-                onClicked: {
-                    current_page = "poll_create";
+                    onClicked: {
+                        current_page = "poll_create";
+                    }
                 }
             }
         }
+
 
         ListView {
             property int index_selected: -1
