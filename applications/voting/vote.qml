@@ -605,14 +605,15 @@ Rectangle {
 
         // Add poll info to the list of active polls
         case "new_poll":
-            active_polls.append(message.poll)
+            active_polls.append(message.poll);
             break;
         
         // Populate the client view of the current question and options
         case "poll_prompt":
-            current_page = "poll_client_view"
+            current_page = "poll_client_view";
+            active_polls_list.index_selected = -1; // Unselect whatever poll was selected (If one was selected)
             // Clear options
-            poll_option_model.clear()
+            poll_option_model.clear();
 
             // Set values
             prompt_question.text = message.prompt.question
