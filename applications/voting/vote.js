@@ -38,6 +38,7 @@
 	Script.scriptEnding.connect(function () {
 		console.log("Shutting Down");
 		tablet.removeButton(appButton);
+		deletePoll();
 	});
 
 	// Overlay button toggle
@@ -111,6 +112,9 @@
 	function deletePoll(){
 		// Check to see if we are hosting the poll
 		if (poll.host != myUuid) return; // We are not the host of this poll
+
+		// We are in a poll
+		if (poll.id == '') return;
 
 		console.log("Closing active poll");
 

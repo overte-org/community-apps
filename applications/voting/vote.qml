@@ -539,6 +539,7 @@ Rectangle {
                     text: option
                     anchors.centerIn: parent
                     color: "white"
+                    font.pointSize: 14
                 }
 
             }
