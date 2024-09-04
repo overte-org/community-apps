@@ -627,7 +627,7 @@ Rectangle {
 
         // Close the poll and remove it from the list of active polls
         case "close_poll":
-            current_page = "poll_list"
+            if (message.isOurPoll) current_page = "poll_list"
 
             // Find the poll with the matching ID and remove it from active polls
             for (var i = 0; i < active_polls.count; i++) {

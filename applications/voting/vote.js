@@ -14,6 +14,7 @@
 // TODO: Documentation
 // TODO: Save questions and answers locally
 // TODO: Allow more than 9 candidates
+// TODO: Allow host voting
 
 (() => {
 	"use strict";
@@ -247,11 +248,13 @@
 
 			// Polls closed :)
 			if (message.type == "close_poll") { 
+				var isOurPoll = poll.id == message.poll.id;
+
 				// Tell UI to close poll
-				_emitEvent({type: "close_poll", poll: {id: message.poll.id}});
+				_emitEvent({type: "close_poll", change_page: isOurPoll, poll: {id: message.poll.id}});
 
 				// Unregister self from poll
-				leavePoll();
+				if (isOurPoll) leavePoll();
 			}
 
 			break;
