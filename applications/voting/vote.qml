@@ -385,6 +385,7 @@ Rectangle {
                 delegate: Loader {
                     property int delegateIndex: index
                     property string delegateOption: model.option
+                    property int delegateRank: model.rank
                     width: poll_options.width
 
                     sourceComponent: poll_option_template
@@ -393,7 +394,60 @@ Rectangle {
             
             ListModel {
                 id: poll_option_model
+            }
+        }
 
+        // Add Option Button
+        Item {
+            width: parent.width
+            height: 40
+
+            RowLayout {
+                anchors.centerIn: parent
+
+                Rectangle {
+                    width: 150
+                    height: 40
+                    color: "#c0bfbc"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text:"Cast ballot"
+                        color: "black"
+                        font.pointSize:18
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+
+
+                        // TODO: Turn into function and move to root
+                        onClicked: {
+                            var votes = {};
+                            var orderedArray = [];
+                            
+                            // Find all options and order then from first to last
+                            // poll_option_model.get(i) gets them in order
+
+                            for (var i = 0; i < poll_option_model.count; ++i) {
+                                var option = poll_option_model.get(i); //
+
+                                // FIXME: Stringify this or make it JSON safe. Requires cross-verification
+                                votes[option.option] = option.rank
+                            }
+
+                            // TODO: This is painful to look at.
+                            // Sort the object from lowest to heighest
+                            var entries = Object.entries(votes);
+                            entries.sort((a, b) => a[1] - b[1]);
+                            // Get names instead of numbers
+                            var onlyNames = entries.map((entry) => entry[0]);
+
+                            // Send our ballot to the host (by sending it to everyone in the poll lol)
+                            toScript({type: "cast_vote", ballot: onlyNames});
+                        }
+                    }
+                }
             }
         }
     }
@@ -505,19 +559,10 @@ Rectangle {
         Rectangle {
             property int index: delegateIndex
             property string option: delegateOption
-
-            property bool selected: (active_polls_list.index_selected == index)
-            property bool vote_cast: false 
-            property bool vote_confirmed: false 
-            height: vote_confirmed ? 100 : 60 
+            property int rank: delegateRank
+            height: 60 
 
             color: index % 2 === 0 ? "transparent" : Qt.rgba(0.15,0.15,0.15,1)
-
-            Behavior on height {
-                NumberAnimation {
-                    duration: 100
-                }
-            }
 
             Item {
                 width: parent.width - 10
@@ -530,10 +575,18 @@ Rectangle {
                 TextField {
                     width: 50
                     height: 50
+                    font.pointSize: 20
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter    
                     color: "black"
                     validator: RegExpValidator { regExp: /^[0-9]$/ } 
                     inputMethodHints: Qt.ImhDigitsOnly 
                     anchors.verticalCenter: parent.verticalCenter
+                    text: rank
+
+                    onTextChanged: {
+                        poll_option_model.setProperty(index, "rank", Number(text))
+                    }
                 }
 
                 Text {
@@ -542,7 +595,6 @@ Rectangle {
                     color: "white"
                     font.pointSize: 14
                 }
-
             }
         }
     }
@@ -621,7 +673,7 @@ Rectangle {
             prompt_question.text = message.prompt.question
             for (var option of message.prompt.options){
                 console.log("adding option "+ option);
-                poll_option_model.append({option: option}) 
+                poll_option_model.append({option: option, rank: 0}) 
             }
             // Set the options
             break;

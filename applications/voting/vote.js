@@ -22,6 +22,7 @@
 	var appButton;
 	var active = false;
 	var poll = {id: '', title: '', description: '', host: '', question: '', options: []};
+	var responses = {};
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
 	Messages.messageReceived.connect(receivedMessage);
@@ -179,6 +180,14 @@
 
 		console.log(`Emitting prompt`);
 		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", prompt: {question: poll.question, options: poll.options}}));
+	}
+
+	// Take the gathered responses and preform the election
+	function preformElection(){
+		// Get the array of responses in a list
+		let voteList = Object.values(responses);
+
+		console.log(voteList)
 	}
 
 	// Create a UUID or turn an existing UUID into a string
