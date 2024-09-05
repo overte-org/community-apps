@@ -365,6 +365,7 @@ Rectangle {
             }
         }
 
+        // TODO: Keep track of used numbers and blacklist them
         // Options
         Item {
             width: parent.width

@@ -164,13 +164,13 @@
 
 	// Cast a vote on a poll
 	function castVote(event) {
-		console.log(`Casting vote to ${poll.id}: ${event}`);
+		console.log(`Casting vote to ${poll.id}`);
 
 		// Check if poll is valid
 		if (poll == undefined || poll.id == '') return;
 
-		// Send vote to server
-		Messages.sendMessage(poll.id, JSON.stringify({type: "vote", option: event.option}));
+		// Send vote to users in poll
+		Messages.sendMessage(poll.id, JSON.stringify({type: "vote", ballot: event.ballot, uuid: myUuid}));
 	}
 
 	// Emit the prompt question and options to the server
@@ -192,8 +192,7 @@
 	// Communication
 	function fromQML(event) {
 		console.log(`New QML event:\n${JSON.stringify(event)}`);
-		// event = JSON.parse(event);
-		console.log(event.type);
+		
 		switch (event.type) {
 		case "create_poll":
 			createPoll(event.poll);
