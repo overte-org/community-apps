@@ -232,6 +232,9 @@
 	}
 
 	function receivedMessage(channel, message){
+		// Not for us, ignore!
+		if (channel !== 'ga-polls' && channel !== poll.id) return;
+
 		console.log(`Received message on ${channel} from server:\n${JSON.stringify(message)}\n`);
 
 		message = JSON.parse(message);
