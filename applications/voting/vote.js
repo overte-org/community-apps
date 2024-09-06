@@ -66,7 +66,9 @@
 			if (poll.id != '' && poll.host != myUuid) return joinPoll({id: poll.id});
 
 			// If we are hosting a poll, switch the screen
-			if (poll.id != '' && poll.host == myUuid) return _emitEvent({type: "rehost"});
+			if (poll.id != '' && poll.host == myUuid) {
+				return _emitEvent({type: "rehost", prompt: {question: poll.question, options: poll.options}});
+			}
 
 			// Request a list of active polls if we are not already in one
 			if (poll.id == '') return getActivePolls();

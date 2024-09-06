@@ -695,6 +695,14 @@ Rectangle {
         // Only called when the host closes their tablet and reopens it.
         case "rehost":
             current_page = "poll_host_view"
+
+            poll_to_respond_title.text = message.prompt.question
+
+            poll_option_model_host.clear();
+            for (var option of message.prompt.options){
+                console.log("adding option "+ option);
+                poll_option_model_host.append({option: option})
+            }
             break;
         }
     }
