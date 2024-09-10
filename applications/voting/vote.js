@@ -13,19 +13,16 @@
 
 // TODO: Documentation
 // TODO: Allow host voting
-// TODO: Debug mode?
-// FIXME: Handle ties
+// FIXME: Handle ties: kill both of tied results
 
 // TODO: Voting results page
 // TODO: Joining poll sometimes causes to double stack on other clients poll_list?
-// FIXME: Closing application also prompts for user confirmation. Probably don't want that.
 
 (() => {
 	"use strict";
 	let tablet;
 	let appButton;
 	let active = false;
-	let hasJoined = false;
 	const debug = false;
 
 	let poll = {id: '', title: '', description: '', host: '', question: '', options: []}; // The current poll
@@ -49,7 +46,7 @@
 	Script.scriptEnding.connect(function () {
 		console.log("Shutting Down");
 		tablet.removeButton(appButton);
-		deletePoll();
+		deletePoll(true);
 	});
 
 	// Overlay button toggle
@@ -130,16 +127,18 @@
 	}
 
 	// Closes the poll and return to the main menu
-	function deletePoll(){
+	function deletePoll(bypassPrompt){
 		// Check to see if we are hosting the poll
 		if (poll.host != myUuid) return; // We are not the host of this poll
 
 		// We are in a poll
 		if (poll.id == '') return;
 
-		var answer = Window.confirm('Are you sure you want to close the poll?')
-
-		if (!answer) return;
+		// Confirm to user if they want to close the poll
+		if (!bypassPrompt) {
+			var answer = Window.confirm('Are you sure you want to close the poll?')
+			if (!answer) return;
+		}
 
 		console.log("Closing active poll");
 
