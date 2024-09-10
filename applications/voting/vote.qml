@@ -234,23 +234,21 @@ Rectangle {
             ListModel {
                 id: poll_option_model_host
 
-                ListElement {
-                    option: "Yes"
-                }
-
-                ListElement {
-                    option: "No"
-                }
+                // ListElement {
+                //     option: "Prefill"
+                // }
             }
         }
 
         // Add Option Button
-        Item {
+        ColumnLayout {
+            anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
             height: 40
 
             RowLayout {
-                anchors.centerIn: parent
+                width: parent.width
+                anchors.horizontalCenter: parent.horizontalCenter
 
                 Rectangle {
                     width: 150
@@ -322,7 +320,30 @@ Rectangle {
                 }
             }
 
+            RowLayout {
+                width: parent.width
+                anchors.horizontalCenter: parent.horizontalCenter
 
+                Rectangle {
+                    width: 150
+                    height: 40
+                    color: "#1c71d8"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text:"Run Election"
+                        color: "white"
+                        font.pointSize:18
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            toScript({type: "run_election"})
+                        }
+                    }
+                }
+            }
         }
     } 
 
@@ -436,10 +457,16 @@ Rectangle {
                                 votes[option.option] = option.rank
                             }
 
-                            // TODO: This is painful to look at.
+                            // FIXME: This is painful to look at.
                             // Sort the object from lowest to heighest
                             var entries = Object.entries(votes);
                             entries.sort((a, b) => a[1] - b[1]);
+
+                            // Remove entries that have a numerical value of 0
+                            // FIXME: Inconsistant with how we are handling non-votes in the script side?
+                            // This is our "leave seat empty" or "non-vote"
+                            entries = entries.filter((entry) => entry[1]!== 0);
+
                             // Get names instead of numbers
                             var onlyNames = entries.map((entry) => entry[0]);
 

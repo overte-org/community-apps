@@ -12,17 +12,27 @@
 /* global Script Tablet Messages MyAvatar Uuid*/
 
 // TODO: Documentation
-// TODO: Save questions and answers locally
 // TODO: Allow more than 9 candidates
 // TODO: Allow host voting
+// TODO: Sound for new vote
+// TODO: Clear poll host view on creating new poll
+// TODO: Confirm before closing poll
+// TODO: Debug mode?
+// FIXME: Handle ties
+// FIXME: Joining poll resets everyones vote
+// FIXME: Running election without votes causes max stack error
 
 (() => {
 	"use strict";
 	var tablet;
 	var appButton;
 	var active = false;
-	var poll = {id: '', title: '', description: '', host: '', question: '', options: []};
-	var responses = {};
+	const debug = false;
+
+	var poll = {id: '', title: '', description: '', host: '', question: '', options: []}; // The current poll
+	var responses = {}; // All ballots received and to be used by the election function.
+	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
+
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
 	Messages.messageReceived.connect(receivedMessage);
@@ -100,6 +110,7 @@
 		poll.title = pollInformation.title;
 		poll.description = pollInformation.description;
 		console.log(`Active poll set as:\nid:${poll.id}\ntitle:${poll.title}\ndescription:${poll.description}`);
+		responses = {}; // Clear any lingering responses
 
 		// Send message to all clients
 		Messages.sendMessage("ga-polls", JSON.stringify({type: "active_poll", poll: poll}));
@@ -110,6 +121,13 @@
 
 		// Update the UI screen
 		_emitEvent({type: "create_poll"});
+
+		// Debug: Create a lot of fake ballots
+		if (!debug) return;
+
+		for (let i = 0; i < 25; ++i) {
+			_debugDummyBallot();
+		}
 	}
 
 	// Closes the poll and return to the main menu
@@ -180,16 +198,78 @@
 	function emitPrompt(){
 		if (poll.host != myUuid) return; // We are not the host of this poll
 
+		console.log(`Clearing responses`)
+		responses = {}
+
 		console.log(`Emitting prompt`);
 		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", prompt: {question: poll.question, options: poll.options}}));
 	}
 
 	// Take the gathered responses and preform the election
+	// TODO: Simplify logging of critical information
+	// FIXME: Recursive function call
 	function preformElection(){
-		// Get the array of responses in a list
-		let voteList = Object.values(responses);
+		let firstVotes = [];
+		let voteObject = {}; 
 
-		console.log(voteList)
+		// TODO: Debug total votes at beginning of election vs ending
+
+		Object.keys(responses).forEach((key) => {
+			let uuid = key;
+			let vote = responses[uuid];
+
+			// Assign first vote to new array
+			firstVotes.push(vote[0]);
+		});
+
+		for (let i = 0; i < firstVotes.length; i++) {
+			// Check if firstVotes index exists
+			if (!firstVotes[i]) firstVotes[i] = -1; // FIXME: We need a special case for "Non-vote" or "Vacant?"
+
+			// Create voteObject index if it does not exist
+			if (!voteObject[firstVotes[i]]) voteObject[firstVotes[i]] = 0;
+
+			// Increment value for each vote
+			voteObject[firstVotes[i]]++
+		}
+
+		console.log(`Votes: ${JSON.stringify(voteObject, null, 4)}`);
+
+		// Check to see if there is a majority vote
+		let totalVotes = Object.keys(responses).length; // TODO: Check to make sure this value never changes.
+		let majority = Math.floor(totalVotes / 2); 
+
+		// Sort the voteObject by value in descending order
+		const sortedArray = Object.entries(voteObject).sort(([, a], [, b]) => b - a); // FIXME: This works but looks ugly
+		const sortedObject = Object.fromEntries(sortedArray);
+
+		// Check the most voted for option to see if it makes up over 50% of votes
+		// NOTE: Has to be *over* 50%.
+		if (sortedObject[Object.keys(sortedObject)[0]] > majority) {
+			// Show dialog of election statistics
+			console.log(`\nWinner: ${Object.keys(sortedObject)[0]}\nElection rounds: ${electionIterations}\nVotes counted: ${totalVotes}`);
+			return; // Winner was selected. We are done!
+		}; 
+
+		// If there is not a majority vote, remove the least popular candidate and call preformElection() again
+		let leastPopularIndex = Object.keys(sortedObject).length - 1;
+		let leastPopular = Object.keys(sortedObject)[leastPopularIndex];
+
+		console.log(`Removing least popular: ${JSON.stringify(leastPopular, null, 4)}`);
+
+		// Go into each vote and delete the selected least popular candidate
+		Object.keys(responses).forEach((key) => {
+			let uuid = key;
+			// Remove the least popular candidate from each vote.
+			responses[uuid].splice(responses[uuid].indexOf(leastPopular), 1);
+			console.log(responses[uuid]);
+		});
+
+		// Update statistics
+		electionIterations++; 
+
+		// Run again
+		preformElection();
 	}
 
 	// Create a UUID or turn an existing UUID into a string
@@ -198,6 +278,21 @@
 
 		existingUuid = Uuid.toString(existingUuid); // Scripts way to turn it into a string
 		return existingUuid.replace(/[{}]/g, ''); // Remove '{' and '}' from UUID string >:(
+	}
+
+	function _debugDummyBallot() {
+		if (!debug) return; // Just incase...
+		let ballot = getRandomOrder('C1', 'C2', 'C3', 'C4', 'C5', 'C6');
+
+		responses[Object.keys(responses).length.toString()] = ballot;
+
+		function getRandomOrder(...words) {
+			for (let i = words.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[words[i], words[j]] = [words[j], words[i]];
+			}
+			return words;
+		}
 	}
 
 	// Communication
@@ -221,6 +316,9 @@
 			poll.question = event.prompt.question;
 			poll.options = event.prompt.options;
 			emitPrompt();
+			break;
+		case "run_election":
+			preformElection();
 			break;
 		}
 	}
@@ -283,6 +381,20 @@
 				if (poll.host == myUuid) return; // We are the host of this poll
 				console.log(`Prompt:\n ${JSON.stringify(message.prompt)}`);
 				_emitEvent({type: "poll_prompt", prompt: message.prompt});
+			}
+
+			// Received a ballot 
+			if (message.type == "vote") {
+				// Check if we are the host
+				if (poll.host != myUuid) return;
+
+				// Record the ballot
+				responses[message.uuid] = message.ballot;
+
+				// Emit a echo so the voter knows we have received it
+				// TODO:
+
+				// console.log(JSON.stringify(responses));
 			}
 
 		}
