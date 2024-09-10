@@ -15,7 +15,6 @@
 // TODO: Allow host voting
 // TODO: Sound for new vote
 // TODO: Clear poll host view on creating new poll
-// TODO: Confirm before closing poll
 // TODO: Debug mode?
 // FIXME: Handle ties
 // FIXME: Joining poll resets everyones vote
@@ -139,13 +138,17 @@
 		// We are in a poll
 		if (poll.id == '') return;
 
+		var answer = Window.confirm('Are you sure you want to close the poll?')
+
+		if (!answer) return;
+
 		console.log("Closing active poll");
 
 		// Submit the termination message to all clients
 		Messages.sendMessage("ga-polls", JSON.stringify({type: "close_poll", poll: {id: poll.id}}));
 
 		// Update the UI screen
-		_emitEvent({type: "close_poll", poll: {id: poll.id}});
+		_emitEvent({type: "close_poll", poll: {id: poll.id}, change_page: true});
 
 		// Clear our active poll data
 		poll = { host: '', title: '', description: '', id: '', question: '', options: []};

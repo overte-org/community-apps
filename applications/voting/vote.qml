@@ -266,7 +266,6 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
                             toScript({type: "close_poll"});
-                            current_page = "poll_list";
                         }
                     }
                 }
