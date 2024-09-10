@@ -16,10 +16,10 @@
 // TODO: Sound for new vote
 // TODO: Debug mode?
 // FIXME: Handle ties
-// FIXME: Running election without votes causes max stack error
 
 // TODO: Voting results page
 // TODO: Joining poll sometimes causes to double stack on other clients poll_list?
+// FIXME: Closing application also prompts for user confirmation. Probably don't want that.
 
 (() => {
 	"use strict";
@@ -236,6 +236,9 @@
 			// Increment value for each vote
 			voteObject[firstVotes[i]]++
 		}
+
+		// Don't run election if we don't have any votes.
+		if (firstVotes.length == 0) return; 
 
 		console.log(`Votes: ${JSON.stringify(voteObject, null, 4)}`);
 
