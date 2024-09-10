@@ -13,7 +13,6 @@
 
 // TODO: Documentation
 // TODO: Allow host voting
-// TODO: Sound for new vote
 // TODO: Debug mode?
 // FIXME: Handle ties
 
@@ -391,6 +390,8 @@
 				// TODO: This is still silly. Try using UUIDs per prompt and check if we are answering the same question by id?
 				// Don't recreate the prompt if we already have the matching question
 				if (message.prompt.question == poll.question) return;
+				const newPollSound = SoundCache.getSound(Script.resolvePath("./sound/new_vote.mp3"))
+				Audio.playSystemSound(newPollSound, {volume: 0.5});
 				_emitEvent({type: "poll_prompt", prompt: message.prompt});
 
 				poll.question = message.prompt.question;
