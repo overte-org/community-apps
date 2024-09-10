@@ -17,20 +17,20 @@
 // TODO: Clear poll host view on creating new poll
 // TODO: Debug mode?
 // FIXME: Handle ties
-// FIXME: Joining poll resets everyones vote
 // FIXME: Running election without votes causes max stack error
 
 // TODO: Voting results page
 
 (() => {
 	"use strict";
-	var tablet;
-	var appButton;
-	var active = false;
+	let tablet;
+	let appButton;
+	let active = false;
+	let hasJoined = false;
 	const debug = false;
 
-	var poll = {id: '', title: '', description: '', host: '', question: '', options: []}; // The current poll
-	var responses = {}; // All ballots received and to be used by the election function.
+	let poll = {id: '', title: '', description: '', host: '', question: '', options: []}; // The current poll
+	let responses = {}; // All ballots received and to be used by the election function.
 	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
 
 	const url = Script.resolvePath("./vote.qml");
@@ -384,7 +384,13 @@
 			if (message.type == "poll_prompt") {
 				if (poll.host == myUuid) return; // We are the host of this poll
 				console.log(`Prompt:\n ${JSON.stringify(message.prompt)}`);
+
+				// TODO: This is still silly. Try using UUIDs per prompt and check if we are answering the same question by id?
+				// Don't recreate the prompt if we already have the matching question
+				if (message.prompt.question == poll.question) return;
 				_emitEvent({type: "poll_prompt", prompt: message.prompt});
+
+				poll.question = message.prompt.question;
 			}
 
 			// Received a ballot 
