@@ -14,12 +14,12 @@
 // TODO: Documentation
 // TODO: Allow host voting
 // TODO: Sound for new vote
-// TODO: Clear poll host view on creating new poll
 // TODO: Debug mode?
 // FIXME: Handle ties
 // FIXME: Running election without votes causes max stack error
 
 // TODO: Voting results page
+// TODO: Joining poll sometimes causes to double stack on other clients poll_list?
 
 (() => {
 	"use strict";

@@ -159,7 +159,6 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         toScript({type: "create_poll", poll: {title: poll_to_create_title.text, description: poll_to_create_description.text}});
-                        current_page = "poll_host_view";
                     }
                 }
             }
@@ -681,6 +680,12 @@ Rectangle {
         switch (message.type){
         // Switch view to the create poll view
         case "create_poll":
+            // Reset poll host page
+            poll_to_respond_title.text = "Prompt"
+            poll_option_model_host.clear();
+
+            // Show host page
+            current_page = "poll_host_view";
             break;
 
         // Add poll info to the list of active polls
