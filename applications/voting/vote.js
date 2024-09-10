@@ -12,7 +12,6 @@
 /* global Script Tablet Messages MyAvatar Uuid*/
 
 // TODO: Documentation
-// TODO: Allow more than 9 candidates
 // TODO: Allow host voting
 // TODO: Sound for new vote
 // TODO: Clear poll host view on creating new poll
@@ -21,6 +20,8 @@
 // FIXME: Handle ties
 // FIXME: Joining poll resets everyones vote
 // FIXME: Running election without votes causes max stack error
+
+// TODO: Voting results page
 
 (() => {
 	"use strict";

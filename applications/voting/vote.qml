@@ -591,22 +591,21 @@ Rectangle {
 
             color: index % 2 === 0 ? "transparent" : Qt.rgba(0.15,0.15,0.15,1)
 
-            Item {
+            Row {
                 width: parent.width - 10
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: parent.height
                 clip: true
 
-                // FIXME: Allow more than 9 options
                 // TODO: Replace cap with total amount of options
                 TextField {
-                    width: 50
+                    width: 70
                     height: 50
                     font.pointSize: 20
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter    
                     color: "black"
-                    validator: RegExpValidator { regExp: /^[0-9]$/ } 
+                    validator: RegExpValidator { regExp: /^[0-9]+$/ } 
                     inputMethodHints: Qt.ImhDigitsOnly 
                     anchors.verticalCenter: parent.verticalCenter
                     text: rank
@@ -617,6 +616,7 @@ Rectangle {
                 }
 
                 Text {
+                    Layout.fillWidth: true
                     text: option
                     anchors.centerIn: parent
                     color: "white"
