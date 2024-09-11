@@ -569,9 +569,8 @@ Rectangle {
         }
 
         // TODO: Style: Not centered. Remake.
-        // Host actions
+        // Client actions
         RowLayout {
-            visible: is_host
             width: parent.width
             anchors.horizontalCenter: parent.horizontalCenter
 
@@ -580,7 +579,7 @@ Rectangle {
                 width: 150
                 height: 40
                 color: "#c0bfbc"
-                visible: (is_host && host_can_vote) || !is_host
+                visible: ((is_host && host_can_vote) || !is_host)
 
                 Text {
                     anchors.centerIn: parent
@@ -625,7 +624,7 @@ Rectangle {
                 }
             }
 
-            // Preform Election
+            // Return to poll settings
             Rectangle {
                 width: 150
                 height: 40
@@ -641,6 +640,7 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
+                        current_page = "poll_host_view"
                     }
                 }
             }
