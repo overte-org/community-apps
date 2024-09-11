@@ -17,6 +17,7 @@
 
 // TODO: Voting results page
 // TODO: Joining poll sometimes causes to double stack on other clients poll_list?
+// TODO: Do active polls persist across domain leave? If so close them on session leave
 
 (() => {
 	"use strict";
@@ -25,7 +26,7 @@
 	let active = false;
 	const debug = false;
 
-	let poll = {id: '', title: '', description: '', host: '', question: '', options: []}; // The current poll
+	let poll = {id: '', title: '', description: '', host: '', question: '', options: [], host_can_vote: false}; // The current poll
 	let responses = {}; // All ballots received and to be used by the election function.
 	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
 
@@ -117,13 +118,6 @@
 
 		// Update the UI screen
 		_emitEvent({type: "create_poll"});
-
-		// Debug: Create a lot of fake ballots
-		if (!debug) return;
-
-		for (let i = 0; i < 25; ++i) {
-			_debugDummyBallot();
-		}
 	}
 
 	// Closes the poll and return to the main menu
@@ -200,9 +194,6 @@
 	function emitPrompt(){
 		if (poll.host != myUuid) return; // We are not the host of this poll
 
-		console.log(`Clearing responses`)
-		responses = {}
-
 		console.log(`Emitting prompt`);
 		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", prompt: {question: poll.question, options: poll.options}}));
 	}
@@ -252,6 +243,7 @@
 		// NOTE: Has to be *over* 50%.
 		if (sortedObject[Object.keys(sortedObject)[0]] > majority) {
 			// Show dialog of election statistics
+			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", winner: Object.keys(sortedObject)[0], rounds: electionIterations, votesCounted: totalVotes}));
 			console.log(`\nWinner: ${Object.keys(sortedObject)[0]}\nElection rounds: ${electionIterations}\nVotes counted: ${totalVotes}`);
 			return; // Winner was selected. We are done!
 		}; 
@@ -287,9 +279,9 @@
 
 	function _debugDummyBallot() {
 		if (!debug) return; // Just incase...
-		let ballot = getRandomOrder('C1', 'C2', 'C3', 'C4', 'C5', 'C6');
-
-		responses[Object.keys(responses).length.toString()] = ballot;
+		let ballot = getRandomOrder(...poll.options);
+		const responsesKeyName = Object.keys(responses).length.toString();
+		responses[responsesKeyName] = ballot;
 
 		function getRandomOrder(...words) {
 			for (let i = words.length - 1; i > 0; i--) {
@@ -320,9 +312,17 @@
 		case "prompt":
 			poll.question = event.prompt.question;
 			poll.options = event.prompt.options;
+			poll.host_can_vote = event.host_can_vote
 			emitPrompt();
 			break;
 		case "run_election":
+			// Debug: Create a lot of fake ballots
+			if (debug) {
+				for (let i = 0; i < 25; ++i) {
+					_debugDummyBallot();
+				}
+			}
+
 			preformElection();
 			break;
 		}
@@ -383,14 +383,16 @@
 
 			// Received poll information
 			if (message.type == "poll_prompt") {
-				if (poll.host == myUuid) return; // We are the host of this poll
 				console.log(`Prompt:\n ${JSON.stringify(message.prompt)}`);
 
 				// TODO: This is still silly. Try using UUIDs per prompt and check if we are answering the same question by id?
 				// Don't recreate the prompt if we already have the matching question
-				if (message.prompt.question == poll.question) return;
+				if (message.prompt.question == poll.question && !poll.host_can_vote) return;
+
+				// Play sound for new poll
 				const newPollSound = SoundCache.getSound(Script.resolvePath("./sound/new_vote.mp3"))
 				Audio.playSystemSound(newPollSound, {volume: 0.5});
+
 				_emitEvent({type: "poll_prompt", prompt: message.prompt});
 
 				poll.question = message.prompt.question;
@@ -408,6 +410,11 @@
 				// TODO:
 
 				// console.log(JSON.stringify(responses));
+			}
+
+			// Winner was broadcasted
+			if (message.type == "poll_winner") {
+				_emitEvent({type: "poll_winner", winner: message.winner, rounds: message.rounds, votesCounted: message.votes});
 			}
 
 		}

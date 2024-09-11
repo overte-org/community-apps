@@ -1,5 +1,5 @@
 import QtQuick 2.7
-import QtQuick.Controls 2.0
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import controlsUit 1.0 as HifiControlsUit
 
@@ -10,9 +10,11 @@ Rectangle {
     height: 700
     id: root
 
-    // property string current_page: "poll_host_view"
+    // property string current_page: "poll_results"
 
     property string current_page: "poll_list"
+    property bool host_can_vote: false
+    property bool is_host: false 
 
     // Poll List view
     ColumnLayout {
@@ -119,6 +121,26 @@ Rectangle {
             wrapMode: Text.WordWrap
             id: poll_to_create_description
 
+        }
+
+        RowLayout {
+            width: parent.width
+
+            Text {
+                text: "Allow host voting"
+                color:"white"
+                font.pointSize: 12
+                Layout.fillWidth: true
+            }
+
+            CheckBox {
+                width: 30
+                height: 25
+                checked: false
+                onToggled: {
+                    host_can_vote = checked
+                }
+            }
         }
 
         // Submit button
@@ -239,7 +261,7 @@ Rectangle {
             }
         }
 
-        // Add Option Button
+        // Host actions
         ColumnLayout {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
@@ -249,6 +271,7 @@ Rectangle {
                 width: parent.width
                 anchors.horizontalCenter: parent.horizontalCenter
 
+                // Close poll
                 Rectangle {
                     width: 150
                     height: 40
@@ -269,6 +292,7 @@ Rectangle {
                     }
                 }
 
+                // Add poll option
                 Rectangle {
                     width: 40
                     height: 40
@@ -289,6 +313,7 @@ Rectangle {
                     }
                 }
 
+                // Submit the poll to the users
                 Rectangle {
                     width: 150
                     height: 40
@@ -312,32 +337,12 @@ Rectangle {
                                 options.push(element.option)
                             }
 
-                            toScript({type: "prompt", prompt: {question: poll_to_respond_title.text, options: options}})
-                        }
-                    }
-                }
-            }
+                            // Send the prompt to the server
+                            toScript({type: "prompt", prompt: {question: poll_to_respond_title.text, options: options}, host_can_vote: host_can_vote});
 
-            RowLayout {
-                width: parent.width
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                Rectangle {
-                    width: 150
-                    height: 40
-                    color: "#1c71d8"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text:"Run Election"
-                        color: "white"
-                        font.pointSize:18
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            toScript({type: "run_election"})
+                            // If the host can vote, change the screen to the client view to allow the vote
+                            if (host_can_vote) current_page = "poll_client_view";
+                            else current_page = "poll_results"
                         }
                     }
                 }
@@ -441,6 +446,7 @@ Rectangle {
 
 
                         // TODO: Turn into function and move to root
+                        // TODO: Validate responses
                         onClicked: {
                             var votes = {};
                             var orderedArray = [];
@@ -470,11 +476,226 @@ Rectangle {
 
                             // Send our ballot to the host (by sending it to everyone in the poll lol)
                             toScript({type: "cast_vote", ballot: onlyNames});
+
+                            // Change screen to results screen
+                            current_page = "poll_results"
                         }
                     }
                 }
             }
         }
+    }
+
+    // Poll results
+    ColumnLayout {
+        width: parent.width
+        height: parent.height - 40
+        visible: current_page == "poll_results"
+
+        // Header
+        Item {
+            height: 100
+            Layout.fillWidth: true
+
+            Rectangle {
+                color: "black"
+                anchors.fill: parent
+            }
+
+            Text {
+                width: parent.width
+                text: "Winner"
+                color: "gray"
+                font.pointSize: 12
+                wrapMode: Text.NoWrap
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                y: 20
+            }
+            Text {
+                id: poll_winner
+                width: parent.width
+                text: "Me"
+                color: "white"
+                font.pointSize: 20
+                wrapMode: Text.NoWrap
+                anchors.top: parent.children[1].bottom
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        Item {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+
+            ColumnLayout {
+                Layout.fillHeight: true
+                width: parent.width - 40
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                RowLayout {
+                    width: parent.width
+
+                    Text {
+                        text: "Votes recived:"
+                        color: "gray"
+                        Layout.fillWidth: true
+                        font.pointSize: 12
+                    }
+                    Text {
+                        text: "0"
+                        color: "white"
+                        font.pointSize: 14
+                    }
+                }
+
+                RowLayout {
+                    width: parent.width
+
+                    Text {
+                        text: "Iterations:"
+                        color: "gray"
+                        Layout.fillWidth: true
+                        font.pointSize: 12
+                    }
+                    Text {
+                        text: "-"
+                        color: "white"
+                        font.pointSize: 14
+                    }
+                }
+            }
+        }
+
+        // TODO: Style: Not centered. Remake.
+        // Host actions
+        RowLayout {
+            visible: is_host
+            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            // Recast vote
+            Rectangle {
+                width: 150
+                height: 40
+                color: "#c0bfbc"
+                visible: (is_host && host_can_vote) || !is_host
+
+                Text {
+                    anchors.centerIn: parent
+                    text:"Recast Vote"
+                    color: "black"
+                    font.pointSize:18
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        current_page = "poll_client_view"
+                    }
+                }
+            }
+        }
+
+        // Host actions
+        RowLayout {
+            visible: is_host
+            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            // Preform Election
+            Rectangle {
+                width: 150
+                height: 40
+                color: "#c0bfbc"
+
+                Text {
+                    anchors.centerIn: parent
+                    text:"Tally Votes"
+                    color: "black"
+                    font.pointSize:18
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        toScript({type: "run_election"})
+                    }
+                }
+            }
+
+            // Preform Election
+            Rectangle {
+                width: 150
+                height: 40
+                color: "#c0bfbc"
+
+                Text {
+                    anchors.centerIn: parent
+                    text:"Poll Settings"
+                    color: "black"
+                    font.pointSize:18
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                    }
+                }
+            }
+        }
+
+        // TODO: View a list of the ballots and the results of the election rounds
+        // Item {
+        //     Layout.fillHeight: true
+        //     Layout.fillWidth: true
+
+        //     // TODO: Allow scrolling
+        //     ScrollView {
+        //         // ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        //         // ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+        //         clip: true
+        //         width: parent.width
+        //         height: parent.height
+
+        //         ColumnLayout {
+        //             Repeater {
+        //                 model: 3
+        //                 ColumnLayout {
+        //                     Text {
+        //                         text: "Round "+ index +": Eleminated XXX"
+        //                         font.pointSize: 18
+        //                         color: "white"
+        //                     }
+
+        //                     Repeater {
+        //                         model: 20
+
+        //                         RowLayout {
+        //                             height: 30
+
+        //                             Repeater {
+        //                                 model: 4
+        //                                 Item {
+        //                                     width: 100
+        //                                     height: 30
+
+        //                                     Text {
+        //                                         text: 'One ' + index
+        //                                         color: "white"
+        //                                         font.pointSize: 12
+        //                                         width: parent.width - 10
+        //                                     }
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 
 
@@ -681,11 +902,15 @@ Rectangle {
         // Switch view to the create poll view
         case "create_poll":
             // Reset poll host page
-            poll_to_respond_title.text = "Prompt"
+            poll_to_respond_title.text = ""
             poll_option_model_host.clear();
 
             // Show host page
             current_page = "poll_host_view";
+
+            // Set variables
+            is_host = true
+            
             break;
 
         // Add poll info to the list of active polls
@@ -720,6 +945,10 @@ Rectangle {
                     active_polls.remove(i);
                 }
             }
+
+            // Set variables
+            is_host = false
+
             break;
 
         // Open the host view
@@ -734,6 +963,9 @@ Rectangle {
                 console.log("adding option "+ option);
                 poll_option_model_host.append({option: option})
             }
+            break;
+        case "poll_winner":
+            poll_winner.text = message.winner
             break;
         }
     }
