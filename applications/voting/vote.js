@@ -12,11 +12,11 @@
 /* global Script Tablet Messages MyAvatar Uuid*/
 
 // TODO: Documentation
+// FIXME: Reset create_poll view when switching screens 
 // FIXME: Handle ties: kill both of tied results
 // FIXME: Handle ties: Last two standing are tied.
 
 // FIXME: Host closes window does not return them to client view when applicable
-// FIXME: User joining in poll results mode causes window to switch to vote mode only if host can vote
 
 (() => {
 	"use strict";

@@ -593,6 +593,7 @@ Rectangle {
         RowLayout {
             width: parent.width
             anchors.horizontalCenter: parent.horizontalCenter
+            visible: !votes_tallied
 
             // Recast vote
             Rectangle {
@@ -927,7 +928,6 @@ Rectangle {
         
         // Populate the client view of the current question and options
         case "poll_prompt":
-            current_page = "poll_client_view";
             active_polls_list.index_selected = -1; // Unselect whatever poll was selected (If one was selected)
             // Clear options
             poll_option_model.clear();
@@ -938,6 +938,10 @@ Rectangle {
                 console.log("adding option "+ option);
                 poll_option_model.append({option: option, rank: 0}) 
             }
+
+            if (is_host) return; 
+
+            current_page = "poll_client_view";
 
             // Clear the results page
             _clearResults()
@@ -979,6 +983,7 @@ Rectangle {
             poll_winner.text = message.winner
             tally_votes_itterations.text = message.rounds
             tally_votes_counted.text = message.votesCounted
+            votes_tallied = true
             break;
         case "received_vote":
             tally_votes_received.text = message.voteCount
