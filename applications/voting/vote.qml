@@ -544,7 +544,25 @@ Rectangle {
                         font.pointSize: 12
                     }
                     Text {
+                        id: tally_votes_received
                         text: "0"
+                        color: "white"
+                        font.pointSize: 14
+                    }
+                }
+
+                RowLayout {
+                    width: parent.width
+
+                    Text {
+                        text: "Votes counted:"
+                        color: "gray"
+                        Layout.fillWidth: true
+                        font.pointSize: 12
+                    }
+                    Text {
+                        id: tally_votes_counted
+                        text: "-"
                         color: "white"
                         font.pointSize: 14
                     }
@@ -560,6 +578,7 @@ Rectangle {
                         font.pointSize: 12
                     }
                     Text {
+                        id: tally_votes_itterations
                         text: "-"
                         color: "white"
                         font.pointSize: 14
@@ -645,57 +664,6 @@ Rectangle {
                 }
             }
         }
-
-        // TODO: View a list of the ballots and the results of the election rounds
-        // Item {
-        //     Layout.fillHeight: true
-        //     Layout.fillWidth: true
-
-        //     // TODO: Allow scrolling
-        //     ScrollView {
-        //         // ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
-        //         // ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-        //         clip: true
-        //         width: parent.width
-        //         height: parent.height
-
-        //         ColumnLayout {
-        //             Repeater {
-        //                 model: 3
-        //                 ColumnLayout {
-        //                     Text {
-        //                         text: "Round "+ index +": Eleminated XXX"
-        //                         font.pointSize: 18
-        //                         color: "white"
-        //                     }
-
-        //                     Repeater {
-        //                         model: 20
-
-        //                         RowLayout {
-        //                             height: 30
-
-        //                             Repeater {
-        //                                 model: 4
-        //                                 Item {
-        //                                     width: 100
-        //                                     height: 30
-
-        //                                     Text {
-        //                                         text: 'One ' + index
-        //                                         color: "white"
-        //                                         font.pointSize: 12
-        //                                         width: parent.width - 10
-        //                                     }
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
 
 
@@ -966,6 +934,11 @@ Rectangle {
             break;
         case "poll_winner":
             poll_winner.text = message.winner
+            tally_votes_itterations.text = message.rounds
+            tally_votes_counted.text = message.votesCounted
+            break;
+        case "received_vote":
+            tally_votes_received.text = message.voteCount
             break;
         }
     }

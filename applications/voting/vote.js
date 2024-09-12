@@ -18,6 +18,7 @@
 // TODO: Voting results page
 // TODO: Joining poll sometimes causes to double stack on other clients poll_list?
 // TODO: Do active polls persist across domain leave? If so close them on session leave
+// FIXME: Empty arrays in responses don't count as valid votes anymore? Causes miscounts?
 
 (() => {
 	"use strict";
@@ -280,6 +281,10 @@
 	function _debugDummyBallot() {
 		if (!debug) return; // Just incase...
 		let ballot = getRandomOrder(...poll.options);
+
+		const indexToRemove = Math.floor(Math.random() * ballot.length);
+		ballot.splice(indexToRemove, 1);
+
 		const responsesKeyName = Object.keys(responses).length.toString();
 		responses[responsesKeyName] = ballot;
 
@@ -288,6 +293,7 @@
 				const j = Math.floor(Math.random() * (i + 1));
 				[words[i], words[j]] = [words[j], words[i]];
 			}
+
 			return words;
 		}
 	}
@@ -398,6 +404,10 @@
 				poll.question = message.prompt.question;
 			}
 
+			if (message.type == "vote_count") {
+				_emitEvent({type: "received_vote", voteCount: message.voteCount});
+			}
+
 			// Received a ballot 
 			if (message.type == "vote") {
 				// Check if we are the host
@@ -409,12 +419,13 @@
 				// Emit a echo so the voter knows we have received it
 				// TODO:
 
-				// console.log(JSON.stringify(responses));
+				// Broadcast the updated count to all clients
+				Messages.sendMessage(poll.id, JSON.stringify({type: "vote_count", voteCount: Object.keys(responses).length}));
 			}
 
 			// Winner was broadcasted
 			if (message.type == "poll_winner") {
-				_emitEvent({type: "poll_winner", winner: message.winner, rounds: message.rounds, votesCounted: message.votes});
+				_emitEvent({type: "poll_winner", winner: message.winner, rounds: message.rounds, votesCounted: message.votesCounted});
 			}
 
 		}
