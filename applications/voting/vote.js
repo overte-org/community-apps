@@ -13,10 +13,10 @@
 
 // TODO: Documentation
 // FIXME: Handle ties: kill both of tied results
+// FIXME: Handle ties: Last two standing are tied.
 
 // FIXME: Empty arrays in responses don't count as valid votes anymore? Causes miscounts?
 // FIXME: Host closes window does not return them to client view when applicable
-// FIXME: Sound playing on every user join.
 
 (() => {
 	"use strict";
@@ -308,6 +308,15 @@
 		activePolls = []; 
 	}
 
+	function _emitSound(type){
+		switch (type) {
+			case "new_prompt":
+				const newPollSound = SoundCache.getSound(Script.resolvePath("./sound/new_vote.mp3"))
+				Audio.playSystemSound(newPollSound, {volume: 0.5});
+				break;
+		}
+	}
+
 	// Communication
 	function fromQML(event) {
 		console.log(`New QML event:\n${JSON.stringify(event)}`);
@@ -396,7 +405,6 @@
 		case poll.id:
 			// Received poll request
 			if (message.type == "join") {
-				// FIXME: Does not work!
 				emitPrompt();
 			}
 
@@ -409,8 +417,7 @@
 				if (message.prompt.question == poll.question && !poll.host_can_vote) return;
 
 				// Play sound for new poll
-				const newPollSound = SoundCache.getSound(Script.resolvePath("./sound/new_vote.mp3"))
-				Audio.playSystemSound(newPollSound, {volume: 0.5});
+				_emitSound("new_prompt");
 
 				_emitEvent({type: "poll_prompt", prompt: message.prompt});
 
