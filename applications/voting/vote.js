@@ -12,10 +12,8 @@
 /* global Script Tablet Messages MyAvatar Uuid*/
 
 // TODO: Documentation
-// TODO: Allow host voting
 // FIXME: Handle ties: kill both of tied results
 
-// TODO: Voting results page
 // TODO: Joining poll sometimes causes to double stack on other clients poll_list?
 // TODO: Do active polls persist across domain leave? If so close them on session leave
 // FIXME: Empty arrays in responses don't count as valid votes anymore? Causes miscounts?
@@ -30,6 +28,7 @@
 	let poll = {id: '', title: '', description: '', host: '', question: '', options: [], host_can_vote: false}; // The current poll
 	let responses = {}; // All ballots received and to be used by the election function.
 	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
+	let activePolls = []; // All active polls.
 
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
@@ -362,10 +361,12 @@
 
 			// Received an active poll 
 			if (message.type == "active_poll") {
-				// If we are not connected to a poll, list polls in the UI
-				if (poll.id == '') {
-					_emitEvent({type: "new_poll", poll: message.poll});
-				}
+				if (poll.id != '') return; // We are in a poll, don't populate the list
+
+				if (activePolls.indexOf(message.poll.id) != -1) return; // We already have that poll in the list
+
+				_emitEvent({type: "new_poll", poll: message.poll});
+				activePolls.push(message.poll.id);
 			}
 
 			// Polls closed :)
@@ -377,6 +378,7 @@
 
 				// Unregister self from poll
 				if (isOurPoll) leavePoll();
+				activePolls.splice(activePolls.indexOf(message.poll.id), 1); // Remove from active list
 			}
 
 			break;
