@@ -14,9 +14,9 @@
 // TODO: Documentation
 // FIXME: Handle ties: kill both of tied results
 
-// TODO: Joining poll sometimes causes to double stack on other clients poll_list?
-// TODO: Do active polls persist across domain leave? If so close them on session leave
 // FIXME: Empty arrays in responses don't count as valid votes anymore? Causes miscounts?
+// FIXME: Host closes window does not return them to client view when applicable
+// FIXME: Sound playing on every user join.
 
 (() => {
 	"use strict";
@@ -49,6 +49,8 @@
 		tablet.removeButton(appButton);
 		deletePoll(true);
 	});
+
+	AvatarList.avatarSessionChangedEvent.connect(_resetNetworking);
 
 	// Overlay button toggle
 	appButton.clicked.connect(toolbarButtonClicked);
@@ -143,7 +145,7 @@
 		_emitEvent({type: "close_poll", poll: {id: poll.id}, change_page: true});
 
 		// Clear our active poll data
-		poll = { host: '', title: '', description: '', id: '', question: '', options: []};
+		_resetNetworking();
 	}
 
 	// Join an existing poll hosted by another user
@@ -168,13 +170,12 @@
 
 	// Leave a poll hosted by another user
 	function leavePoll() { 
+		if (!poll.id) return; // No poll to leave
+
 		let pollToLeave = poll.id;
 
-		// Unsubscribe from message mixer for poll information
-		Messages.unsubscribe(poll.id);
-
 		// Clear poll
-		poll = {id: '', host: ''}; 
+		_resetNetworking();
 
 		console.log(`Successfully left ${pollToLeave}`);
 	}
@@ -295,6 +296,16 @@
 
 			return words;
 		}
+	}
+
+	// Reset application "networking" information to default values
+	function _resetNetworking(){
+		if (poll.id) Messages.unsubscribe(poll.id);
+
+		poll = {id: '', title: '', description: '', host: '', question: '', options: [], host_can_vote: false}; 
+		responses = {};
+		electionIterations = 0; 
+		activePolls = []; 
 	}
 
 	// Communication

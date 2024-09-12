@@ -515,7 +515,7 @@ Rectangle {
             Text {
                 id: poll_winner
                 width: parent.width
-                text: "Me"
+                text: "---"
                 color: "white"
                 font.pointSize: 20
                 wrapMode: Text.NoWrap
@@ -864,6 +864,13 @@ Rectangle {
         }
     }
 
+    function _clearResults(){
+        poll_winner.text = "---"
+        tally_votes_itterations.text = "-"
+        tally_votes_counted.text = "-"
+        tally_votes_received.text = "0"
+    }
+
     // Messages from script
     function fromScript(message) {
         switch (message.type){
@@ -899,6 +906,10 @@ Rectangle {
                 console.log("adding option "+ option);
                 poll_option_model.append({option: option, rank: 0}) 
             }
+
+            // Clear the results page
+            _clearResults()
+
             // Set the options
             break;
 
