@@ -15,6 +15,7 @@ Rectangle {
     property string current_page: "poll_list"
     property bool host_can_vote: false
     property bool is_host: false 
+    property bool votes_tallied: false
 
     // Poll List view
     ColumnLayout {
@@ -624,6 +625,7 @@ Rectangle {
 
             // Preform Election
             Rectangle {
+                visible: !votes_tallied
                 width: 150
                 height: 40
                 color: "#c0bfbc"
@@ -638,13 +640,15 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        toScript({type: "run_election"})
+                        toScript({type: "run_election"});
+                        votes_tallied = true;
                     }
                 }
             }
 
             // Return to poll settings
             Rectangle {
+                visible: !votes_tallied
                 width: 150
                 height: 40
                 color: "#c0bfbc"
@@ -660,6 +664,31 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         current_page = "poll_host_view"
+                    }
+                }
+            }
+
+            // Make a new question
+            Rectangle {
+                visible: is_host && votes_tallied
+                width: 150
+                height: 40
+                color: "#c0bfbc"
+
+                Text {
+                    anchors.centerIn: parent
+                    text:"Next poll"
+                    color: "black"
+                    font.pointSize:18
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        _clearHost();
+                        _clearResults();
+                        current_page = "poll_host_view";
+                        votes_tallied = false;
                     }
                 }
             }
@@ -871,14 +900,17 @@ Rectangle {
         tally_votes_received.text = "0"
     }
 
+    function _clearHost(){
+        poll_to_respond_title.text = ""
+        poll_option_model_host.clear();
+    }
+
     // Messages from script
     function fromScript(message) {
         switch (message.type){
         // Switch view to the create poll view
         case "create_poll":
-            // Reset poll host page
-            poll_to_respond_title.text = ""
-            poll_option_model_host.clear();
+            _clearHost()
 
             // Show host page
             current_page = "poll_host_view";

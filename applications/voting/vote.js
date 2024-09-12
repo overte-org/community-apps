@@ -15,8 +15,8 @@
 // FIXME: Handle ties: kill both of tied results
 // FIXME: Handle ties: Last two standing are tied.
 
-// FIXME: Empty arrays in responses don't count as valid votes anymore? Causes miscounts?
 // FIXME: Host closes window does not return them to client view when applicable
+// FIXME: User joining in poll results mode causes window to switch to vote mode only if host can vote
 
 (() => {
 	"use strict";
@@ -203,69 +203,79 @@
 	// TODO: Simplify logging of critical information
 	// FIXME: Recursive function call
 	function preformElection(){
-		let firstVotes = [];
-		let voteObject = {}; 
-
-		// TODO: Debug total votes at beginning of election vs ending
-
+		let firstVotes = []; // List of first choices from every ballot
+		let voteResults = {}; // Object that stores the total amount of votes each candidate gets
+	
+		// Don't run election if we don't have any votes.
+		if (Object.keys(responses).length == 0) return; 
+	
+		// Go though each vote received and get the most preferred candidate per ballot.
 		Object.keys(responses).forEach((key) => {
 			let uuid = key;
 			let vote = responses[uuid];
-
+	
 			// Assign first vote to new array
 			firstVotes.push(vote[0]);
 		});
-
+	
+		// Go through each first choice and increment the total amount of votes per candidate.
 		for (let i = 0; i < firstVotes.length; i++) {
+			let candidate = firstVotes[i];
+	
 			// Check if firstVotes index exists
-			if (!firstVotes[i]) firstVotes[i] = -1; // FIXME: We need a special case for "Non-vote" or "Vacant?"
-
-			// Create voteObject index if it does not exist
-			if (!voteObject[firstVotes[i]]) voteObject[firstVotes[i]] = 0;
-
+			if (!candidate) candidate = -1; // If we have received a "no-vote", just assign -1
+	
+			// Create voteResults index if it does not exist
+			if (!voteResults[candidate]) voteResults[candidate] = 0;
+	
 			// Increment value for each vote
-			voteObject[firstVotes[i]]++
+			voteResults[candidate]++
+		}
+	
+		const totalVotes = Object.keys(responses).length; // Total votes to expect to be counted.
+		const majority = Math.floor(totalVotes / 2); // Minimum value to be considered a majority
+	
+		const sortedArray = Object.entries(voteResults).sort((a, b) => b[1] - a[1]);
+		let sortedObject = [];
+		for (const [key, value] of sortedArray) {
+			sortedObject.push({ [key]: value });
 		}
 
-		// Don't run election if we don't have any votes.
-		if (firstVotes.length == 0) return; 
-
-		console.log(`Votes: ${JSON.stringify(voteObject, null, 4)}`);
-
-		// Check to see if there is a majority vote
-		let totalVotes = Object.keys(responses).length; // TODO: Check to make sure this value never changes.
-		let majority = Math.floor(totalVotes / 2); 
-
-		// Sort the voteObject by value in descending order
-		const sortedArray = Object.entries(voteObject).sort(([, a], [, b]) => b - a); // FIXME: This works but looks ugly
-		const sortedObject = Object.fromEntries(sortedArray);
-
+		console.log(`Iteration Votes: ${JSON.stringify(sortedObject, null, 2)}`);
+	
 		// Check the most voted for option to see if it makes up over 50% of votes
 		// NOTE: Has to be *over* 50%.
-		if (sortedObject[Object.keys(sortedObject)[0]] > majority) {
-			// Show dialog of election statistics
-			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", winner: Object.keys(sortedObject)[0], rounds: electionIterations, votesCounted: totalVotes}));
-			console.log(`\nWinner: ${Object.keys(sortedObject)[0]}\nElection rounds: ${electionIterations}\nVotes counted: ${totalVotes}`);
+		if (sortedObject[0][Object.keys(sortedObject[0])[0]] > majority) {
+			let winnerName = Object.keys(sortedObject[0])[0];
+			if (winnerName == '-1') winnerName = "No vote";
+			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", winner: winnerName, rounds: electionIterations, votesCounted: totalVotes}));
+			console.log(`\nWinner: ${winnerName}\nElection rounds: ${electionIterations}\nVotes counted: ${totalVotes}`);
+			responses = {};
 			return; // Winner was selected. We are done!
 		}; 
-
+	
 		// If there is not a majority vote, remove the least popular candidate and call preformElection() again
-		let leastPopularIndex = Object.keys(sortedObject).length - 1;
-		let leastPopular = Object.keys(sortedObject)[leastPopularIndex];
+		let leastPopularIndex = sortedObject.length - 1;
+		let leastPopular = Object.keys(sortedObject[leastPopularIndex])[0];
 
-		console.log(`Removing least popular: ${JSON.stringify(leastPopular, null, 4)}`);
-
+		// Check to see if least popular is "-1"/"no-vote"
+		if (leastPopular === "-1") {
+			leastPopularIndex--;
+			leastPopular = Object.keys(sortedObject[leastPopularIndex])[0]; // Get the real leastPopular candidate
+		}
+	
+		console.log(`Removing least popular: ${leastPopular}`);
+	
 		// Go into each vote and delete the selected least popular candidate
-		Object.keys(responses).forEach((key) => {
-			let uuid = key;
+		Object.keys(responses).forEach((uuid) => {
 			// Remove the least popular candidate from each vote.
-			responses[uuid].splice(responses[uuid].indexOf(leastPopular), 1);
+			if (responses[uuid].indexOf(leastPopular) != -1) responses[uuid].splice(responses[uuid].indexOf(leastPopular), 1);
 			console.log(responses[uuid]);
 		});
-
+	
 		// Update statistics
 		electionIterations++; 
-
+	
 		// Run again
 		preformElection();
 	}
@@ -283,7 +293,7 @@
 		let ballot = getRandomOrder(...poll.options);
 
 		const indexToRemove = Math.floor(Math.random() * ballot.length);
-		ballot.splice(indexToRemove, 1);
+		ballot.splice(indexToRemove, ballot.length - indexToRemove);
 
 		const responsesKeyName = Object.keys(responses).length.toString();
 		responses[responsesKeyName] = ballot;
@@ -348,6 +358,7 @@
 				}
 			}
 
+			electionIterations = 0;
 			preformElection();
 			break;
 		}
