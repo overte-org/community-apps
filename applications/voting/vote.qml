@@ -1019,6 +1019,8 @@ Rectangle {
         case "poll_sync":
             poll = message.poll;
             pollStats = message.pollStats;
+            is_host = message.isHost;
+            canHostVote = message.poll.canHostVote;
             break;
         }
     }

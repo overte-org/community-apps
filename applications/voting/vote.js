@@ -80,10 +80,10 @@
 			// If we are connected to a poll already, repopulate the screen
 			if (poll.id != '' && poll.host != myUuid) return joinPoll({id: poll.id});
 
-			// If we are hosting a poll, switch the screen
-			if (poll.id != '' && poll.host == myUuid) {
-				return _emitEvent({type: "switch_page", page: selectedPage, poll: poll, pollStats: pollStats});
-			}
+			// Sync
+			// TODO: switch_page optional sync components?
+			_emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats, isHost: poll.host == myUuid});
+			if (selectedPage) _emitEvent({type: "switch_page", page: selectedPage, poll: poll, pollStats: pollStats});
 
 			// Request a list of active polls if we are not already in one
 			if (poll.id == '') return getActivePolls();
