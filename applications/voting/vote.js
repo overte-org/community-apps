@@ -16,6 +16,12 @@
 // FIXME: Handle ties: Last two standing are tied.
 
 // FIXME: Host closes window does not return them to client view when applicable
+// FIXME: Recasting vote from closed window does not populate the options.
+// FIXME: Sound is inconsistent
+
+// STYLE ---------------
+// FIXME: Camel case
+// TODO: Placeholder text
 
 (() => {
 	"use strict";
@@ -29,6 +35,7 @@
 	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
 	let activePolls = []; // All active polls.
 	let winnerSelected = false; // Whether or not the election function has selected a winner for the active poll
+	let selectedPage = ""; // Selected page the vote screen is on. Used when the host closes the window.
 
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
@@ -76,7 +83,8 @@
 
 			// If we are hosting a poll, switch the screen
 			if (poll.id != '' && poll.host == myUuid) {
-				return _emitEvent({type: "rehost", prompt: {question: poll.question, options: poll.options}});
+				// return _emitEvent({type: "rehost", prompt: {question: poll.question, options: poll.options}});
+				return _emitEvent({type: "switch_page", page: selectedPage, options: {isHost: poll.host == myUuid, hostCanVote: poll.host_can_vote}, poll: poll});
 			}
 
 			// Request a list of active polls if we are not already in one
@@ -363,6 +371,9 @@
 
 			electionIterations = 0;
 			preformElection();
+			break;
+		case "page_name":
+			selectedPage = event.page;
 			break;
 		}
 	}

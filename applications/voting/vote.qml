@@ -45,7 +45,7 @@ Rectangle {
                     anchors.fill: parent
 
                     onClicked: {
-                        current_page = "poll_create";
+                        _changePage("poll_create");
                     }
                 }
             }
@@ -164,7 +164,7 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        current_page = "poll_list";
+                        _changePage("poll_list");
                     }
                 }
             }
@@ -217,10 +217,11 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 y: 20
             }
+            // TODO: Pleaseholder text
             TextEdit {
                 id: poll_to_respond_title
                 width: parent.width
-                text: "<Question>"
+                text: ""
                 color: "white"
                 font.pointSize: 20
                 wrapMode: Text.NoWrap
@@ -236,6 +237,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
+            // TODO: Pleaseholder text
             ListView {
                 property int index_selected: -1
                 width: parent.width - 40
@@ -345,8 +347,8 @@ Rectangle {
                             toScript({type: "prompt", prompt: {question: poll_to_respond_title.text, options: options}, host_can_vote: host_can_vote});
 
                             // If the host can vote, change the screen to the client view to allow the vote
-                            if (host_can_vote) current_page = "poll_client_view";
-                            else current_page = "poll_results"
+                            if (host_can_vote) _changePage("poll_client_view"); 
+                            else _changePage("poll_results");
                         }
                     }
                 }
@@ -482,7 +484,7 @@ Rectangle {
                             toScript({type: "cast_vote", ballot: onlyNames});
 
                             // Change screen to results screen
-                            current_page = "poll_results"
+                            _changePage("poll_results");
                         }
                     }
                 }
@@ -615,7 +617,7 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        current_page = "poll_client_view"
+                        _changePage("poll_client_view");
                     }
                 }
             }
@@ -667,7 +669,7 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        current_page = "poll_host_view"
+                        _changePage("poll_host_view");
                     }
                 }
             }
@@ -691,7 +693,7 @@ Rectangle {
                     onClicked: {
                         _clearHost();
                         _clearResults();
-                        current_page = "poll_host_view";
+                        _changePage("poll_host_view");
                         votes_tallied = false;
                     }
                 }
@@ -914,6 +916,11 @@ Rectangle {
         poll_to_create_description.text = "Vote on things!";
     }
 
+    function _changePage(pageName){
+        current_page = pageName;
+        toScript({type: "page_name", page: pageName});
+    }
+
     // Messages from script
     function fromScript(message) {
         switch (message.type){
@@ -922,7 +929,7 @@ Rectangle {
             _clearHost()
 
             // Show host page
-            current_page = "poll_host_view";
+            _changePage("poll_host_view");
 
             // Set variables
             is_host = true
@@ -949,7 +956,7 @@ Rectangle {
 
             if (is_host) return; 
 
-            current_page = "poll_client_view";
+            _changePage("poll_client_view");
 
             // Clear the results page
             _clearResults()
@@ -959,7 +966,7 @@ Rectangle {
 
         // Close the poll and remove it from the list of active polls
         case "close_poll":
-            if (message.change_page == true) current_page = "poll_list"
+            if (message.change_page == true) _changePage("poll_list");
 
             // Find the poll with the matching ID and remove it from active polls
             for (var i = 0; i < active_polls.count; i++) {
@@ -974,20 +981,6 @@ Rectangle {
             poll_to_create_host_can_vote.checked = false;
 
             break;
-
-        // Open the host view
-        // Only called when the host closes their tablet and reopens it.
-        case "rehost":
-            current_page = "poll_host_view"
-
-            poll_to_respond_title.text = message.prompt.question
-
-            poll_option_model_host.clear();
-            for (var option of message.prompt.options){
-                console.log("adding option "+ option);
-                poll_option_model_host.append({option: option})
-            }
-            break;
         case "poll_winner":
             poll_winner.text = message.winner
             tally_votes_itterations.text = message.rounds
@@ -996,6 +989,20 @@ Rectangle {
             break;
         case "received_vote":
             tally_votes_received.text = message.voteCount
+            break;
+        case "switch_page":
+            current_page = message.page;
+            is_host = message.options.isHost;
+            host_can_vote = message.options.hostCanVote;
+            // if (message.page == "poll_host_view") {
+            //     poll_to_respond_title.text = message.poll.question
+
+            //     poll_option_model_host.clear();
+            //     for (var option of message.poll.options){
+            //         console.log("adding option "+ option);
+            //         poll_option_model_host.append({option: option})
+            //     }
+            // }
             break;
         }
     }
