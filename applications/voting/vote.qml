@@ -95,7 +95,7 @@ Rectangle {
         TextField {
             width: 300
             height: 30
-            text: "New Poll"
+            text: MyAvatar.displayName + "'s Poll"
             cursorVisible: false
             font.pointSize: 16
             Layout.fillWidth: true
@@ -124,6 +124,7 @@ Rectangle {
 
         }
 
+        // Options
         RowLayout {
             width: parent.width
 
@@ -135,6 +136,7 @@ Rectangle {
             }
 
             CheckBox {
+                id: poll_to_create_host_can_vote
                 width: 30
                 height: 25
                 checked: false
@@ -182,6 +184,7 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         toScript({type: "create_poll", poll: {title: poll_to_create_title.text, description: poll_to_create_description.text}});
+                        _clearHostCreate();
                     }
                 }
             }
@@ -906,6 +909,11 @@ Rectangle {
         poll_option_model_host.clear();
     }
 
+    function _clearHostCreate() {
+        poll_to_create_title.text = MyAvatar.displayName + "'s Poll";
+        poll_to_create_description.text = "Vote on things!";
+    }
+
     // Messages from script
     function fromScript(message) {
         switch (message.type){
@@ -963,6 +971,7 @@ Rectangle {
 
             // Set variables
             is_host = false
+            poll_to_create_host_can_vote.checked = false;
 
             break;
 

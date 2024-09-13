@@ -12,7 +12,6 @@
 /* global Script Tablet Messages MyAvatar Uuid*/
 
 // TODO: Documentation
-// FIXME: Reset create_poll view when switching screens 
 // FIXME: Handle ties: kill both of tied results
 // FIXME: Handle ties: Last two standing are tied.
 
@@ -29,6 +28,7 @@
 	let responses = {}; // All ballots received and to be used by the election function.
 	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
 	let activePolls = []; // All active polls.
+	let winnerSelected = false; // Whether or not the election function has selected a winner for the active poll
 
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
@@ -186,6 +186,9 @@
 
 		// Check if poll is valid
 		if (poll == undefined || poll.id == '') return;
+
+		// Check if a winner was already chosen
+		if (winnerSelected) return;
 
 		// Send vote to users in poll
 		Messages.sendMessage(poll.id, JSON.stringify({type: "vote", ballot: event.ballot, uuid: myUuid}));
@@ -433,6 +436,8 @@
 				_emitEvent({type: "poll_prompt", prompt: message.prompt});
 
 				poll.question = message.prompt.question;
+
+				winnerSelected = false;
 			}
 
 			if (message.type == "vote_count") {
@@ -456,6 +461,7 @@
 
 			// Winner was broadcasted
 			if (message.type == "poll_winner") {
+				winnerSelected = true;
 				_emitEvent({type: "poll_winner", winner: message.winner, rounds: message.rounds, votesCounted: message.votesCounted});
 			}
 
