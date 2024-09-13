@@ -933,7 +933,7 @@ Rectangle {
     }
     function _populateResults(){
         tally_votes_received.text = pollStats.votesReceived;
-        poll_winner.text = pollStats.winnerName;
+        poll_winner.text = pollStats.winnerName ? pollStats.winnerName : "---";
         tally_votes_itterations.text = pollStats.iterations;
         tally_votes_counted.text = pollStats.votesCounted;
     }
@@ -966,9 +966,6 @@ Rectangle {
 
             poll = message.poll;
             pollStats = message.pollStats;
-
-            console.log("\n\n\n\n")
-            console.log(JSON.stringify(poll, null, 4))
 
             // Set values
             _populateClient()
@@ -1005,7 +1002,7 @@ Rectangle {
             votes_tallied = true;
             break;
         case "received_vote":
-            pollStats.votesReceived = message.pollStats.votesReceived;
+            pollStats = message.pollStats;
             _populateResults();
             break;
         case "switch_page":
