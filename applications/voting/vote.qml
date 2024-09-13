@@ -953,6 +953,7 @@ Rectangle {
         // Populate the client view of the current question and options
         case "poll_prompt":
             active_polls_list.index_selected = -1; // Unselect whatever poll was selected (If one was selected)
+            if (poll.question == message.poll.question) return;
             // Clear options
             poll_option_model.clear();
 

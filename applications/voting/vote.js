@@ -447,7 +447,7 @@
 
 				pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 }
 				poll = message.poll;
-				// Play sound for new poll
+
 				_emitSound("new_prompt");
 
 				_emitEvent({type: "poll_prompt", poll: message.poll});
