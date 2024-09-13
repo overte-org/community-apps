@@ -10,10 +10,10 @@ Rectangle {
     height: 700
     id: root
 
-    // property string current_page: "poll_results"
-
     property string current_page: "poll_list"
-    property bool host_can_vote: false
+    property var poll: {} 
+    property var pollStats: {} 
+    property bool canHostVote: false
     property bool is_host: false 
     property bool votes_tallied: false
 
@@ -141,7 +141,7 @@ Rectangle {
                 height: 25
                 checked: false
                 onToggled: {
-                    host_can_vote = checked
+                    canHostVote = checked
                 }
             }
         }
@@ -344,10 +344,10 @@ Rectangle {
                             }
 
                             // Send the prompt to the server
-                            toScript({type: "prompt", prompt: {question: poll_to_respond_title.text, options: options}, host_can_vote: host_can_vote});
+                            toScript({type: "prompt", prompt: {question: poll_to_respond_title.text, options: options}, canHostVote: canHostVote});
 
                             // If the host can vote, change the screen to the client view to allow the vote
-                            if (host_can_vote) _changePage("poll_client_view"); 
+                            if (canHostVote) _changePage("poll_client_view"); 
                             else _changePage("poll_results");
                         }
                     }
@@ -605,7 +605,7 @@ Rectangle {
                 width: 150
                 height: 40
                 color: "#c0bfbc"
-                visible: ((is_host && host_can_vote) || !is_host)
+                visible: ((is_host && canHostVote) || !is_host)
 
                 Text {
                     anchors.centerIn: parent
@@ -921,6 +921,23 @@ Rectangle {
         toScript({type: "page_name", page: pageName});
     }
 
+    function _populateHostCreate(){
+
+    }
+    function _populateClient() {
+        prompt_question.text = poll.question;
+        for (var option of poll.options){
+            console.log("adding option "+ option);
+            poll_option_model.append({option: option, rank: 0}) 
+        }
+    }
+    function _populateResults(){
+        tally_votes_received.text = pollStats.votesReceived;
+        poll_winner.text = pollStats.winnerName;
+        tally_votes_itterations.text = pollStats.iterations;
+        tally_votes_counted.text = pollStats.votesCounted;
+    }
+
     // Messages from script
     function fromScript(message) {
         switch (message.type){
@@ -947,12 +964,14 @@ Rectangle {
             // Clear options
             poll_option_model.clear();
 
+            poll = message.poll;
+            pollStats = message.pollStats;
+
+            console.log("\n\n\n\n")
+            console.log(JSON.stringify(poll, null, 4))
+
             // Set values
-            prompt_question.text = message.prompt.question
-            for (var option of message.prompt.options){
-                console.log("adding option "+ option);
-                poll_option_model.append({option: option, rank: 0}) 
-            }
+            _populateClient()
 
             if (is_host) return; 
 
@@ -982,27 +1001,27 @@ Rectangle {
 
             break;
         case "poll_winner":
-            poll_winner.text = message.winner
-            tally_votes_itterations.text = message.rounds
-            tally_votes_counted.text = message.votesCounted
-            votes_tallied = true
+            _populateResults();
+            votes_tallied = true;
             break;
         case "received_vote":
-            tally_votes_received.text = message.voteCount
+            pollStats.votesReceived = message.pollStats.votesReceived;
+            _populateResults();
             break;
         case "switch_page":
             current_page = message.page;
-            is_host = message.options.isHost;
-            host_can_vote = message.options.hostCanVote;
-            // if (message.page == "poll_host_view") {
-            //     poll_to_respond_title.text = message.poll.question
+            poll = message.poll;
+            pollStats = message.pollStats;
 
-            //     poll_option_model_host.clear();
-            //     for (var option of message.poll.options){
-            //         console.log("adding option "+ option);
-            //         poll_option_model_host.append({option: option})
-            //     }
-            // }
+            if (message.page == "poll_client_view") _populateClient();
+            if (message.page == "poll_results") {
+                _populateClient();
+                _populateResults();
+            };
+            break;
+        case "poll_sync":
+            poll = message.poll;
+            pollStats = message.pollStats;
             break;
         }
     }

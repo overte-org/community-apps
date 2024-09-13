@@ -18,6 +18,7 @@
 // FIXME: Host closes window does not return them to client view when applicable
 // FIXME: Recasting vote from closed window does not populate the options.
 // FIXME: Sound is inconsistent
+// FIXME: Simplify
 
 // STYLE ---------------
 // FIXME: Camel case
@@ -30,11 +31,9 @@
 	let active = false;
 	const debug = false;
 
-	let poll = {id: '', title: '', description: '', host: '', question: '', options: [], host_can_vote: false}; // The current poll
-	let responses = {}; // All ballots received and to be used by the election function.
-	let electionIterations = 0; // How many times the election function has been called to narrow down a candidate.
+	let poll = {id: '', title: '', description: '', host: '', question: '', options: [], canHostVote: false}; // The current poll
+	let pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 };
 	let activePolls = []; // All active polls.
-	let winnerSelected = false; // Whether or not the election function has selected a winner for the active poll
 	let selectedPage = ""; // Selected page the vote screen is on. Used when the host closes the window.
 
 	const url = Script.resolvePath("./vote.qml");
@@ -83,8 +82,7 @@
 
 			// If we are hosting a poll, switch the screen
 			if (poll.id != '' && poll.host == myUuid) {
-				// return _emitEvent({type: "rehost", prompt: {question: poll.question, options: poll.options}});
-				return _emitEvent({type: "switch_page", page: selectedPage, options: {isHost: poll.host == myUuid, hostCanVote: poll.host_can_vote}, poll: poll});
+				return _emitEvent({type: "switch_page", page: selectedPage, poll: poll, pollStats: pollStats});
 			}
 
 			// Request a list of active polls if we are not already in one
@@ -117,7 +115,7 @@
 		poll.title = pollInformation.title;
 		poll.description = pollInformation.description;
 		console.log(`Active poll set as:\nid:${poll.id}\ntitle:${poll.title}\ndescription:${poll.description}`);
-		responses = {}; // Clear any lingering responses
+		pollStats.responses = {}; // Clear any lingering responses
 
 		// Send message to all clients
 		Messages.sendMessage("ga-polls", JSON.stringify({type: "active_poll", poll: poll}));
@@ -196,7 +194,7 @@
 		if (poll == undefined || poll.id == '') return;
 
 		// Check if a winner was already chosen
-		if (winnerSelected) return;
+		if (pollStats.winnerSelected) return;
 
 		// Send vote to users in poll
 		Messages.sendMessage(poll.id, JSON.stringify({type: "vote", ballot: event.ballot, uuid: myUuid}));
@@ -207,7 +205,7 @@
 		if (poll.host != myUuid) return; // We are not the host of this poll
 
 		console.log(`Emitting prompt`);
-		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", prompt: {question: poll.question, options: poll.options}}));
+		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats}));
 	}
 
 	// Take the gathered responses and preform the election
@@ -218,12 +216,12 @@
 		let voteResults = {}; // Object that stores the total amount of votes each candidate gets
 	
 		// Don't run election if we don't have any votes.
-		if (Object.keys(responses).length == 0) return; 
+		if (Object.keys(pollStats.responses).length == 0) return; 
 	
 		// Go though each vote received and get the most preferred candidate per ballot.
-		Object.keys(responses).forEach((key) => {
+		Object.keys(pollStats.responses).forEach((key) => {
 			let uuid = key;
-			let vote = responses[uuid];
+			let vote = pollStats.responses[uuid];
 	
 			// Assign first vote to new array
 			firstVotes.push(vote[0]);
@@ -243,7 +241,7 @@
 			voteResults[candidate]++
 		}
 	
-		const totalVotes = Object.keys(responses).length; // Total votes to expect to be counted.
+		const totalVotes = Object.keys(pollStats.responses).length; // Total votes to expect to be counted.
 		const majority = Math.floor(totalVotes / 2); // Minimum value to be considered a majority
 	
 		const sortedArray = Object.entries(voteResults).sort((a, b) => b[1] - a[1]);
@@ -259,9 +257,15 @@
 		if (sortedObject[0][Object.keys(sortedObject[0])[0]] > majority) {
 			let winnerName = Object.keys(sortedObject[0])[0];
 			if (winnerName == '-1') winnerName = "No vote";
-			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", winner: winnerName, rounds: electionIterations, votesCounted: totalVotes}));
-			console.log(`\nWinner: ${winnerName}\nElection rounds: ${electionIterations}\nVotes counted: ${totalVotes}`);
-			responses = {};
+
+			pollStats.winnerName = winnerName;
+			pollStats.votesCounted = totalVotes;
+
+			_emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats});
+
+			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", pollStats: pollStats}));
+			console.log(`\nWinner: ${winnerName}\nElection rounds: ${pollStats.iterations}\nVotes counted: ${totalVotes}`);
+			pollStats.responses = {};
 			return; // Winner was selected. We are done!
 		}; 
 	
@@ -278,14 +282,14 @@
 		console.log(`Removing least popular: ${leastPopular}`);
 	
 		// Go into each vote and delete the selected least popular candidate
-		Object.keys(responses).forEach((uuid) => {
+		Object.keys(pollStats.responses).forEach((uuid) => {
 			// Remove the least popular candidate from each vote.
-			if (responses[uuid].indexOf(leastPopular) != -1) responses[uuid].splice(responses[uuid].indexOf(leastPopular), 1);
-			console.log(responses[uuid]);
+			if (pollStats.responses[uuid].indexOf(leastPopular) != -1) pollStats.responses[uuid].splice(pollStats.responses[uuid].indexOf(leastPopular), 1);
+			console.log(pollStats.responses[uuid]);
 		});
 	
 		// Update statistics
-		electionIterations++; 
+		pollStats.iterations++; 
 	
 		// Run again
 		preformElection();
@@ -306,7 +310,7 @@
 		const indexToRemove = Math.floor(Math.random() * ballot.length);
 		ballot.splice(indexToRemove, ballot.length - indexToRemove);
 
-		const responsesKeyName = Object.keys(responses).length.toString();
+		const responsesKeyName = Object.keys(pollStats.responses).length.toString();
 		responses[responsesKeyName] = ballot;
 
 		function getRandomOrder(...words) {
@@ -323,9 +327,9 @@
 	function _resetNetworking(){
 		if (poll.id) Messages.unsubscribe(poll.id);
 
-		poll = {id: '', title: '', description: '', host: '', question: '', options: [], host_can_vote: false}; 
-		responses = {};
-		electionIterations = 0; 
+		poll = {id: '', title: '', description: '', host: '', question: '', options: [], canHostVote: false}; 
+		pollStats.responses = {};
+		pollStats.iterations = 0; 
 		activePolls = []; 
 	}
 
@@ -340,7 +344,7 @@
 
 	// Communication
 	function fromQML(event) {
-		console.log(`New QML event:\n${JSON.stringify(event)}`);
+		console.log(`New QML event:\n${JSON.stringify(event, null, 4)}`);
 		
 		switch (event.type) {
 		case "create_poll":
@@ -358,7 +362,7 @@
 		case "prompt":
 			poll.question = event.prompt.question;
 			poll.options = event.prompt.options;
-			poll.host_can_vote = event.host_can_vote
+			poll.canHostVote = event.canHostVote
 			emitPrompt();
 			break;
 		case "run_election":
@@ -369,7 +373,7 @@
 				}
 			}
 
-			electionIterations = 0;
+			pollStats.iterations = 0;
 			preformElection();
 			break;
 		case "page_name":
@@ -389,8 +393,6 @@
 	function receivedMessage(channel, message){
 		// Not for us, ignore!
 		if (channel !== 'ga-polls' && channel !== poll.id) return;
-
-		console.log(`Received message on ${channel} from server:\n${JSON.stringify(message)}\n`);
 
 		message = JSON.parse(message);
 
@@ -435,24 +437,24 @@
 
 			// Received poll information
 			if (message.type == "poll_prompt") {
-				console.log(`Prompt:\n ${JSON.stringify(message.prompt)}`);
+				console.log(`Prompt:\n ${JSON.stringify(message.poll)}`);
 
 				// TODO: This is still silly. Try using UUIDs per prompt and check if we are answering the same question by id?
 				// Don't recreate the prompt if we already have the matching question
-				if (message.prompt.question == poll.question && !poll.host_can_vote) return;
+				if (message.poll.question == poll.question && !poll.canHostVote) return;
 
 				// Play sound for new poll
 				_emitSound("new_prompt");
 
-				_emitEvent({type: "poll_prompt", prompt: message.prompt});
+				_emitEvent({type: "poll_prompt", poll: message.poll});
 
-				poll.question = message.prompt.question;
+				poll.question = message.poll.question;
 
-				winnerSelected = false;
+				pollStats.winnerSelected = false;
 			}
 
 			if (message.type == "vote_count") {
-				_emitEvent({type: "received_vote", voteCount: message.voteCount});
+				_emitEvent({type: "received_vote", pollStats: pollStats});
 			}
 
 			// Received a ballot 
@@ -461,18 +463,19 @@
 				if (poll.host != myUuid) return;
 
 				// Record the ballot
-				responses[message.uuid] = message.ballot;
+				pollStats.responses[message.uuid] = message.ballot;
 
 				// Emit a echo so the voter knows we have received it
 				// TODO:
 
 				// Broadcast the updated count to all clients
-				Messages.sendMessage(poll.id, JSON.stringify({type: "vote_count", voteCount: Object.keys(responses).length}));
+				pollStats.votesReceived = Object.keys(pollStats.responses).length;
+				Messages.sendMessage(poll.id, JSON.stringify({type: "vote_count", pollStats: pollStats}));
 			}
 
 			// Winner was broadcasted
 			if (message.type == "poll_winner") {
-				winnerSelected = true;
+				pollStats.winnerSelected = true;
 				_emitEvent({type: "poll_winner", winner: message.winner, rounds: message.rounds, votesCounted: message.votesCounted});
 			}
 
