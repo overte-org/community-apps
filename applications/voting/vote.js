@@ -445,14 +445,14 @@
 				// Don't recreate the prompt if we already have the matching question
 				if (message.poll.question == poll.question && !poll.canHostVote) return;
 
+				pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 }
+				poll = message.poll;
 				// Play sound for new poll
 				_emitSound("new_prompt");
 
 				_emitEvent({type: "poll_prompt", poll: message.poll});
 
 				poll.question = message.poll.question;
-
-				pollStats.winnerSelected = false;
 			}
 
 			if (message.type == "vote_count") {

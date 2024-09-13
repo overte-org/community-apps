@@ -693,7 +693,6 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         _clearHost();
-                        _clearResults();
                         _changePage("poll_host_view");
                         votes_tallied = false;
                     }
@@ -899,13 +898,6 @@ Rectangle {
         }
     }
 
-    function _clearResults(){
-        poll_winner.text = "---"
-        tally_votes_itterations.text = "-"
-        tally_votes_counted.text = "-"
-        tally_votes_received.text = "0"
-    }
-
     function _clearHost(){
         poll_to_respond_title.text = ""
         poll_option_model_host.clear();
@@ -975,7 +967,7 @@ Rectangle {
             _changePage("poll_client_view");
 
             // Clear the results page
-            _clearResults()
+            _populateResults();
 
             // Set the options
             break;
