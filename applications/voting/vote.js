@@ -19,6 +19,7 @@
 // FIXME: Recasting vote from closed window does not populate the options.
 // FIXME: Sound is inconsistent
 // FIXME: Simplify
+// FIXME: The results screen is not being cleared properly?
 
 // STYLE ---------------
 // FIXME: Camel case
@@ -260,6 +261,7 @@
 
 			pollStats.winnerName = winnerName;
 			pollStats.votesCounted = totalVotes;
+			pollStats.winnerSelected = true;
 
 			_emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats});
 
@@ -454,7 +456,7 @@
 			}
 
 			if (message.type == "vote_count") {
-				_emitEvent({type: "received_vote", pollStats: pollStats});
+				_emitEvent({type: "received_vote", pollStats: message.pollStats});
 			}
 
 			// Received a ballot 
@@ -475,8 +477,7 @@
 
 			// Winner was broadcasted
 			if (message.type == "poll_winner") {
-				pollStats.winnerSelected = true;
-				_emitEvent({type: "poll_winner", winner: message.winner, rounds: message.rounds, votesCounted: message.votesCounted});
+				_emitEvent({type: "poll_winner", pollStats: message.pollStats});
 			}
 
 		}

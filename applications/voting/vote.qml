@@ -269,13 +269,13 @@ Rectangle {
 
         // Host actions
         ColumnLayout {
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
             width: parent.width
             height: 40
 
             RowLayout {
                 width: parent.width
-                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
 
                 // Close poll
                 Rectangle {
@@ -401,6 +401,7 @@ Rectangle {
             width: parent.width
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.alignment: Qt.AlignHCenter
 
             ListView {
                 property int index_selected: -1
@@ -597,7 +598,7 @@ Rectangle {
         // Client actions
         RowLayout {
             width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
             visible: !votes_tallied
 
             // Recast vote
@@ -627,7 +628,7 @@ Rectangle {
         RowLayout {
             visible: is_host
             width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
 
             // Preform Election
             Rectangle {
@@ -726,7 +727,7 @@ Rectangle {
 
             Item {
                 width: parent.width - 10
-                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
                 height: parent.height
                 clip: true
 
@@ -815,7 +816,6 @@ Rectangle {
 
             Row {
                 width: parent.width - 10
-                anchors.horizontalCenter: parent.horizontalCenter
                 height: parent.height
                 clip: true
 
@@ -840,7 +840,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: option
-                    anchors.centerIn: parent
+                    anchors.centerIn: parent // FIXME: QML Does not like this for some reason...
                     color: "white"
                     font.pointSize: 14
                 }
@@ -867,7 +867,7 @@ Rectangle {
 
             RowLayout {
                 width: parent.width
-                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
                 height: parent.height
 
                 TextField {
@@ -933,9 +933,9 @@ Rectangle {
     }
     function _populateResults(){
         tally_votes_received.text = pollStats.votesReceived;
-        poll_winner.text = pollStats.winnerName ? pollStats.winnerName : "---";
-        tally_votes_itterations.text = pollStats.iterations;
-        tally_votes_counted.text = pollStats.votesCounted;
+        poll_winner.text = pollStats.winnerSelected ? pollStats.winnerName : "---";
+        tally_votes_itterations.text = pollStats.winnerSelected ? pollStats.iterations : "-";
+        tally_votes_counted.text = pollStats.winnerSelected ? pollStats.votesCounted : "-";
     }
 
     // Messages from script
@@ -998,6 +998,7 @@ Rectangle {
 
             break;
         case "poll_winner":
+            pollStats = message.pollStats;
             _populateResults();
             votes_tallied = true;
             break;
