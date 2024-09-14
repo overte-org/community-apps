@@ -33,7 +33,7 @@
 	const debug = false;
 
 	let poll = {id: '', title: '', description: '', host: '', question: '', options: [], canHostVote: false}; // The current poll
-	let pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 };
+	let pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 }; // Sent by host
 	let activePolls = []; // All active polls.
 	let selectedPage = ""; // Selected page the vote screen is on. Used when the host closes the window.
 
@@ -173,6 +173,7 @@
 
 		// Log the successful join
 		console.log(`Successfully joined ${poll.id}`);
+		_emitEvent({type: "switch_page", page: "poll_client_view"});
 	}
 
 	// Leave a poll hosted by another user
@@ -201,11 +202,11 @@
 		Messages.sendMessage(poll.id, JSON.stringify({type: "vote", ballot: event.ballot, uuid: myUuid}));
 	}
 
-	// Emit the prompt question and options to the server
+	// Emit the prompt question and options to the clients
 	function emitPrompt(){
 		if (poll.host != myUuid) return; // We are not the host of this poll
 
-		console.log(`Emitting prompt`);
+		console.log(`Host: Emitting prompt: ${JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats})}`);
 		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats}));
 	}
 
@@ -365,6 +366,7 @@
 			poll.question = event.prompt.question;
 			poll.options = event.prompt.options;
 			poll.canHostVote = event.canHostVote
+			pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 };
 			emitPrompt();
 			break;
 		case "run_election":
@@ -432,32 +434,35 @@
 
 			break;
 		case poll.id:
-			// Received poll request
-			if (message.type == "join") {
-				emitPrompt();
-			}
-
 			// Received poll information
 			if (message.type == "poll_prompt") {
-				console.log(`Prompt:\n ${JSON.stringify(message.poll)}`);
+				console.log(`Received new prompt from host:\n${JSON.stringify(message.poll, null, 4)}`);
 
 				// TODO: This is still silly. Try using UUIDs per prompt and check if we are answering the same question by id?
 				// Don't recreate the prompt if we already have the matching question
-				if (message.poll.question == poll.question && !poll.canHostVote) return;
+				if (message.poll.question == poll.question && poll.host != myUuid) return;
+				if (poll.host == myUuid && !poll.canHostVote) return;
 
-				pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 }
+				// update our poll information
 				poll = message.poll;
+				
 
 				_emitSound("new_prompt");
 
-				_emitEvent({type: "poll_prompt", poll: message.poll});
-
-				poll.question = message.poll.question;
+				_emitEvent({type: "poll_prompt", poll: poll, pollStats: pollStats});
 			}
 
 			if (message.type == "vote_count") {
 				_emitEvent({type: "received_vote", pollStats: message.pollStats});
 			}
+
+			// Winner was broadcasted
+			if (message.type == "poll_winner") {
+				_emitEvent({type: "poll_winner", pollStats: message.pollStats});
+			}
+
+			// Host only -----
+			if (poll.host != myUuid) return;
 
 			// Received a ballot 
 			if (message.type == "vote") {
@@ -475,12 +480,11 @@
 				Messages.sendMessage(poll.id, JSON.stringify({type: "vote_count", pollStats: pollStats}));
 			}
 
-			// Winner was broadcasted
-			if (message.type == "poll_winner") {
-				_emitEvent({type: "poll_winner", pollStats: message.pollStats});
+			// Received poll request
+			if (message.type == "join") {
+				emitPrompt();
 			}
-
-		}
+	}
 
 	}
 })();

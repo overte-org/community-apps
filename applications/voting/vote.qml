@@ -1001,8 +1001,8 @@ Rectangle {
             break;
         case "switch_page":
             current_page = message.page;
-            poll = message.poll;
-            pollStats = message.pollStats;
+            if (message.poll) poll = message.poll;
+            if (message.pollStats) pollStats = message.pollStats;
 
             if (message.page == "poll_client_view") _populateClient();
             if (message.page == "poll_results") {
