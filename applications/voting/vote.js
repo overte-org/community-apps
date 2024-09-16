@@ -34,6 +34,7 @@
 
 	let poll = {id: '', title: '', description: '', host: '', question: '', options: [], canHostVote: false}; // The current poll
 	let pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 }; // Sent by host
+	let pollClientState = {hasVoted: false, isHost: false};
 	let activePolls = []; // All active polls.
 	let selectedPage = ""; // Selected page the vote screen is on. Used when the host closes the window.
 
@@ -78,22 +79,34 @@
 		if (url == newUrl) {
 			active = true;
 
-			// If we are connected to a poll already, repopulate the screen
-			if (poll.id != '' && poll.host != myUuid) return joinPoll({id: poll.id});
-
-			// Sync
-			// TODO: switch_page optional sync components?
-			_emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats, isHost: poll.host == myUuid});
-			if (selectedPage) _emitEvent({type: "switch_page", page: selectedPage, poll: poll, pollStats: pollStats});
+			if (poll.id != '') {
+				return _findWhereWeNeedToBe()
+			}
 
 			// Request a list of active polls if we are not already in one
-			if (poll.id == '') return getActivePolls();
+			return getActivePolls();
 		}
 		else active = false;
 
 		appButton.editProperties({
 			isActive: active,
 		});
+	}
+
+	function _findWhereWeNeedToBe(){
+		// Vote has been completed
+		if (pollStats.winnerSelected) return _emitEvent({type: "switch_page", page: 'poll_results', poll: poll, pollStats: pollStats, isHost: pollClientState.isHost});
+	
+		// Has voted already
+		if (pollClientState.hasVoted) return _emitEvent({type: "switch_page", page: 'poll_results', poll: poll, pollStats: pollStats, isHost: pollClientState.isHost});
+		
+		// Has not voted yet, is not the host
+		if (!pollClientState.hasVoted && !pollClientState.isHost) return _emitEvent({type: "switch_page", page: 'poll_client_view', poll: poll, pollStats: pollStats, isHost: pollClientState.isHost});
+	
+		// Has not voted yet, is the host
+		if (!pollClientState.hasVoted && (pollClientState.isHost && poll.canHostVote)) return _emitEvent({type: "switch_page", page: 'poll_client_view', poll: poll, pollStats: pollStats, isHost: pollClientState.isHost});
+
+		_emitEvent({type: "switch_page", page: selectedPage, poll: poll, pollStats: pollStats, isHost: pollClientState.isHost});
 	}
 
 	// Functions
@@ -117,6 +130,9 @@
 		poll.description = pollInformation.description;
 		console.log(`Active poll set as:\nid:${poll.id}\ntitle:${poll.title}\ndescription:${poll.description}`);
 		pollStats.responses = {}; // Clear any lingering responses
+
+		// Update Client State
+		pollClientState.isHost = true;
 
 		// Send message to all clients
 		Messages.sendMessage("ga-polls", JSON.stringify({type: "active_poll", poll: poll}));
@@ -200,14 +216,15 @@
 
 		// Send vote to users in poll
 		Messages.sendMessage(poll.id, JSON.stringify({type: "vote", ballot: event.ballot, uuid: myUuid}));
+		pollClientState.hasVoted = true;
 	}
 
 	// Emit the prompt question and options to the clients
 	function emitPrompt(){
-		if (poll.host != myUuid) return; // We are not the host of this poll
+		if (!pollClientState.isHost) return; // We are not the host of this poll
 
-		console.log(`Host: Emitting prompt: ${JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats})}`);
-		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats}));
+		console.log(`Host: Emitting prompt: ${JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats}, null, 4)}`);
+		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_prompt", poll: poll, pollStats: pollStats}, null, 4));
 	}
 
 	// Take the gathered responses and preform the election
@@ -264,7 +281,7 @@
 			pollStats.votesCounted = totalVotes;
 			pollStats.winnerSelected = true;
 
-			_emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats});
+			// _emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats});
 
 			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", pollStats: pollStats}));
 			console.log(`\nWinner: ${winnerName}\nElection rounds: ${pollStats.iterations}\nVotes counted: ${totalVotes}`);
@@ -334,6 +351,7 @@
 		pollStats.responses = {};
 		pollStats.iterations = 0; 
 		activePolls = []; 
+		pollClientState = {isHost: false, hasVoted: false};
 	}
 
 	function _emitSound(type){
@@ -440,12 +458,13 @@
 
 				// TODO: This is still silly. Try using UUIDs per prompt and check if we are answering the same question by id?
 				// Don't recreate the prompt if we already have the matching question
-				if (message.poll.question == poll.question && poll.host != myUuid) return;
-				if (poll.host == myUuid && !poll.canHostVote) return;
+				if (message.poll.question == poll.question && !pollClientState.isHost) return;
+				if (pollClientState.isHost && !poll.canHostVote) return;
 
 				// update our poll information
 				poll = message.poll;
-				
+				pollClientState.hasVoted = false;
+				pollStats.winnerSelected = false;
 
 				_emitSound("new_prompt");
 
@@ -458,7 +477,18 @@
 
 			// Winner was broadcasted
 			if (message.type == "poll_winner") {
+				pollStats = message.pollStats;
 				_emitEvent({type: "poll_winner", pollStats: message.pollStats});
+			}
+
+			// Received a sync packet
+			if (message.type == "sync"){
+				if (pollClientState.isHost) return; // Host doesn't need to sync to itself
+				
+				console.log("Got sync packet!");
+				poll = message.poll;
+				pollStats = message.pollStats;
+				_findWhereWeNeedToBe();
 			}
 
 			// Host only -----
@@ -482,6 +512,11 @@
 
 			// Received poll request
 			if (message.type == "join") {
+				if (!pollClientState.isHost) return;
+
+				// Send a sync packet
+				console.log("Sending sync packet.");
+				Messages.sendMessage(poll.id, JSON.stringify({type: "sync", poll: poll, pollStats: pollStats}));
 				emitPrompt();
 			}
 	}

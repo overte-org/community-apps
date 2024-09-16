@@ -12,7 +12,7 @@ Rectangle {
 
     property string current_page: "poll_list"
     property var poll: {} 
-    property var pollStats: {} 
+    property var pollStats: { winnerSelected: false } 
     property bool canHostVote: false
     property bool is_host: false 
     property bool votes_tallied: false
@@ -345,7 +345,7 @@ Rectangle {
 
                             // Send the prompt to the server
                             toScript({type: "prompt", prompt: {question: poll_to_respond_title.text, options: options}, canHostVote: canHostVote});
-
+                            
                             // If the host can vote, change the screen to the client view to allow the vote
                             if (canHostVote) _changePage("poll_client_view"); 
                             else _changePage("poll_results");
@@ -606,7 +606,7 @@ Rectangle {
                 width: 150
                 height: 40
                 color: "#c0bfbc"
-                visible: ((is_host && canHostVote) || !is_host)
+                visible: ((is_host && canHostVote) || !is_host) && !pollStats.winnerSelected
 
                 Text {
                     anchors.centerIn: parent
@@ -913,8 +913,12 @@ Rectangle {
         toScript({type: "page_name", page: pageName});
     }
 
-    function _populateHostCreate(){
+    function _populateHost(){
+        poll_to_respond_title.text = poll.title;
 
+        for (var option of poll.options){
+            poll_option_model_host.append({option: option});
+        }
     }
     function _populateClient() {
         prompt_question.text = poll.question;
@@ -953,7 +957,7 @@ Rectangle {
         // Populate the client view of the current question and options
         case "poll_prompt":
             active_polls_list.index_selected = -1; // Unselect whatever poll was selected (If one was selected)
-            if (poll.question == message.poll.question) return;
+
             // Clear options
             poll_option_model.clear();
 
@@ -1003,18 +1007,20 @@ Rectangle {
             current_page = message.page;
             if (message.poll) poll = message.poll;
             if (message.pollStats) pollStats = message.pollStats;
+            if (message.isHost) is_host = true;
 
-            if (message.page == "poll_client_view") _populateClient();
+            if (message.page == "poll_client_view") {
+                _populateClient();
+                if (is_host) _populateHost();
+            }
             if (message.page == "poll_results") {
                 _populateClient();
                 _populateResults();
+                if (is_host) _populateHost();
             };
-            break;
-        case "poll_sync":
-            poll = message.poll;
-            pollStats = message.pollStats;
-            is_host = message.isHost;
-            canHostVote = message.poll.canHostVote;
+            if (message.page == "poll_host_view"){
+                if (is_host) _populateHost();
+            }
             break;
         }
     }
