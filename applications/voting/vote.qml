@@ -496,6 +496,31 @@ Rectangle {
                         }
                     }
                 }
+
+                // Leave
+                Rectangle {
+                    width: 150
+                    height: 40
+                    color: "#c0bfbc"
+                    visible: !isHost
+
+                    Text {
+                        anchors.centerIn: parent
+                        text:"Leave"
+                        color: "black"
+                        font.pointSize:18
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+
+                        onClicked: {
+                            _clearClient();
+                            toScript({type: "leave"});
+                            _changePage("poll_list");
+                        }
+                    }
+                }
             }
         }
     }
@@ -626,6 +651,31 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         _changePage("poll_client_view");
+                    }
+                }
+            }
+            
+            // Leave
+            Rectangle {
+                width: 150
+                height: 40
+                color: "#c0bfbc"
+                visible: !isHost
+
+                Text {
+                    anchors.centerIn: parent
+                    text:"Leave"
+                    color: "black"
+                    font.pointSize:18
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: {
+                        _clearClient();
+                        toScript({type: "leave"});
+                        _changePage("poll_list");
                     }
                 }
             }
@@ -922,6 +972,11 @@ Rectangle {
         poll_to_create_description.text = "Vote on things!";
     }
 
+    function _clearClient(){
+        prompt_question.text = "---";
+        poll_option_model.clear();
+    }
+
     function _changePage(pageName){
         current_page = pageName;
         toScript({type: "page_name", page: pageName});
@@ -935,6 +990,7 @@ Rectangle {
         }
     }
     function _populateClient() {
+        _clearClient();
         prompt_question.text = poll.question;
         for (var option of poll.options){
             console.log("adding option "+ option);
@@ -973,7 +1029,7 @@ Rectangle {
             active_polls_list.index_selected = -1; // Unselect whatever poll was selected (If one was selected)
 
             // Clear options
-            poll_option_model.clear();
+            _clearClient();
 
             poll = message.poll;
             pollStats = message.pollStats;

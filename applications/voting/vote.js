@@ -15,9 +15,6 @@
 // FIXME: Handle ties: kill both of tied results
 // FIXME: Handle ties: Last two standing are tied.
 
-// STYLE ---------------
-// FIXME: Camel case
-
 (() => {
 	"use strict";
 	let tablet;
@@ -340,10 +337,9 @@
 		if (poll.id) Messages.unsubscribe(poll.id);
 
 		poll = {id: '', title: '', description: '', host: '', question: '', options: [], canHostVote: false}; 
-		pollStats.responses = {};
-		pollStats.iterations = 0; 
-		activePolls = []; 
+		pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 };
 		pollClientState = {isHost: false, hasVoted: false};
+		activePolls = []; 
 	}
 
 	function _emitSound(type){
@@ -395,6 +391,9 @@
 			break;
 		case "page_name":
 			selectedPage = event.page;
+			break;
+		case "leave":
+			leavePoll();
 			break;
 		}
 	}
