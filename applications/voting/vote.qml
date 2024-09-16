@@ -6,7 +6,6 @@ import controlsUit 1.0 as HifiControlsUit
 Rectangle {
     color: Qt.rgba(0.1,0.1,0.1,1)
     signal sendToScript(var message);
-    width: parent.width
     height: 700
     id: root
 
@@ -217,7 +216,6 @@ Rectangle {
                 verticalAlignment: Text.AlignVCenter
                 y: 20
             }
-            // TODO: Pleaseholder text
             TextEdit {
                 id: poll_to_respond_title
                 width: parent.width
@@ -229,12 +227,21 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
+            Text {
+                visible: poll_to_respond_title.text == ""
+                color: "gray"
+                font.pointSize: 20
+                anchors.fill: poll_to_respond_title
+                text: "Enter a prompt"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font.italic: true
+            }
         }
 
         // Options
         Item {
             width: parent.width
-            Layout.fillWidth: true
             Layout.fillHeight: true
 
             // TODO: Pleaseholder text
@@ -252,7 +259,7 @@ Rectangle {
                 delegate: Loader {
                     property int delegateIndex: index
                     property string delegateOption: model.option
-                    width: poll_options.width
+                    width: parent.width
 
                     sourceComponent: poll_option_template_host
                 }
@@ -261,9 +268,9 @@ Rectangle {
             ListModel {
                 id: poll_option_model_host
 
-                // ListElement {
-                //     option: "Prefill"
-                // }
+                ListElement {
+                    option: "Prefill"
+                }
             }
         }
 
@@ -857,41 +864,48 @@ Rectangle {
 
             height: 60 
             color: "transparent" 
+            width: parent.width 
 
-            Behavior on height {
-                NumberAnimation {
-                    duration: 100
+            TextField {
+                text: option
+                color: "black"
+                font.pointSize: 14
+                width: parent.width - 50
+
+                // Update the option property
+                onTextChanged: {
+                    poll_option_model_host.setProperty(index, "option", text)
+                }
+                Text {
+                    visible: parent.text == ""
+                    color: "gray"
+                    font.pointSize: 12
+                    anchors.fill: parent
+                    text: "Response..."
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.italic: true
+                    Layout.preferredWidth: 0
                 }
             }
 
-            RowLayout {
-                width: parent.width
-                Layout.alignment: Qt.AlignHCenter
-                height: parent.height
+            Item {
+                width: 50
+                anchors.right: parent.right
+                height: 40
 
-                TextField {
-                    text: option
-                    color: "black"
-                    font.pointSize: 14
-                    Layout.fillWidth: true
-
-                    // Update the option property
-                    onTextChanged: {
-                        poll_option_model_host.setProperty(index, "option", text)
-                    }
+                Image {
+                    anchors.right: parent.right
+                    width: 40
+                    height: 40
+                    source: "img/trash.png"
                 }
 
-                Rectangle {
-                    width: 100
-                    height: parent.height
-                    color: "yellow"
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            // Remove this element from the list
-                            poll_option_model_host.remove(index)
-                        }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        // Remove this element from the list
+                        poll_option_model_host.remove(index)
                     }
                 }
             }

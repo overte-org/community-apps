@@ -365,6 +365,8 @@
 
 	// Communication
 	function fromQML(event) {
+		if (!active) return;
+
 		console.log(`New QML event:\n${JSON.stringify(event, null, 4)}`);
 		
 		switch (event.type) {
