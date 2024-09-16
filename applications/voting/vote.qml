@@ -13,8 +13,8 @@ Rectangle {
     property var poll: {} 
     property var pollStats: { winnerSelected: false } 
     property bool canHostVote: false
-    property bool is_host: false 
-    property bool votes_tallied: false
+    property bool isHost: false 
+    property bool votesTallied: false
 
     // Poll List view
     ColumnLayout {
@@ -606,14 +606,14 @@ Rectangle {
         RowLayout {
             width: parent.width
             Layout.alignment: Qt.AlignHCenter
-            visible: !votes_tallied
+            visible: !votesTallied
 
             // Recast vote
             Rectangle {
                 width: 150
                 height: 40
                 color: "#c0bfbc"
-                visible: ((is_host && canHostVote) || !is_host) && !pollStats.winnerSelected
+                visible: ((isHost && canHostVote) || !isHost) && !pollStats.winnerSelected
 
                 Text {
                     anchors.centerIn: parent
@@ -633,13 +633,13 @@ Rectangle {
 
         // Host actions
         RowLayout {
-            visible: is_host
+            visible: isHost
             width: parent.width
             Layout.alignment: Qt.AlignHCenter
 
             // Preform Election
             Rectangle {
-                visible: !votes_tallied
+                visible: !votesTallied
                 width: 150
                 height: 40
                 color: "#c0bfbc"
@@ -655,14 +655,14 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         toScript({type: "run_election"});
-                        votes_tallied = true;
+                        votesTallied = true;
                     }
                 }
             }
 
             // Return to poll settings
             Rectangle {
-                visible: !votes_tallied
+                visible: !votesTallied
                 width: 150
                 height: 40
                 color: "#c0bfbc"
@@ -684,7 +684,7 @@ Rectangle {
 
             // Make a new question
             Rectangle {
-                visible: is_host && votes_tallied
+                visible: isHost && votesTallied
                 width: 150
                 height: 40
                 color: "#c0bfbc"
@@ -701,7 +701,7 @@ Rectangle {
                     onClicked: {
                         _clearHost();
                         _changePage("poll_host_view");
-                        votes_tallied = false;
+                        votesTallied = false;
                     }
                 }
             }
@@ -959,7 +959,7 @@ Rectangle {
             _changePage("poll_host_view");
 
             // Set variables
-            is_host = true
+            isHost = true
             
             break;
 
@@ -981,7 +981,7 @@ Rectangle {
             // Set values
             _populateClient()
 
-            if (is_host) return; 
+            if (isHost) return; 
 
             _changePage("poll_client_view");
 
@@ -993,7 +993,7 @@ Rectangle {
 
         // Close the poll and remove it from the list of active polls
         case "close_poll":
-            if (message.change_page == true) _changePage("poll_list");
+            if (message.changePage == true) _changePage("poll_list");
 
             // Find the poll with the matching ID and remove it from active polls
             for (var i = 0; i < active_polls.count; i++) {
@@ -1004,14 +1004,14 @@ Rectangle {
             }
 
             // Set variables
-            is_host = false
+            isHost = false
             poll_to_create_host_can_vote.checked = false;
 
             break;
         case "poll_winner":
             pollStats = message.pollStats;
             _populateResults();
-            votes_tallied = true;
+            votesTallied = true;
             break;
         case "received_vote":
             pollStats = message.pollStats;
@@ -1021,19 +1021,19 @@ Rectangle {
             current_page = message.page;
             if (message.poll) poll = message.poll;
             if (message.pollStats) pollStats = message.pollStats;
-            if (message.isHost) is_host = true;
+            if (message.isHost) isHost = true;
 
             if (message.page == "poll_client_view") {
                 _populateClient();
-                if (is_host) _populateHost();
+                if (isHost) _populateHost();
             }
             if (message.page == "poll_results") {
                 _populateClient();
                 _populateResults();
-                if (is_host) _populateHost();
+                if (isHost) _populateHost();
             };
             if (message.page == "poll_host_view"){
-                if (is_host) _populateHost();
+                if (isHost) _populateHost();
             }
             break;
         }

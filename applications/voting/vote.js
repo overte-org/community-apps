@@ -9,7 +9,7 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 
-/* global Script Tablet Messages MyAvatar Uuid*/
+/* global Script Tablet Messages MyAvatar AvatarList Uuid SoundCache*/
 
 // TODO: Documentation
 // FIXME: Handle ties: kill both of tied results
@@ -73,7 +73,7 @@
 			active = true;
 
 			if (poll.id != '') {
-				return _findWhereWeNeedToBe()
+				return _findWhereWeNeedToBe();
 			}
 
 			// Request a list of active polls if we are not already in one
@@ -148,7 +148,7 @@
 
 		// Confirm to user if they want to close the poll
 		if (!bypassPrompt) {
-			var answer = Window.confirm('Are you sure you want to close the poll?')
+			var answer = Window.confirm('Are you sure you want to close the poll?');
 			if (!answer) return;
 		}
 
@@ -158,7 +158,7 @@
 		Messages.sendMessage("ga-polls", JSON.stringify({type: "close_poll", poll: {id: poll.id}}));
 
 		// Update the UI screen
-		_emitEvent({type: "close_poll", poll: {id: poll.id}, change_page: true});
+		_emitEvent({type: "close_poll", poll: {id: poll.id}, changePage: true});
 
 		// Clear our active poll data
 		_resetNetworking();
@@ -249,7 +249,7 @@
 			if (!voteResults[candidate]) voteResults[candidate] = 0;
 	
 			// Increment value for each vote
-			voteResults[candidate]++
+			voteResults[candidate]++;
 		}
 	
 		const totalVotes = Object.keys(pollStats.responses).length; // Total votes to expect to be counted.
@@ -323,7 +323,7 @@
 		ballot.splice(indexToRemove, ballot.length - indexToRemove);
 
 		const responsesKeyName = Object.keys(pollStats.responses).length.toString();
-		responses[responsesKeyName] = ballot;
+		pollStats.responses[responsesKeyName] = ballot;
 
 		function getRandomOrder(...words) {
 			for (let i = words.length - 1; i > 0; i--) {
@@ -348,10 +348,11 @@
 
 	function _emitSound(type){
 		switch (type) {
-			case "new_prompt":
-				const newPollSound = SoundCache.getSound(Script.resolvePath("./sound/new_vote.mp3"))
-				Audio.playSystemSound(newPollSound, {volume: 0.5});
-				break;
+		case "new_prompt": {
+			let newPollSound = SoundCache.getSound(Script.resolvePath("./sound/new_vote.mp3"));
+			Audio.playSystemSound(newPollSound, {volume: 0.5});
+			break;
+		}
 		}
 	}
 
@@ -377,7 +378,7 @@
 		case "prompt":
 			poll.question = event.prompt.question;
 			poll.options = event.prompt.options.filter(String); // Clean empty options
-			poll.canHostVote = event.canHostVote
+			poll.canHostVote = event.canHostVote;
 			pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 };
 			emitPrompt();
 			break;
@@ -437,7 +438,7 @@
 				var isOurPoll = poll.id == message.poll.id;
 
 				// Tell UI to close poll
-				_emitEvent({type: "close_poll", change_page: isOurPoll, poll: {id: message.poll.id}});
+				_emitEvent({type: "close_poll", changePage: isOurPoll, poll: {id: message.poll.id}});
 
 				// Unregister self from poll
 				if (isOurPoll) leavePoll();
@@ -513,7 +514,6 @@
 				Messages.sendMessage(poll.id, JSON.stringify({type: "sync", poll: poll, pollStats: pollStats}));
 				emitPrompt();
 			}
-	}
-
+		}
 	}
 })();
