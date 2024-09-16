@@ -15,15 +15,8 @@
 // FIXME: Handle ties: kill both of tied results
 // FIXME: Handle ties: Last two standing are tied.
 
-// FIXME: Host closes window does not return them to client view when applicable
-// FIXME: Recasting vote from closed window does not populate the options.
-// FIXME: Sound is inconsistent
-// FIXME: Simplify
-// FIXME: The results screen is not being cleared properly?
-
 // STYLE ---------------
 // FIXME: Camel case
-// TODO: Placeholder text
 
 (() => {
 	"use strict";
@@ -228,7 +221,6 @@
 	}
 
 	// Take the gathered responses and preform the election
-	// TODO: Simplify logging of critical information
 	// FIXME: Recursive function call
 	function preformElection(){
 		let firstVotes = []; // List of first choices from every ballot
@@ -384,7 +376,7 @@
 			break;
 		case "prompt":
 			poll.question = event.prompt.question;
-			poll.options = event.prompt.options;
+			poll.options = event.prompt.options.filter(String); // Clean empty options
 			poll.canHostVote = event.canHostVote
 			pollStats = {iterations: 0, responses: {}, winnerSelected: false, winnerName: "", votesReceived: 0, votesCounted: 0 };
 			emitPrompt();
