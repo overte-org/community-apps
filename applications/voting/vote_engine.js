@@ -19,7 +19,7 @@ function preformVote(arrayOfBallots) {
 	const totalAmountOfVotes = ballotsStorage.length;
 	let firstChoices = {};
 
-	if (totalAmountOfVotes === 0) return; // No votes, no results.
+	if (totalAmountOfVotes === 0) return null; // No votes, no results.
 	iterations++;
 
 	// Go though each ballot and count the first choice for each
@@ -45,7 +45,7 @@ function preformVote(arrayOfBallots) {
 	let lowestVoteAmount = Infinity;
 	let highestVoteAmount = -Infinity;
 	let highestVoteCandidate = "";
-	// let highestVoteCandidateTied = false; // If there are multiple candidates with the same amount of votes. TODO
+	let candidatesWithSameHighestVote = []; // Array of the highest voted for candidates
 
 	// Find the lowest amount of votes for a candidate
 	Object.keys(firstChoices).forEach((candidate) => { 
@@ -58,15 +58,43 @@ function preformVote(arrayOfBallots) {
 		if (firstChoices[candidate] < lowestVoteAmount) lowestVoteAmount = firstChoices[candidate];
 	});
 
+	// print(JSON.stringify(firstChoices, null, 4));
+	// Check to see if there are multiple candidates with the highest amount of votes
+	Object.keys(firstChoices).forEach((candidate) => { 
+		// print(`Is ${firstChoices[candidate]} == ${highestVoteAmount}?`);
+		if (firstChoices[candidate] == highestVoteAmount) {
+			candidatesWithSameHighestVote.push(candidate);
+			// print(`Pushing ${candidate}`);
+		}
+	});
+
 	// Check to see if we have a winner.
 	// A winner is chosen when they have a total vote amount that is more than half of the total votes.
-	// print(JSON.stringify(firstChoices, null, 4));
 	// print(`Is ${highestVoteAmount} > ${Math.floor(ballotsStorage.length / 2)}`);
-	// TODO: Check for ties
-	if (highestVoteAmount > Math.floor(ballotsStorage.length / 2)) {
+	// Simple check for a winner.
+	if (highestVoteAmount > Math.floor(ballotsStorage.length / 2) && candidatesWithSameHighestVote.length == 1) {
 		const returnValue = {name: highestVoteCandidate, iterations: iterations};
 		iterations = 0; // Reset iterations.
 		ballotsStorage = []; // Reset the ballots array.
+		print("Normal exit");
+		return returnValue;
+	}
+
+	/* 
+	[ "Hello", "World", "Goodbye", "-1" ],
+	[ "World", "Hello", "Goodbye", "-1" ],
+	[ "Hello", "World", "Goodbye"      	],
+	[ "World", 							],	
+	[ 		 							],	
+	*/
+
+	// TODO: Check to see if this tie handling works. 
+	if(candidatesWithSameHighestVote.length > 1 && candidatesWithSameHighestVote.length == Object.keys(firstChoices).length){
+		// We have a tie, show the tie
+		const returnValue = {name: candidatesWithSameHighestVote, iterations: iterations, tie: true};
+		iterations = 0; // Reset iterations.
+		ballotsStorage = []; // Reset the ballots array.
+		print("Tie exit");
 		return returnValue;
 	}
 

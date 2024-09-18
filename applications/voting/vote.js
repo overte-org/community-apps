@@ -12,8 +12,6 @@
 /* global Script Tablet Messages MyAvatar AvatarList Uuid SoundCache*/
 
 // TODO: Documentation
-// FIXME: Handle ties: kill both of tied results
-// FIXME: Handle ties: Last two standing are tied.
 // FIXME: Make the candidate name have reserved value "-1", or change to uncommon name.
 
 (() => {
@@ -232,10 +230,13 @@
 		});
 
 		const winner = voteEngine.preformVote(votesFormatted);
-		console.log(`Winner: ${winner.name}`);
+		if (!winner) return;
+		const winnerName = winner?.tie ? winner.name.join(', ') : winner.name;
+
+		console.log(`Winner: ${winnerName}`);
 
 		// Update the stats
-		pollStats.winnerName = winner.name;
+		pollStats.winnerName = winnerName;
 		pollStats.winnerSelected = true;
 		pollStats.votesCounted = Object.keys(pollStats.responses).length;
 		pollStats.iterations = winner.iterations;
@@ -323,7 +324,7 @@
 		case "run_election":
 			// Debug: Create a lot of fake ballots
 			if (debug) {
-				for (let i = 0; i < 25; ++i) {
+				for (let i = 0; i < 26; ++i) {
 					_debugDummyBallot();
 				}
 			}
