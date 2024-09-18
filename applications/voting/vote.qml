@@ -630,14 +630,13 @@ Rectangle {
         RowLayout {
             width: parent.width
             Layout.alignment: Qt.AlignHCenter
-            visible: !votesTallied
 
             // Recast vote
             Rectangle {
                 width: 150
                 height: 40
                 color: "#c0bfbc"
-                visible: ((isHost && canHostVote) || !isHost) && !pollStats.winnerSelected
+                visible: ((isHost && canHostVote) || !isHost) && !pollStats.winnerSelected && !votesTallied
 
                 Text {
                     anchors.centerIn: parent
