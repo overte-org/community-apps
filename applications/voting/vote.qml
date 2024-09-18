@@ -626,7 +626,6 @@ Rectangle {
             }
         }
 
-        // TODO: Style: Not centered. Remake.
         // Client actions
         RowLayout {
             width: parent.width

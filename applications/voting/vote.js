@@ -14,6 +14,7 @@
 // TODO: Documentation
 // FIXME: Handle ties: kill both of tied results
 // FIXME: Handle ties: Last two standing are tied.
+// FIXME: Make the candidate name have reserved value "-1", or change to uncommon name.
 
 (() => {
 	"use strict";
@@ -27,6 +28,8 @@
 	let pollClientState = {hasVoted: false, isHost: false};
 	let activePolls = []; // All active polls.
 	let selectedPage = ""; // Selected page the vote screen is on. Used when the host closes the window.
+
+	let voteEngine = Script.require("./vote_engine.js");
 
 	const url = Script.resolvePath("./vote.qml");
 	const myUuid = generateUUID(MyAvatar.sessionUUID);
@@ -220,88 +223,27 @@
 	// Take the gathered responses and preform the election
 	// FIXME: Recursive function call
 	function preformElection(){
-		let firstVotes = []; // List of first choices from every ballot
-		let voteResults = {}; // Object that stores the total amount of votes each candidate gets
-	
-		// Don't run election if we don't have any votes.
-		if (Object.keys(pollStats.responses).length == 0) return; 
-	
-		// Go though each vote received and get the most preferred candidate per ballot.
-		Object.keys(pollStats.responses).forEach((key) => {
-			let uuid = key;
-			let vote = pollStats.responses[uuid];
-	
-			// Assign first vote to new array
-			firstVotes.push(vote[0]);
+
+		// Format the votes into a format that the election engine can understand
+		let votesFormatted = [];
+		const allVoters = Object.keys(pollStats.responses);
+		allVoters.forEach((voterId) => {
+			votesFormatted.push(pollStats.responses[voterId]);
 		});
-	
-		// Go through each first choice and increment the total amount of votes per candidate.
-		for (let i = 0; i < firstVotes.length; i++) {
-			let candidate = firstVotes[i];
-	
-			// Check if firstVotes index exists
-			if (!candidate) candidate = -1; // If we have received a "no-vote", just assign -1
-	
-			// Create voteResults index if it does not exist
-			if (!voteResults[candidate]) voteResults[candidate] = 0;
-	
-			// Increment value for each vote
-			voteResults[candidate]++;
-		}
-	
-		const totalVotes = Object.keys(pollStats.responses).length; // Total votes to expect to be counted.
-		const majority = Math.floor(totalVotes / 2); // Minimum value to be considered a majority
-	
-		const sortedArray = Object.entries(voteResults).sort((a, b) => b[1] - a[1]);
-		let sortedObject = [];
-		for (const [key, value] of sortedArray) {
-			sortedObject.push({ [key]: value });
-		}
 
-		console.log(`Iteration Votes: ${JSON.stringify(sortedObject, null, 2)}`);
-	
-		// Check the most voted for option to see if it makes up over 50% of votes
-		// NOTE: Has to be *over* 50%.
-		if (sortedObject[0][Object.keys(sortedObject[0])[0]] > majority) {
-			let winnerName = Object.keys(sortedObject[0])[0];
-			if (winnerName == '-1') winnerName = "No vote";
+		const winner = voteEngine.preformVote(votesFormatted);
+		console.log(`Winner: ${winner.name}`);
 
-			pollStats.winnerName = winnerName;
-			pollStats.votesCounted = totalVotes;
-			pollStats.winnerSelected = true;
+		// Update the stats
+		pollStats.winnerName = winner.name;
+		pollStats.winnerSelected = true;
+		pollStats.votesCounted = Object.keys(pollStats.responses).length;
+		pollStats.iterations = winner.iterations;
 
-			// _emitEvent({type: "poll_sync", poll: poll, pollStats: pollStats});
-
-			Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", pollStats: pollStats}));
-			console.log(`\nWinner: ${winnerName}\nElection rounds: ${pollStats.iterations}\nVotes counted: ${totalVotes}`);
-			pollStats.responses = {};
-			return; // Winner was selected. We are done!
-		}; 
-	
-		// If there is not a majority vote, remove the least popular candidate and call preformElection() again
-		let leastPopularIndex = sortedObject.length - 1;
-		let leastPopular = Object.keys(sortedObject[leastPopularIndex])[0];
-
-		// Check to see if least popular is "-1"/"no-vote"
-		if (leastPopular === "-1") {
-			leastPopularIndex--;
-			leastPopular = Object.keys(sortedObject[leastPopularIndex])[0]; // Get the real leastPopular candidate
-		}
-	
-		console.log(`Removing least popular: ${leastPopular}`);
-	
-		// Go into each vote and delete the selected least popular candidate
-		Object.keys(pollStats.responses).forEach((uuid) => {
-			// Remove the least popular candidate from each vote.
-			if (pollStats.responses[uuid].indexOf(leastPopular) != -1) pollStats.responses[uuid].splice(pollStats.responses[uuid].indexOf(leastPopular), 1);
-			console.log(pollStats.responses[uuid]);
-		});
-	
-		// Update statistics
-		pollStats.iterations++; 
-	
-		// Run again
-		preformElection();
+		// Synchronize the winner with all clients
+		Messages.sendMessage(poll.id, JSON.stringify({type: "poll_winner", pollStats: pollStats}));
+		pollStats.responses = {};
+		return;
 	}
 
 	// Create a UUID or turn an existing UUID into a string
