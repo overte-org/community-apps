@@ -71,6 +71,7 @@
         text: display_name,
         backgroundAlpha: 0.0,
         billboardMode: "full",
+        dimensions: { x: 0.8, y: 0.2, z: 0.1 },
         unlit: true,
         parentID: user_uuid,
         position: Vec3.sum(user.position, { x: 0, y: 0.4 + jointInObjectFrame.y, z: 0 }),
@@ -109,9 +110,9 @@
     // https://apidocs.overte.org/Entities.html#.textSize
     Script.setTimeout(() => {
       let textSize = Entities.textSize(user_nametags[user_uuid].text, display_name);
-      Entities.editEntity(user_nametags[user_uuid].text, { dimensions: { x: textSize.width + 0.25, y: textSize.height - 0.05, z: 0.1 } });
+      Entities.editEntity(user_nametags[user_uuid].text, { dimensions: { x: textSize.width + 0.25, y: textSize.height + 0.07, z: 0.1 } });
       Entities.editEntity(user_nametags[user_uuid].background, {
-        dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height - 0.05, z: 0.1 },
+        dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height+0.05, z: 0.1 },
       });
     }, 100);
   }
