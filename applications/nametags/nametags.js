@@ -112,7 +112,7 @@
       let textSize = Entities.textSize(user_nametags[user_uuid].text, display_name);
       Entities.editEntity(user_nametags[user_uuid].text, { dimensions: { x: textSize.width + 0.25, y: textSize.height + 0.07, z: 0.1 } });
       Entities.editEntity(user_nametags[user_uuid].background, {
-        dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height+0.05, z: 0.1 },
+        dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height + 0.05, z: 0.1 },
       });
     }, 100);
   }
@@ -139,7 +139,7 @@
       const headJointIndex = user.getJointIndex("Head");
       const jointInObjectFrame = user.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
       Entities.editEntity(user_nametags[user_uuid].text, {
-        position: Vec3.sum(user.position, { x: 0, y: jointInObjectFrame.y + Math.abs(user.scale - 1) + 0.4, z: 0 }),
+        position: Vec3.sum(user.position, { x: 0.01, y: jointInObjectFrame.y + Math.abs(user.scale - 1) + 0.4, z: 0 }),
         text: display_name,
       });
     });
