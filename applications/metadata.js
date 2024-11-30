@@ -82,7 +82,7 @@ var metadata = { "applications":
             "caption": "REFRESH"
         },
         {
-            "isActive": false,
+            "isActive": true,
             "directory": "nametags",
             "name": "Nametags",
             "description": "Display users' display names above their heads.",
