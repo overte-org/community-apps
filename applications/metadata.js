@@ -92,15 +92,6 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
-            "directory": "materialDataCreator",
-            "name": "Material Data Creator",
-            "description": "This tool helps you create your own material data with a real-time preview. From that, you can directly generate a Material entity or a .json file that can be used in Material entities.",
-            "jsfile": "materialDataCreator/appMaterialDataCreator.js",
-            "icon": "materialDataCreator/images/icon_materialDate_inactive.png",
-            "caption": "MAT-GEN"
-        },
-        {
-            "isActive": true,
             "directory": "blocks",
             "name": "Blocks",
             "description": "Script to create blocks in a Minecraft way",
@@ -197,15 +188,6 @@ var metadata = { "applications":
             "jsfile": "survivalKit/app-survivalKit.js",
             "icon": "survivalKit/icon_inactive.png",
             "caption": "SURVIVAL"
-        },
-        {
-            "isActive": true,
-            "directory": "audioZones",
-            "name": "Audio Zones Helper",
-            "description": "This tool helps you to setup Audio Zones using 3D box entities in-world. The tools will generate the coordinates that need to be captured in the Domain Server (Content > Audio Environment). The 3D representations of the audio zones can be hidden and locked to be preserved for future adjustments or restorations.",
-            "jsfile": "audioZones/app-audioZones.js",
-            "icon": "audioZones/images/icon_audioZone_inactive.png",
-            "caption": "AUDIO-Z"
         },
         {
             "isActive": true,
@@ -343,12 +325,12 @@ var metadata = { "applications":
             "caption": "3rd PERS"
         },
         {
-            "isActive": true,
+            "isActive": false,
             "directory": "voting",
             "name": "General Assembly Voting",
             "description": "Vote in the General Assembly",
             "jsfile": "voting/vote.js",
-            "icon": "voting/icon_white.png",
+            "icon": "voting/img/icon_white.png",
             "caption": "VOTE"
         }
     ]
