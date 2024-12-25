@@ -92,15 +92,6 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
-            "directory": "materialDataCreator",
-            "name": "Material Data Creator",
-            "description": "This tool helps you create your own material data with a real-time preview. From that, you can directly generate a Material entity or a .json file that can be used in Material entities.",
-            "jsfile": "materialDataCreator/appMaterialDataCreator.js",
-            "icon": "materialDataCreator/images/icon_materialDate_inactive.png",
-            "caption": "MAT-GEN"
-        },
-        {
-            "isActive": true,
             "directory": "blocks",
             "name": "Blocks",
             "description": "Script to create blocks in a Minecraft way",
@@ -197,15 +188,6 @@ var metadata = { "applications":
             "jsfile": "survivalKit/app-survivalKit.js",
             "icon": "survivalKit/icon_inactive.png",
             "caption": "SURVIVAL"
-        },
-        {
-            "isActive": true,
-            "directory": "audioZones",
-            "name": "Audio Zones Helper",
-            "description": "This tool helps you to setup Audio Zones using 3D box entities in-world. The tools will generate the coordinates that need to be captured in the Domain Server (Content > Audio Environment). The 3D representations of the audio zones can be hidden and locked to be preserved for future adjustments or restorations.",
-            "jsfile": "audioZones/app-audioZones.js",
-            "icon": "audioZones/images/icon_audioZone_inactive.png",
-            "caption": "AUDIO-Z"
         },
         {
             "isActive": true,
@@ -317,21 +299,21 @@ var metadata = { "applications":
         },
         {
             "isActive": true,
-            "directory": "armored-chat",
-            "name": "Chat",
-            "description": "Chat application",
-            "jsfile": "armored-chat/armored_chat.js",
-            "icon": "armored-chat/img/icon_black.png",
-            "caption": "CHAT"
-        },
-        {
-            "isActive": true,
             "directory": "domainMapper",
             "name": "Domain Mapper",
             "description": "Generate a 3D miniature representation of your domain's zones. Useful if you have many 'Places' in your domain and are trying to visualize where you can add new ones. The domain overview  can also be used in parallel with the 'Create' application to help you adjust kilometers wide zones. This tool also displays where are the avatars in the domain. (It refreshes every 5 seconds.)",
             "jsfile": "domainMapper/app-domainMapper.js",
             "icon": "domainMapper/icon_inactive_white.png",
             "caption": "DOMAP"
+        },
+        {
+            "isActive": true,
+            "directory": "more",
+            "name": "MoreNG",
+            "description": "More app rewrite in QML. Please see documentation https://github.com/overte-org/community-apps/tree/master/applications/more for more information",
+            "jsfile": "more/more.js",
+            "icon": "more/img/icon_white.png",
+            "caption": "MORE-NG"
         },
         {
             "isActive": true,
@@ -350,6 +332,15 @@ var metadata = { "applications":
             "jsfile": "flow/flowAppCpp.js",
             "icon": "flow/flow-i.svg",
             "caption": "FLOW"
+        },
+        {
+            "isActive": false,
+            "directory": "voting",
+            "name": "General Assembly Voting",
+            "description": "Vote in the General Assembly",
+            "jsfile": "voting/vote.js",
+            "icon": "voting/img/icon_white.png",
+            "caption": "VOTE"
         }
     ]
 };

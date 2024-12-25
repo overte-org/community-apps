@@ -4,7 +4,7 @@
     Created by George Deac, October 21st, 2023.
     Copyright 2023 George Deac.
     Copyright 2023 The MediaPipe Authors.
-    Copyright 2023, Overte e.V.
+    Copyright 2024, Overte e.V.
 
     Overte Application for Mediapipe face tracking in Desktop mode.
 
@@ -267,6 +267,15 @@
                     <span class="slider"></span>
                 </label>
             </td>
+            <td>
+                Show preview window:
+            </td>
+            <td>
+                <label class="switch">
+                    <input type="checkbox" id="enable_webcam_display" class="switchmove">
+                    <span class="slider"></span>
+                </label>
+            </td>
         </tr>
         <tr><td colspan="4">
             <div class="select">
@@ -274,7 +283,7 @@
             </div>              
         </td></tr>
     </table><br>
-    <div style="position: relative;">
+    <div id="preview_camera_area" style="display:none; position: relative;">
         <video id="webcam" autoplay playsinline></video>
         <canvas class="output_canvas" id="output_canvas" style="position: absolute; left: 0px; top: 0px;"></canvas>
     </div>
@@ -662,6 +671,7 @@
     const {FaceLandmarker, FilesetResolver, DrawingUtils} = vision;
     const demosSection = document.getElementById("demos");
     const videoBlendShapes = document.getElementById("video-blend-shapes");
+    const enableWebcamDisplaySwitch = document.querySelector('#enable_webcam_display')
     let faceLandmarker;
     let runningMode = "IMAGE";
     let enableWebcamButton;
@@ -695,6 +705,11 @@
     }
 
     runDemo();
+
+    enableWebcamDisplaySwitch.addEventListener('change', (event) => { 
+        let enabled = event.target.checked;
+        preview_camera_area.style.display = enabled ? "block" : "none";
+    })
 
     const video = document.getElementById("webcam");
     const canvasElement = document.getElementById("output_canvas");
