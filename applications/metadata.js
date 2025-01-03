@@ -325,6 +325,15 @@ var metadata = { "applications":
             "caption": "3rd PERS"
         },
         {
+            "isActive": true,
+            "directory": "flow",
+            "name": "Flow Bones",
+            "description": "Effortlessly tweak and tune avatar flow bones.",
+            "jsfile": "flow/flowAppCpp.js",
+            "icon": "flow/flow-i.svg",
+            "caption": "FLOW"
+        },
+        {
             "isActive": false,
             "directory": "voting",
             "name": "General Assembly Voting",
