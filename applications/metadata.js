@@ -341,6 +341,15 @@ var metadata = { "applications":
             "jsfile": "voting/vote.js",
             "icon": "voting/img/icon_white.png",
             "caption": "VOTE"
+        },
+        {
+            "isActive": true,
+            "directory": "flex",
+            "name": "Blendshape Buddy",
+            "description": "Control your blendshapes.",
+            "jsfile": "flex/blendshape_buddy.js",
+            "icon": "flex/flex-i.svg",
+            "caption": "FLEX"
         }
     ]
 };

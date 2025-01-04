@@ -1,0 +1,93 @@
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+<!doctype html>
+<html>
+	<head>
+		<title>Blendshape Buddy</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+html, body { height: 100vh }
+
+body {
+	margin: 0;
+	padding: 0;
+	background: #222;
+	color: #ddd;
+	display: flex;
+	flex-direction: column;
+	font-size: 18pt;
+	font-family: sans-serif;
+	align-items: center;
+	justify-content: center;
+}
+
+button, input {
+	font-size: 18pt;
+	font-family: sans-serif;
+	background: #222;
+	color: #ddd;
+	border: thin solid;
+}
+
+button:hover {
+	background: #666;
+}
+
+dialog {
+	background: #222;
+	color: #ddd;
+}
+</style>
+	</head>
+	<body>
+		<p style="text-align: center">Blendshape Buddy</p>
+		<div>
+			<div style="display: flex">
+				<input id="txt-flexname" placeholder="Blendshape name" value="JawOpen" style="flex-grow:1">
+				<button style="flex-grow: 0.1" onclick="dlg_presets.showModal()">⏷</button>
+			</div>
+			<input id="num-flexscale" type="range" min="0" max="1" step="0.05" value="0" style="width:100%">
+		</div>
+
+		<dialog id="dlg-presets" style="width: 60%; padding: .2em">
+			<button onclick="dlg_presets.close()" style="position: absolute;right:0;top:0;font-weight: bold">x</button>
+			<p style="text-align: center; margin-top: 0; margin-bottom: .5em; font-weight: bold">Presets</p>
+			<hr>
+			<div style="display: flex; flex-direction: column; gap: .3em">
+				<button onclick="setFlexName('JawOpen')">JawOpen</button>
+				<button onclick="setFlexName('TongueOut')">TongueOut</button>
+				<button onclick="setFlexName('Smile')">Smile</button>
+				<button onclick="setFlexName('Frown')">Frown</button>
+				<button onclick="setFlexName('Blink')">Blink</button>
+				<button onclick="setFlexName('UserBlendshape0')">User 0</button>
+				<button onclick="setFlexName('UserBlendshape1')">User 1</button>
+				<button onclick="setFlexName('UserBlendshape2')">User 2</button>
+				<button onclick="setFlexName('UserBlendshape3')">User 3</button>
+				<button onclick="setFlexName('UserBlendshape4')">User 4</button>
+				<button onclick="setFlexName('UserBlendshape5')">User 5</button>
+				<button onclick="setFlexName('UserBlendshape6')">User 6</button>
+				<button onclick="setFlexName('UserBlendshape7')">User 7</button>
+				<button onclick="setFlexName('UserBlendshape8')">User 8</button>
+				<button onclick="setFlexName('UserBlendshape9')">User 9</button>
+			</div>
+		</dialog>
+
+		<script>
+			const txt_flexname = document.getElementById("txt-flexname");
+			const num_flexscale = document.getElementById("num-flexscale");
+			const dlg_presets = document.getElementById("dlg-presets");
+
+			function setFlexName(name) {
+				txt_flexname.value = name;
+				dlg_presets.close();
+			}
+
+			num_flexscale.addEventListener("change", e => {
+				EventBridge.emitWebEvent(JSON.stringify({
+						flex: txt_flexname.value,
+						value: e.target.value,
+				}));
+			});
+		</script>
+	</body>
+</html>
