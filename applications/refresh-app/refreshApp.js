@@ -35,7 +35,7 @@ Script.scriptEnding.connect(function(){
 
 function refreshAvatar() {
     var modelURL = MyAvatar.getFullAvatarURLFromPreferences();
-    modelURL = modelURL.split("?")[0] + "?" + new Date().getTime();
+    modelURL = modelURL.split("#")[0] + "#" + new Date().getTime();
     MyAvatar.useFullAvatarURL(modelURL);
     console.log('Avatar refreshed: ' + modelURL);
 }
@@ -49,7 +49,7 @@ function refreshAttachments() {
     for (var id in data) {
         var attachment = data[id];
         if (attachment.type.toString() === 'Model') {
-            attachment.modelURL = attachment.modelURL.toString().split('?')[0] + '?' + Date.now();  
+            attachment.modelURL = attachment.modelURL.toString().split('#')[0] + '#' + Date.now();  
             attachmentAmount++;
         }
     }
