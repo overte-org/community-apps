@@ -8,7 +8,6 @@ function drawNamePlate(name = "", userUUID = "", hasGroup = false, groupBannerUR
 	canvas.height = groupBannerHeight + nameTagHeight;
 
 	if (hasGroup) {
-		console.log("Has group")
 		const backgroundImage = new Image();
 		backgroundImage.setAttribute('crossorigin', 'anonymous');
 		backgroundImage.src = groupBannerURL;
@@ -51,7 +50,7 @@ function drawNamePlate(name = "", userUUID = "", hasGroup = false, groupBannerUR
 	}
 
 	// Nametag background with inset border
-	const radius = 30; // Define the radius of the rounded corners
+	const radius = 160; // Define the radius of the rounded corners
 
 	// Main fill color
 	ctx.fillStyle = "#111111ee";
