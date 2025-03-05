@@ -1,5 +1,16 @@
 const canvas = document.querySelector('canvas');
 
+const colors = {
+	transparentBlack: "#111111ee",
+	black: "black",
+	white: "white",
+	overte: "#6667ab"
+}
+
+const fonts = {
+	nameplate: "256px Arial",
+}
+
 function drawNamePlate(name = "", userUUID = "", hasGroup = false, groupBannerURL = "", tagWidth = 3000, groupBannerHeight = 600, nameTagHeight = 500) {
 	let ctx = canvas.getContext("2d");
 
@@ -53,28 +64,28 @@ function drawNamePlate(name = "", userUUID = "", hasGroup = false, groupBannerUR
 	const radius = 160; // Define the radius of the rounded corners
 
 	// Main fill color
-	ctx.fillStyle = "#111111ee";
-	ctx.strokeStyle = "black";
+	ctx.fillStyle = colors.transparentBlack;
+	ctx.strokeStyle = colors.black;
 	drawRoundedRectangle(ctx, 0, groupBannerHeight, tagWidth, nameTagHeight, radius);
 	ctx.fill();
 
 	// Inset border color
-	ctx.strokeStyle = "#6667ab";
-	ctx.lineWidth = 20; // Set the stroke width
+	ctx.strokeStyle = colors.overte;
+	ctx.lineWidth = 20;
 	drawRoundedRectangle(ctx, 20, groupBannerHeight + 20, tagWidth - 40, nameTagHeight - 40, radius - 10);
 	ctx.stroke();
 
-	ctx.fillStyle = "#111111ee";
-	ctx.strokeStyle = "black";
+	ctx.fillStyle = colors.transparentBlack;
+	ctx.strokeStyle = colors.black;
 
-	ctx.font = '256px Arial'; // Set font size and type
-	ctx.fillStyle = 'white'; // Set text color
+	ctx.font = fonts.nameplate; // Set font size and type
+	ctx.fillStyle = colors.white; // Set text color
 
 	const nameTag = name;
 	const nameTagTextWidth = ctx.measureText(nameTag).width; // Measure the width of the text
 	const nameTagXPosition = (tagWidth / 2) - (nameTagTextWidth / 2); // Calculate the center position
 
-	ctx.shadowColor = "black";
+	ctx.shadowColor = colors.black;
 	ctx.shadowBlur = 10;
 	ctx.lineWidth = 8;
 
@@ -90,7 +101,6 @@ function drawNamePlate(name = "", userUUID = "", hasGroup = false, groupBannerUR
 			}
 		}));
 	}
-
 }
 
 function drawRoundedRectangle(ctx, x, y, width, height, radius) {
