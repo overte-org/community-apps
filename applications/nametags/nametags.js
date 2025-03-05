@@ -137,6 +137,7 @@ function onWebEventReceived(event) {
                 parentID: userUUID,
                 billboardMode: "full",
                 imageURL: eventPacket.data.imageBase64,
+                subImage: { x: 0, y: 1, width: 3000, height: 1100 },    // Crop the first row of pixels. (Image not clamped?)
                 canCastShadow: false,
                 grab: {
                     grabbable: false
