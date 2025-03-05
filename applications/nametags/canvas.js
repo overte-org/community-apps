@@ -75,11 +75,10 @@ function drawNamePlate(name = "", userUUID = "", hasGroup = false, groupBannerUR
 	drawRoundedRectangle(ctx, 20, groupBannerHeight + 20, tagWidth - 40, nameTagHeight - 40, radius - 10);
 	ctx.stroke();
 
-	ctx.fillStyle = colors.transparentBlack;
+	// Name text
+	ctx.font = fonts.nameplate;
+	ctx.fillStyle = colors.white;
 	ctx.strokeStyle = colors.black;
-
-	ctx.font = fonts.nameplate; // Set font size and type
-	ctx.fillStyle = colors.white; // Set text color
 
 	const nameTag = name;
 	const nameTagTextWidth = ctx.measureText(nameTag).width; // Measure the width of the text
