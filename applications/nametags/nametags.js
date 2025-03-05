@@ -60,6 +60,8 @@ function _updateList() {
 // Add a user to the user list
 async function _addUser(userUUID) {
     if (!visible) return;
+    if (Object.keys(nameTags).includes(userUUID)) return;   // We have a tag for that user already!
+
     const user = AvatarList.getAvatar(userUUID);
     const displayName = user.displayName.substring(0, maximumNameLength) ?? "Anonymous";
 
