@@ -2,7 +2,7 @@
 //  app-roomScaleMarker.js
 //
 //  Created by Alezia Kurdis, December 18th 2023.
-//  Copyright 2023 Overte e.V.
+//  Copyright 2023-2025 Overte e.V.
 //
 //  Put a Marker on the floor to indicate the center of the room as you are doing full body tracking.
 //
@@ -19,7 +19,7 @@
     var APP_ICON_ACTIVE = ROOT + "icon_active.png"; 
     var appStatus = false;
     var channel = "overte.application.ak.roomScaleMarker";
-    var markerID = Uuid.NULL;
+    var markerID = Uuid.NONE;
     
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 
@@ -52,7 +52,7 @@
     button.clicked.connect(clicked);
 
     function drawMarker() {
-        if (markerID !== Uuid.NULL) {
+        if (markerID !== Uuid.NONE) {
             clearMarker();
         }
         markerID = Entities.addEntity({ 
@@ -82,9 +82,9 @@
     }
 
     function clearMarker() {
-        if (markerID !== Uuid.NULL) {
+        if (markerID !== Uuid.NONE) {
             Entities.deleteEntity(markerID);
-            markerID = Uuid.NULL;
+            markerID = Uuid.NONE;
         }
         Controller.actionEvent.disconnect(onActionEvent);
     }

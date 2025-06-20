@@ -3,7 +3,7 @@
     
     Created by Zach Fox on January 30th, 2019
     Copyright 2019 High Fidelity, Inc.
-    Copyright 2023, Overte e.V.
+    Copyright 2023-2025 Overte e.V.
 
     "Appreciate" application.
     Show someone else that you like what they're doing. 
@@ -88,7 +88,7 @@
         if (intensityEntity) {
             Entities.deleteEntity(intensityEntity);
             intensityEntity = false;
-            intensityEntityMaterial = Uuid.NULL;
+            intensityEntityMaterial = Uuid.NONE;
         }
     }
 
@@ -151,7 +151,7 @@
     // current intensity of their appreciation.
     // Many of these property values are empirically determined.
     var intensityEntity = false;
-    var intensityEntityMaterial = Uuid.NULL;
+    var intensityEntityMaterial = Uuid.NONE;
     var INTENSITY_ENTITY_MAX_DIMENSIONS = {
         "x": 0.24,
         "y": 0.24,
@@ -280,7 +280,7 @@
             if (intensityEntity) {
                 Entities.deleteEntity(intensityEntity);
                 intensityEntity = false;
-                intensityEntityMaterial = Uuid.NULL;
+                intensityEntityMaterial = Uuid.NONE;
             }
             
             maybeClearUpdateIntensityEntityInterval();
@@ -1065,7 +1065,7 @@
         if (intensityEntity) {
             Entities.deleteEntity(intensityEntity);
             intensityEntity = false;
-            intensityEntityMaterial = Uuid.NULL;
+            intensityEntityMaterial = Uuid.NONE;
         }
 
         HMD.displayModeChanged.disconnect(enableOrDisableAppreciate);

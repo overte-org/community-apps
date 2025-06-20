@@ -2,7 +2,7 @@
 //  app-expozer.js
 //
 //  Created by Alezia Kurdis, June 17th 2023.
-//  Copyright 2023 Overte e.V.
+//  Copyright 2023-2025 Overte e.V.
 //
 //  Overte Application to read the data of the entities around you.
 //
@@ -22,7 +22,7 @@
     var timestamp = 0;
     var INTERCALL_DELAY = 200; //0.3 sec
     var REQUEST_TIMEOUT = 10000; //10 seconds
-    var showSelectedID = Uuid.NULL;
+    var showSelectedID = Uuid.NONE;
     
     var radius = Settings.getValue("entityListDefaultRadius", 300);
     
@@ -119,9 +119,9 @@
     }
 
     function removeShowEntity() {
-        if (showSelectedID !== Uuid.NULL) {
+        if (showSelectedID !== Uuid.NONE) {
             Entities.deleteEntity(showSelectedID);
-            showSelectedID = Uuid.NULL;
+            showSelectedID = Uuid.NONE;
         }
     }
 

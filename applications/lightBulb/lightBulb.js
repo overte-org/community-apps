@@ -3,7 +3,7 @@
 //  lightBulb.js
 //
 //  Created by Alezia Kurdis, July 14th, 2021.
-//  Copyright 2022 Overte e.V.
+//  Copyright 2022-2025 Overte e.V.
 //
 //  Turn a shape to a light bulb.
 //
@@ -14,8 +14,8 @@
 
     var ROOT = Script.resolvePath('').split("lightBulb.js")[0];
     var DEG_TO_RAD = Math.PI/180;
-    var lightID = Uuid.NULL;
-    var materialID = Uuid.NULL;
+    var lightID = Uuid.NONE;
+    var materialID = Uuid.NONE;
     
     this.preload = function(entityID) {
 
@@ -100,12 +100,12 @@
 
     this.unload = function(entityID) {
         //Termination proces
-        if (lightID !== Uuid.NULL) {
+        if (lightID !== Uuid.NONE) {
             Entities.deleteEntity(lightID);
         }
-        if (materialID !== Uuid.NULL) {
+        if (materialID !== Uuid.NONE) {
             Entities.deleteEntity(materialID);
-        }        
+        }
     };  
 
 })
