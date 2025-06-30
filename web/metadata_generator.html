@@ -47,36 +47,36 @@
 
 					<div class="form-textinput">
 						<label for="app-v1-name">Name</label>
-						<input id="app-v1-name" type="text" placeholder="Name" oninput="updateFormData(event, 'name')">
+						<input id="app-v1-name" type="text" placeholder="Name" oninput="updateMetadataFromHTML('v1')">
 					</div>
 
 					<div class="form-textarea">
 						<label for="app-v1-description">Description</label>
 						<textarea id="app-v1-description" type="text" placeholder="Description"
-							oninput="updateFormData(event, 'description')"></textarea>
+							oninput="updateMetadataFromHTML('v1')"></textarea>
 					</div>
 
 					<div class="form-textinput">
 						<label for="app-v1-icon">Icon</label>
-						<input id="app-v1-icon" type="text" placeholder="Icon" oninput="updateFormData(event, 'icon')">
+						<input id="app-v1-icon" type="text" placeholder="Icon" oninput="updateMetadataFromHTML('v1')">
 					</div>
 
 					<div class="form-textinput">
 						<label for="app-v1-directory">Directory</label>
 						<input id="app-v1-directory" type="text" placeholder="Directory"
-							oninput="updateFormData(event, 'directory')">
+							oninput="updateMetadataFromHTML('v1')">
 					</div>
 
 					<div class="form-textinput">
 						<label for="app-v1-script">JSfile</label>
 						<input id="app-v1-script" type="text" placeholder="Script file"
-							oninput="updateFormData(event, 'script')">
+							oninput="updateMetadataFromHTML('v1')">
 					</div>
 
 					<div class="form-textinput">
 						<label for="app-v1-script">Caption</label>
 						<input id="app-v1-caption" type="text" placeholder="Toolbar caption"
-							oninput="updateFormData(event, 'caption')">
+							oninput="updateMetadataFromHTML('v1')">
 					</div>
 
 				</div>
@@ -198,8 +198,7 @@
 	document.querySelector(`#content`).classList.remove('hidden');
 </script>
 
-<script src="./js/metadata_generator.org.js"></script>
-<script src="./js/metadata_generator.js"></script>
 <script src="./js/format.js"></script>
+<script src="./js/metadata_generator.js"></script>
 
 </html>

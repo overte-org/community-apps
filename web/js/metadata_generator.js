@@ -1,5 +1,3 @@
-// FIXME: Description does not allow punctuation.
-
 let repository = {};
 
 let formData = {
@@ -65,7 +63,6 @@ async function continueFromV1() {
 	showPageArea('results');
 }
 
-
 function continueFromV2() {
 	if (validateV2Metadata() === false) {
 		return;
@@ -81,61 +78,18 @@ function continueFromV2() {
 function validateV2Metadata() {
 	clearFormErrors();
 	const { app } = formData;
-	let isValid = true;
-
-	if (!isStringValid(app.name)) newError(`Invalid application name`, 'app-name');
-	if (!isStringValid(app.description)) newError(`Invalid application description`, 'app-description');
-	if (!isUrlValid(app.icon)) newError(`Invalid application icon path`, 'app-icon');
-	if (!isUrlValid(app.directory)) newError(`Invalid application directory path`, 'app-directory');
-	if (!isUrlValid(app.script)) newError(`Invalid application script path`, 'app-script');
-	if (!isStringValid(app.author)) newError(`Invalid application author`, 'app-author');
-	if (!isUrlValid(app.homepage || '')) newError(`Invalid application homepage path`, 'app-homepage');
-	if (!isStringValid(app.category)) newError(`Invalid application category`, 'app-category');
-	if (!isStringValid(app.maturity)) newError(`Invalid application maturity`, 'app-maturity');
-
-	return isValid;
-
-	function newError(error, targetElement) {
-		console.log(`Element ${targetElement} has error '${error}'.`);
-		addFormError(error);
-		document.querySelector(`#${targetElement}`).classList.add('error-input');
-		errorElements.push(document.querySelector(`#${targetElement}`));
-		isValid = false;
-	}
 }
+
 function validateV1Metadata() {
 	clearFormErrors();
 	const { app } = formData;
-	let isValid = true;
 
-	if (!isStringValid(app.name)) newError(`Invalid application name`, 'app-v1-name');
-	if (!isStringValid(app.description)) newError(`Invalid application description`, 'app-v1-description');
-	if (!isUrlValid(app.icon)) newError(`Invalid application icon path`, 'app-v1-icon');
-	if (!isUrlValid(app.directory)) newError(`Invalid application directory path`, 'app-v1-directory');
-	if (!isUrlValid(app.script)) newError(`Invalid application script path`, 'app-v1-script');
-	if (!isStringValid(app.caption)) newError(`Invalid application caption`, 'app-v1-caption');
+	// V1 of the metadata requires the app directory to be leading in all directory fields
+	app.icon = format.v1Directory(app.icon, app.directory);
+	app.directory = format.directory(app.directory);
+	app.script = format.v1Directory(app.script, app.directory);
 
-	return isValid;
-
-	function newError(error, targetElement) {
-		console.log(`Element ${targetElement} has error '${error}'.`);
-		addFormError(error);
-		document.querySelector(`#${targetElement}`).classList.add('error-input');
-		errorElements.push(document.querySelector(`#${targetElement}`));
-		isValid = false;
-	}
-}
-
-function isStringValid(input) {
-	const regex = /^[A-Za-z0-9 _-]*$/; // Allow letters, numbers, and spaces
-	const regexText = regex.test(input);
-	return input !== '' && regexText;
-}
-
-function isUrlValid(input) {
-	const regex = /^[A-Za-z0-9 _\-:.\/]*$/; // Allow URL characters.
-	const regexText = regex.test(input);
-	return input !== '' && regexText;
+	return true;
 }
 
 function addFormError(error) {
@@ -148,8 +102,19 @@ function clearFormErrors() {
 	errorElements = [];
 }
 
-function updateFormData(event, targetElementName) {
-	formData.app[targetElementName] = event.target.value;
+function updateMetadataFromHTML(version) {
+	if (version == 'v1') {
+		const v1Parent = document.querySelector(`#form-v1-app`);
+		const textInputs = v1Parent.querySelectorAll(`div input`);
+		const textTextareas = v1Parent.querySelectorAll(`div textarea`);
+		const allInputs = [...textInputs, ...textTextareas];
+
+		allInputs.forEach((element) => {
+			formData.app[element.id.replace('app-v1-', '')] = element.value;
+		});
+
+		return;
+	}
 }
 
 async function getCommunityAppsMetadata() {
