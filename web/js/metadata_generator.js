@@ -31,6 +31,18 @@ function updateMetadataFromHTML(version) {
 
 		return;
 	}
+
+	if (version == 'v2') {
+		const v2Parent = document.querySelector(`#form-v2-app`);
+		const textInputs = v2Parent.querySelectorAll(`div input`);
+		const textTextareas = v2Parent.querySelectorAll(`div textarea`);
+		const textComboboxes = v2Parent.querySelectorAll(`div select`);
+		const allInputs = [...textInputs, ...textTextareas, ...textComboboxes];
+
+		allInputs.forEach((element) => {
+			formData.app[element.id.replace('app-v2-', '')] = element.value;
+		});
+	}
 }
 
 async function getCommunityAppsMetadata() {
@@ -81,7 +93,6 @@ async function getMetadata(url) {
 		// TODO: Handle errors
 		console.log('Failed to convert response to JSON.');
 	}
-
 	repository = response;
 }
 

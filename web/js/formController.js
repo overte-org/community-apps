@@ -7,6 +7,8 @@ function continueFromUrl() {
 		return;
 	}
 
+	getMetadata(formData.url);
+
 	showPageArea('form-v2-app');
 }
 
@@ -45,27 +47,24 @@ function continueFromV1() {
 }
 
 function continueFromV2() {
-	if (validateV2Metadata() === false) {
-		return;
-	}
-
 	const { app } = formData;
 
 	const entry = {
-		name: app.name,
-		description: app.description,
-		directory: app.directory,
-		jsfile: app.script,
-		icon: app.icon,
-		caption: app.caption,
-		isActive: true
+		appName: app.name,
+		appDescription: app.description,
+		appBaseDirectory: app.directory,
+		appScriptVersions: { stable: app.script },
+		appIcon: app.icon,
+		appHomeUrl: app.homepage,
+		appCategory: app.category,
+		appAgeMaturity: app.maturity,
+		appActive: true
 	}
 
 	document.querySelector('#result-snippet-textarea').value = JSON.stringify(entry, null, 4);
 
-	repository.applications.push(entry);
+	repository.applicationList.push(entry);
 	let fullMetadata = JSON.stringify(repository, null, 4);
-	fullMetadata = `var metadata = ${fullMetadata};`; // Append the extra string that was remove earlier
 
 	document.querySelector('#result-complete-textarea').value = fullMetadata;
 
