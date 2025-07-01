@@ -1,0 +1,204 @@
+<!--
+//  metadata_generator.html
+//
+//  Created by Armored Dragon, June 2025.
+//  Copyright 2025 Overte e.V.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Overte Metadata Generator</title>
+	<link rel="stylesheet" href="./css/metadata_generator.css">
+</head>
+
+<body>
+	<noscript>
+		<div class="center-align">
+			<h1>Unfortunately, this web application requires Javascript to run.
+				<br>Please enable javascript and refresh your page.
+			</h1>
+		</div>
+	</noscript>
+
+	<div id="content" class="center-align hidden">
+		<h1>Overte Metadata Generator</h1>
+
+		<!-- Get JSON from metadata.json or the community-apps -->
+		<div id="form-url" class="form-entry">
+			<h2>Enter your repository</h2>
+			<div class="form-area">
+				<input id="repo-url" type="text" value="https://more.overte.org/applications/metadata.js">
+				<div class="button-horizontal-container">
+					<button class="continue-button" onclick="continueFromUrl()">Continue</button>
+				</div>
+			</div>
+		</div>
+		<!-- Create application V1 -->
+		<div id="form-v1-app" class="form-entry hidden">
+			<h2>Create a legacy application</h2>
+			<div class="form-area">
+				<div class="form-data">
+
+					<div class="form-textinput">
+						<label for="app-v1-name">Name</label>
+						<input id="app-v1-name" type="text" placeholder="Name" oninput="updateMetadataFromHTML('v1')">
+					</div>
+
+					<div class="form-textarea">
+						<label for="app-v1-description">Description</label>
+						<textarea id="app-v1-description" type="text" placeholder="Description"
+							oninput="updateMetadataFromHTML('v1')"></textarea>
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v1-icon">Icon</label>
+						<input id="app-v1-icon" type="text" placeholder="Icon" oninput="updateMetadataFromHTML('v1')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v1-directory">Directory</label>
+						<input id="app-v1-directory" type="text" placeholder="Directory"
+							oninput="updateMetadataFromHTML('v1')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v1-script">JSfile</label>
+						<input id="app-v1-script" type="text" placeholder="Script file"
+							oninput="updateMetadataFromHTML('v1')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v1-script">Caption</label>
+						<input id="app-v1-caption" type="text" placeholder="Toolbar caption"
+							oninput="updateMetadataFromHTML('v1')">
+					</div>
+
+				</div>
+				<div class="button-horizontal-container">
+					<button class="continue-button" onclick="continueFromV1()">Continue</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Create application V2 -->
+		<div id="form-v2-app" class="form-entry hidden">
+			<h2>Create an application</h2>
+			<div class="form-area">
+				<div class="form-data">
+
+					<div class="form-textinput">
+						<label for="app-v2-name">Name</label>
+						<input id="app-v2-name" type="text" placeholder="Name" oninput="updateMetadataFromHTML('v2')">
+					</div>
+
+					<div class="form-textarea">
+						<label for="app-v2-description">Description</label>
+						<textarea id="app-v2-description" type="text" placeholder="Description"
+							oninput="updateMetadataFromHTML('v2')"></textarea>
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v2-icon">Icon</label>
+						<input id="app-v2-icon" type="text" placeholder="Icon" oninput="updateMetadataFromHTML('v2')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v2-directory">Directory</label>
+						<input id="app-v2-directory" type="text" placeholder="Relative directory"
+							oninput="updateMetadataFromHTML('v2')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v2-script">Script</label>
+						<input id="app-v2-script" type="text" placeholder="Script file"
+							oninput="updateMetadataFromHTML('v2')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v2-author">Author</label>
+						<input id="app-v2-author" type="text" placeholder="Author"
+							oninput="updateMetadataFromHTML('v2')">
+					</div>
+
+					<div class="form-textinput">
+						<label for="app-v2-homepage">Homepage</label>
+						<input id="app-v2-homepage" type="text" placeholder="Homepage"
+							oninput="updateMetadataFromHTML('v2')">
+					</div>
+
+					<div class="form-combobox">
+						<label for="app-v2-category">Category</label>
+						<select id="app-v2-category" name="app-v2-category" onchange="updateMetadataFromHTML('v2')">
+							<option value="" disabled selected>Select an option</option>
+							<option value="UTILITY">Utility</option>
+							<option value="SCIENCE">Science</option>
+							<option value="HEALTH">Health</option>
+							<option value="GAMES">Games</option>
+							<option value="EDUCATION">Education</option>
+							<option value="ENTERTAINMENT">Entertainment</option>
+							<option value="PRODUCTIVITY">Productivity</option>
+							<option value="SHOPPING">Shopping</option>
+						</select>
+					</div>
+
+					<div class="form-combobox">
+						<label for="app-v2-maturity">Maturity</label>
+						<select id="app-v2-maturity" name="app-v2-maturity" onchange="updateMetadataFromHTML('v2')">
+							<option value="" disabled selected>Select an option</option>
+							<option value="EVERYONE">Everyone</option>
+							<option value="TEEN">Teen</option>
+							<option value="MATURE">Mature</option>
+							<option value="ADULT">Adult</option>
+						</select>
+					</div>
+
+				</div>
+				<div class="button-horizontal-container">
+					<button class="continue-button" onclick="continueFromV2()">Continue</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Results -->
+		<div id="results" class="results hidden">
+			<div class="result-snippet">
+				<h2>Generated entry</h2>
+				<p>The following code has been added to the bottom of the metadata.json file.</p>
+				<div class="code-block">
+					<textarea id="result-snippet-textarea" readonly></textarea>
+				</div>
+				<div class="button-horizontal-container">
+					<button class="continue-button" onclick="copyToClipboard('#result-snippet-textarea')">Copy</button>
+				</div>
+			</div>
+
+			<div class="result-complete">
+				<h2>Complete metadata file</h2>
+				<p>The following code is what your metadata.json file should look like. Review this carefully before
+					committing it.</p>
+				<div class="code-block">
+					<textarea id="result-complete-textarea" readonly></textarea>
+				</div>
+				<div class="button-horizontal-container">
+					<button class="continue-button" onclick="copyToClipboard('#result-complete-textarea')">Copy</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</body>
+
+<script>
+	document.querySelector(`#content`).classList.remove('hidden');
+</script>
+<script src="./js/format.js"></script>
+<script src="./js/formController.js"></script>
+<script src="./js/metadata_generator.js"></script>
+
+</html>
