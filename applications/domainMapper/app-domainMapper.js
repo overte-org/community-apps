@@ -2,7 +2,7 @@
 //  app-domainMapper.js
 //
 //  Created by Alezia Kurdis, March 4th 2024.
-//  Copyright 2024, Overte e.V.
+//  Copyright 2024-2025 Overte e.V.
 //
 //  Overte Application to generate a map of the occupied area in a domain by generating a 3d representation.
 //
@@ -28,7 +28,7 @@
 
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
 
-    var domainMapID = Uuid.NULL;
+    var domainMapID = Uuid.NONE;
     var displayPosition = null;
     var FULL_DOMAIN_SCAN_RADIUS = 27713;
     var DOMAIN_SIZE = 32768;
@@ -526,9 +526,9 @@
     }
 
     function clearDomainMap() {
-        if (domainMapID !== Uuid.NULL) {
+        if (domainMapID !== Uuid.NONE) {
             Entities.deleteEntity(domainMapID);
-            domainMapID = Uuid.NULL;
+            domainMapID = Uuid.NONE;
         }
     }
 

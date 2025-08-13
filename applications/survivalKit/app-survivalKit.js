@@ -3,7 +3,7 @@
 //  app-survivalKit.js
 //
 //  Created by Alezia Kurdis, December 29th 2022.
-//  Copyright 2022, Overte e.V.
+//  Copyright 2022-2025 Overte e.V.
 //
 //  Survival kit for virtual worlds exploration in Overte.
 //
@@ -27,8 +27,8 @@
     var UPDATE_TIMER_INTERVAL = 100; // 0.1 sec
     var processTimer = 0;
     
-    var flashLightID = Uuid.NULL;
-    var flashLightLightID = Uuid.NULL;
+    var flashLightID = Uuid.NONE;
+    var flashLightLightID = Uuid.NONE;
     var filter = "WHITE";
 
     var timestamp = 0;
@@ -60,7 +60,7 @@
         }else{
             Script.update.connect(myTimer);
             var isFlashlightActive = "OFF";
-            if (flashLightID !== Uuid.NULL) {
+            if (flashLightID !== Uuid.NONE) {
                 isFlashlightActive = "ON";
             }
             var url = APP_URL + "?flashlight=" + isFlashlightActive + "&filter=" + filter;
@@ -69,7 +69,7 @@
             appStatus = true;
         }
         
-        if (flashLightID === Uuid.NULL) {
+        if (flashLightID === Uuid.NONE) {
             button.editProperties({
                 isActive: appStatus
             });
@@ -119,7 +119,7 @@
             }
         }
         
-        if (flashLightID === Uuid.NULL) {
+        if (flashLightID === Uuid.NONE) {
             button.editProperties({
                 isActive: appStatus
             });
@@ -155,7 +155,7 @@
             }
         });
         
-        if (flashLightID === Uuid.NULL) {
+        if (flashLightID === Uuid.NONE) {
             flashLightID = Entities.addEntity({
                 "type": "Model",
                 "modelURL": ROOT + "vrFlashLight_" + filter + ".fst",
@@ -186,17 +186,17 @@
     }
     
     function updateFlashLightFilter() {
-        if (flashLightID !== Uuid.NULL) {
+        if (flashLightID !== Uuid.NONE) {
             Entities.editEntity(flashLightID, {"modelURL": ROOT + "vrFlashLight_" + filter + ".fst"});
             Entities.editEntity(flashLightLightID, {"color": lightColor[filter]});
         }
     }
     
     function clearFlashLight() {
-        if (flashLightID !== Uuid.NULL) {
+        if (flashLightID !== Uuid.NONE) {
             Entities.deleteEntity(flashLightID);
-            flashLightID = Uuid.NULL;
-            flashLightLightID = Uuid.NULL;
+            flashLightID = Uuid.NONE;
+            flashLightLightID = Uuid.NONE;
         }
     }
 

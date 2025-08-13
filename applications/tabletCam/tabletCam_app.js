@@ -5,8 +5,8 @@
 //
 // tabletCam_app.js
 //
-// Created by Zach Fox on 2019-04-14
-// Copyright 2022 Overte e.V.
+// Created by Zach Fox on April 14th, 2019
+// Copyright 2022-2025 Overte e.V.
 //
 // Camera with more advanced features than the SNAP application, with an higher resolution capability.
 //
@@ -186,7 +186,7 @@
                 props.localRotation = Quat.fromVec3Degrees([0, 0, 180]);
             }
         } else {
-            props.parentID = Uuid.NULL;
+            props.parentID = Uuid.NONE;
             props.localPosition = inFrontOf(0.5);
             props.localRotation = MyAvatar.orientation;
         }
@@ -506,7 +506,7 @@
                 }
             };
             dynamicProps.visible = true;
-            dynamicProps.parentID = Uuid.NULL;
+            dynamicProps.parentID = Uuid.NONE;
             dynamicProps.parentJointIndex = 65535;
             dynamicProps.triggerable = true;
             if (tabletCamAvatarEntity) {
