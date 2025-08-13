@@ -92,9 +92,9 @@
             "position": cameraPosition,
             "shapeType": "simple-hull",
             "type": "Model",
-            "userData": "{\"grabbableKey\":{\"grabbable\":true}}",
+            "grab": {"grabbable": true},
             "isVisibleInSecondaryCamera": false
-        }, true);
+        }, Entities.canRezAvatarEntities() ? "avatar" : "local");
         spectatorCameraConfig.attachedEntityId = camera;
         createLocalEntity();
         if (!HMD.active) {
@@ -312,7 +312,7 @@
             dimensions: viewFinderLocalEntityDim,
             isVisibleInSecondaryCamera: false,
             ignorePickIntersection: true
-        }); //"local");
+        }, "local");
         var windowGeometry = [];
         windowGeometry.width = Window.innerWidth;
         windowGeometry.height = Window.innerHeight;
@@ -412,12 +412,12 @@
     //   -switchViewControllerMapping: The controller mapping itself.
     //   -takeSnapshotControllerMappingName: The name of the controller mapping.
     //   -takeSnapshotControllerMapping: The controller mapping itself.
-    //   -controllerType: "OculusTouch", "Vive", "Other".
+    //   -controllerType: "OculusTouch", "Vive", "OpenXR", "Other".
     var switchViewControllerMapping;
     var switchViewControllerMappingName = 'Hifi-SpectatorCamera-Mapping-SwitchView';
     function registerSwitchViewControllerMapping() {
         switchViewControllerMapping = Controller.newMapping(switchViewControllerMappingName);
-        if (controllerType === "OculusTouch") {
+        if (controllerType === "OculusTouch" || controllerType === "OpenXR") {
             switchViewControllerMapping.from(Controller.Standard.LS).to(function (value) {
                 if (value === 1.0) {
                     setMonitorShowsCameraViewAndSendToQml(!monitorShowsCameraView);
@@ -438,7 +438,7 @@
 
     var flash = false;
     function setFlashStatus(enabled) {
-        var cameraPosition = Entities.getEntityProperties(camera, ["positon"]).position;
+        var cameraPosition = Entities.getEntityProperties(camera, "position").position;
         if (enabled) {
             if (camera) {
                 Audio.playSound(SOUND_FLASH_ON, {
@@ -469,7 +469,7 @@
                     "name": "Camera Flash",
                     "type": "Light",
                     "parentID": camera,
-                }, true);
+                }, Entities.canRezAvatarEntities() ? "avatar" : "local");
             }
         } else {
             if (flash) {
@@ -529,12 +529,12 @@
             if (HMD.active && monitorShowsCameraView) {
                 setDisplay(false);
             }
-            Window.takeSecondaryCamera360Snapshot(Entities.getEntityProperties(camera, ["positon"]).position);
+            Window.takeSecondaryCamera360Snapshot(Entities.getEntityProperties(camera, "position").position);
         }
     }
     function registerTakeSnapshotControllerMapping() {
         takeSnapshotControllerMapping = Controller.newMapping(takeSnapshotControllerMappingName);
-        if (controllerType === "OculusTouch") {
+        if (controllerType === "OculusTouch" || controllerType === "OpenXR") {
             takeSnapshotControllerMapping.from(Controller.Standard.RS).to(function (value) {
                 if (value === 1.0) {
                     maybeTakeSnapshot();
@@ -558,6 +558,8 @@
                 controllerType = "Vive";
             } else if (VRDevices.indexOf("OculusTouch") !== -1) {
                 controllerType = "OculusTouch";
+            } else if (VRDevices.indexOf("OpenXR") !== -1) {
+                controllerType = "OpenXR";
             } else {
                 sendToQml({
                     method: 'updateControllerMappingCheckbox',
