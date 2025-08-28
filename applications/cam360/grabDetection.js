@@ -3,17 +3,17 @@
 //  grabDetection.js
 //
 //  Created by Alezia Kurdis on August 26th, 2022
-//  Copyright 2022 Overte e.V.
+//  Copyright 2022-2025 Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 (function(){
 
-    var _this;
+    //var _this;
 
-    DetectGrabbed = function() { 
-         _this = this;
+    var DetectGrabbed = function() { 
+         //_this = this;
     };
 
     DetectGrabbed.prototype = {
@@ -40,7 +40,7 @@
             //print("I was released... entity:" + this.entityID);
             var ownerID = Entities.getEntityProperties( this.entityID, ["owningAvatarID"] ).owningAvatarID;
             if ( ownerID === MyAvatar.sessionUUID) {
-                Entities.editEntity(this.entityID, {"userData": "RELEASED"});
+                Entities.editEntity(this.entityID, {"description": "RELEASED"});
             }
         },
 
