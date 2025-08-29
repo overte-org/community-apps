@@ -1,0 +1,330 @@
+/*
+    cam360.css
+
+    Created by Alezia Kurdis, August 23rd 2025.
+    Copyright 2025, Overte e.V.
+
+    CSS for the UI for an application to take 360 degrees photo by throwing a camera in the air.
+
+    Distributed under the Apache License, Version 2.0.
+    See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+*/
+
+@font-face {
+    font-family: FiraSans-SemiBold;
+    src: url(resources/fonts/FiraSans-SemiBold.ttf);
+}
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body.throwMode {
+    background-color: #BBBBBB;
+    font-family: FiraSans-SemiBold;
+    font-size: 12px;
+    color: #000000;
+    font-weight: 600;
+    text-decoration: none;
+    font-style: normal;
+    font-variant: normal;
+    text-transform: none;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body.positionMode {
+    background-color: #222222;
+    font-family: FiraSans-SemiBold;
+    font-size: 12px;
+    color: #FFFFFF;
+    font-weight: 600;
+    text-decoration: none;
+    font-style: normal;
+    font-variant: normal;
+    text-transform: none;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+h1 {
+    padding: 0px 0px 0px 10px;
+    font-size: 22px;
+    color: #ffe657;
+}
+.cameraOnOffthrowMode {
+    color: #222222;
+    background-color: #bbbbbb;
+    font-family: FiraSans-SemiBold;
+    font-size: 16px;
+    padding: 6px 10px 6px 10px;
+    min-width: 80px;
+    margin-top: 5px;
+    border-radius: 6px;
+    box-shadow: 0px 0px 2px 0px #dddddd inset, 0px 0px 2px 1px #222222;
+}
+
+.cameraOnOffthrowMode:hover {
+    background-color: #dddddd;
+}
+
+.cameraOnOffpositionMode {
+    color: #bbbbbb;
+    background-color: #222222;
+    font-family: FiraSans-SemiBold;
+    font-size: 16px;
+    padding: 6px 10px 6px 10px;
+    min-width: 80px;
+    margin-top: 5px;
+    border-radius: 6px;
+    box-shadow: 0px 0px 3px 0px #444444 inset, 0px 0px 2px 1px #000000;
+}
+
+.cameraOnOffpositionMode:hover {
+    background-color: #444444;
+}
+
+#cameraIndicator {
+    margin: 2px 5px 2px 5px;
+    vertical-align: middle;
+}
+#flashOnOff {
+    border: 1px solid #777777;
+    border-radius: 6px;
+    background-color: #222222;
+    padding: 2px;
+    margin: 6px;
+}
+
+#flashOnOff:hover {
+    border: 1px solid #999999;
+}
+
+.folderSetting {
+    color: #ffffff;
+    background-color: #333333;
+    font-family: FiraSans-SemiBold;
+    font-size: 12px;
+    padding: 2px 7px 2px 7px;
+    min-width: 90px;
+    margin: 10px 6px 6px 6px;
+    border-radius: 6px;
+    box-shadow: 0px 0px 3px 0px #444444 inset, 0px 0px 2px 1px #000000;
+}
+
+.folderSetting:hover {
+    background-color: #555555;
+}
+
+*:focus {
+    outline: none;
+}
+.modeBtnOn {
+    border: 1px solid #ffe657;
+    color: #ffe657;
+    background-color: #8f8029;
+    font-family: FiraSans-SemiBold;
+    font-size: 18px;
+    padding: 2px 7px 2px 7px;
+    min-width: 200px;
+    margin: 0;
+}
+.modeBtnOn:hover {
+    border: 1px solid #ffdd00;
+    color: #ffdd00;
+    background-color: #ad9b2f;
+}
+
+.modeBtnOff {
+    border: 1px solid #111111;
+    color: #555555;
+    background-color: #222222;
+    font-family: FiraSans-SemiBold;
+    font-size: 18px;
+    padding: 2px 7px 2px 7px;
+    min-width: 200px;
+    margin: 0;
+}
+
+.modeBtnOff:hover {
+    border: 1px solid #777777;
+    color: #777777;
+    background-color: #333333;
+}
+
+#throwModeControls {
+    display: block;
+    width: 100%;
+    padding: 0;
+    text-align: center;
+    margin: 0;
+}
+#noticeThrow {
+    font-family: FiraSans-SemiBold;
+    font-size: 15px;
+    width: 100%;
+    background-color: #222222;
+    color: #ffff00;
+    padding: 3px;
+    box-shadow: 0px 0px 2px 0px #dddddd inset, 0px 0px 2px 1px #222222;
+}
+
+#positionModeControls {
+    display: none;
+    font-family: FiraSans-SemiBold;
+    font-size: 11px;
+    width: 100%;
+    color: #aaaaaa;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+}
+
+#subPositionContainer {
+    text-align: center;
+    width: 90%;
+}
+
+#capture {
+    box-shadow: 0px 0px 3px 0px #444444 inset, 0px 0px 2px 1px #000000;
+    color: #ff5429;
+    background-color: #222222;
+    font-family: FiraSans-SemiBold;
+    font-size: 18px;
+    padding: 10px 5px 10px 5px;
+    min-width: 120px;
+    height: 60px;
+    margin: 0;
+    border-radius: 30px;
+}
+
+#capture:hover {
+    background-color: #666666;
+}
+
+#capture:disabled {
+    color: #777777;
+}
+
+#showLastCapture {
+    color: #ffffff;
+    background-color: #444444;
+    font-family: FiraSans-SemiBold;
+    font-size: 16px;
+    padding: 10px 5px 10px 5px;
+    min-width: 240px;
+    margin: 6px;
+    border-radius: 13px;
+    box-shadow: 0px 0px 3px 0px #444444 inset, 0px 0px 2px 1px #000000;
+}
+
+#showLastCapture:hover {
+    background-color: #666666;
+}
+
+button.navViewer {
+    color: #ffffff;
+    background-color: #444444;
+    font-family: FiraSans-SemiBold;
+    font-size: 16px;
+    padding: 10px 5px 10px 5px;
+    min-width: 50px;
+    margin: 6px;
+    border-radius: 13px;
+    box-shadow: 0px 0px 3px 0px #444444 inset, 0px 0px 2px 1px #000000;
+}
+
+button.navViewer:hover {
+    background-color: #666666;
+}
+
+#uninstall {
+    font-family: FiraSans-SemiBold;
+    background-color: #666666;
+    font-size: 9px;
+    color: #cccccc;
+    border-radius: 3px;
+    border: 0px solid #000000;
+    transition-duration: 0.2s;
+    width: 100px;
+    padding: 3px;
+    margin-right: 20px;
+    margin-bottom: 15px;
+}
+
+#uninstall:hover {
+    background-color: #888888;
+    color: #ffffff;
+}
+
+#uninstall:focus {
+    outline: none;
+}
+
+#topContainer {
+    width: 100%;
+    padding: 10px;
+    background-color: #444444;
+    box-shadow: -3px 3px 8px #000000;
+}
+
+#viewerContainer {
+    position: fixed;
+    left: 0px;
+    top: 50%;
+    width: 100%;
+    background-color: #444444;
+    box-shadow: -3px -3px 8px #000000;
+    color: #ffffff;
+}
+
+div.overborder {
+    padding: 0;
+    border: 1px solid #000000;
+    display: inline-block;
+}
+
+#postShotContainer {
+    text-align: left;
+    width: 96%;
+    padding: 4px;
+}
+
+#alpha {
+    width: 200px;
+}
+
+#settingContainer {
+    width: 100%;
+    padding: 10px;
+    background-color: #333333;
+    box-shadow: -3px -3px 8px #000000;
+    color: #ffffff;
+    text-align: left;
+}
+
+#uninstallContainer {
+    width: 100%;
+    padding: 10px;
+    background-color: #222222;
+    box-shadow: -3px -3px 8px #000000;
+    color: #ffffff;
+    text-align: right;
+}
+
+#hideVRnotice {
+    font-family: FiraSans-SemiBold;
+    color: #bbbbbb;
+    font-size: 10px;
+    font-style: italic;
+}
