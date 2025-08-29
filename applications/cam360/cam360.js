@@ -537,7 +537,7 @@
                 "type": "Model",
                 "shapeType": "none",
                 "name": "Lastest 360 capture",
-                "dimensions": { "x": 3.0, "y": 3.0, "z": 3.0 },
+                "dimensions": Vec3.multiply({ "x": 3.0, "y": 3.0, "z": 3.0 }, MyAvatar.scale),
                 "modelURL": Script.resolvePath("resources/models/invertedSphere.glb"),
                 "position": MyAvatar.getEyePosition(),
                 "grab": {
