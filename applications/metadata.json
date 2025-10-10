@@ -260,7 +260,7 @@
          "appActive":true,
          "appBaseDirectory":"cam360",
          "appName":"Camera 360",
-         "appDescription":"This camera takes spherical snapshots. It has two capture modes: The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event. The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene. This includes a 360&deg; media viewer.",
+         "appDescription":"This camera takes spherical snapshots. It has two capture modes: The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event. The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene. This includes a 360&deg; viewer.",
          "appScriptVersions":{
             "Stable":"cam360.js"
          },
