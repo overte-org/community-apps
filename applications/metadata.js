@@ -166,7 +166,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "cam360",
             "name": "Camera 360",
-            "description": "This camera takes spherical snapshots. It has two capture modes:<br>- The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event.<br>- The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene.<br>This includes a 360&deg; media viewer.",
+            "description": "This camera takes spherical snapshots. It has two capture modes:<br>- The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event.<br>- The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene.<br>This includes a 360&deg; viewer.",
             "jsfile": "cam360/cam360.js",
             "icon": "cam360/resources/images/icons/cam360-i.svg",
             "caption": "CAM360"

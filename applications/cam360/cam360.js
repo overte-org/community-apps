@@ -2,9 +2,9 @@
 //
 //  cam360.js
 //
-//  Created by Zach Fox on 2018-10-26
+//  Created by Zach Fox on October 26th, 2018.
 //  Copyright 2018 High Fidelity, Inc.
-//  Copyright 2022, Overte e.V.
+//  Copyright 2022-2025, Overte e.V.
 //
 //  Application to take 360 degrees photo by throwing a camera in the air (as in Ready Player One (RPO)) or as a standard positionned camera.
 //  version 2.0
@@ -14,7 +14,8 @@
 //
 
 (function () { // BEGIN LOCAL_SCOPE
-
+    var controllerStandard = Controller.Standard;
+    
     // Function Name: inFrontOf()
     // Description:
     //   - Returns the position in front of the given "position" argument, where the forward vector is based off
@@ -25,8 +26,10 @@
     }
 
     // Function Name: rpo360On()
-    var CAMERA_NAME = "CAM360 Camera";
-    var SETTING_LAST_360_CAPTURE = "overte_app_cam360_last_capture";
+    const CAMERA_NAME = "CAM360 Camera";
+    const SETTING_LAST_360_CAPTURE = "overte_app_cam360_last_capture";
+    const SETTING_POST_SHOT_BAHAVIOR = "overte_app_cam360_post_shot_behavior";
+    const SETTING_VISUALIZER_ALPHA = "overte_app_cam360_visualizer_alpha";
     var secondaryCameraConfig = Render.getConfig("SecondaryCamera");
     var camera = false;
     var cameraRotation;
@@ -34,7 +37,13 @@
     var cameraGravity = {x: 0, y: -5, z: 0};
     var velocityLoopInterval = false;
     var isThrowMode = true;
-
+    var visualizerID = Uuid.NONE;
+    var visualizerMaterialID = Uuid.NONE;
+    const HISTORY_LENGTH = 20;
+    let currentPreviewIndex = 0;
+    let visualizerAlpha = Settings.getValue(SETTING_VISUALIZER_ALPHA, 1.0);
+    let postShotBehavior = Settings.getValue(SETTING_POST_SHOT_BAHAVIOR, "HOME");
+    
     function rpo360On() {
         // Rez the camera model, and attach
         // the secondary camera to the rezzed model.
@@ -43,27 +52,31 @@
         var properties;
         var hostType = "";
         if (isThrowMode) {
-            properties = {
-                "angularDamping": 0.08,
-                "canCastShadow": false,
-                "damping": 0.01,
-                "collisionMask": 7,
-                "modelURL": Script.resolvePath("resources/models/cam360white.fst"),
-                "name": CAMERA_NAME,
-                "rotation": cameraRotation,
-                "position": cameraPosition,
-                "shapeType": "simple-compound",
-                "type": "Model",
-                "grab": {
-                    "grabbable": true
-                },
-                "script": Script.resolvePath("grabDetection.js"),
-                "userData": "",
-                "isVisibleInSecondaryCamera": false,
-                "gravity": cameraGravity,
-                "dynamic": true
-            };
-            hostType = "avatar";
+            if ( Entities.canRezAvatarEntities() ) {
+                properties = {
+                    "angularDamping": 0.08,
+                    "canCastShadow": false,
+                    "damping": 0.01,
+                    "collisionMask": 7,
+                    "modelURL": Script.resolvePath("resources/models/cam360white.fst"),
+                    "name": CAMERA_NAME,
+                    "rotation": cameraRotation,
+                    "position": cameraPosition,
+                    "shapeType": "simple-compound",
+                    "type": "Model",
+                    "grab": {
+                        "grabbable": true
+                    },
+                    "script": Script.resolvePath("grabDetection.js"),
+                    "userData": "",
+                    "isVisibleInSecondaryCamera": false,
+                    "gravity": cameraGravity,
+                    "dynamic": true
+                };
+                hostType = "avatar";
+            } else {
+                Window.displayAnnouncement("Sorry. The Throwing Camera can't be created in this domain.");
+            }
         } else {
             properties = {
                 "canCastShadow": false,
@@ -80,7 +93,7 @@
                 "userData": "",
                 "isVisibleInSecondaryCamera": false
             };
-            hostType = "avatar";
+            hostType = Entities.canRezAvatarEntities() ? "avatar" : "local";
         }
         
         camera = Entities.addEntity(properties, hostType);
@@ -88,7 +101,7 @@
 
         // Play a little sound to let the user know we've rezzed the camera
         Audio.playSound(SOUND_CAMERA_ON, {
-            "volume": 0.15,
+            "volume": 0.2,
             "position": cameraPosition,
             "localOnly": true
         });
@@ -110,7 +123,9 @@
         // Start the velocity loop interval at 70ms
         // This is used to determine when the 360 photo should be snapped
         if (isThrowMode) {
-            velocityLoopInterval = Script.setInterval(velocityLoop, 70);
+            velocityLoopInterval = Script.setInterval(function () {
+                velocityLoop();
+            }, 70);
         }
     }
 
@@ -125,10 +140,10 @@
     var useFlash = false;
     function velocityLoop() {
         // Get the velocity and angular velocity of the camera model
-        var properties = Entities.getEntityProperties(camera, ["velocity", "angularVelocity", "userData"]);
+        var properties = Entities.getEntityProperties(camera, ["velocity", "angularVelocity", "description"]);
         var velocity = properties.velocity;
         var angularVelocity = properties.angularVelocity;
-        var releasedState = properties.userData;
+        var releasedState = properties.description;
 
         if (releasedState === "RELEASED" && !hasBeenThrown) {
             hasBeenThrown = true;
@@ -150,7 +165,7 @@
             // Don't take a snapshot if the camera hasn't been in the air for very long
             if (Date.now() - cameraReleaseTime <= MIN_AIRTIME_MS) {
                 Entities.editEntity(camera, {
-                    "userData": ""
+                    "description": ""
                 });
                 return;
             }
@@ -166,70 +181,52 @@
                 "grab": {
                     "grabbable": false
                 },
-                "userData": ""
+                "description": ""
             });
             // Add a "flash" to the camera that illuminates the ground below the camera
             if (useFlash) {
-                flash = Entities.addEntity({
-                    "collidesWith": "",
-                    "collisionMask": 0,
-                    "color": {
-                        "blue": 173,
-                        "green": 252,
-                        "red": 255
-                    },
-                    "dimensions": {
-                        "x": 100,
-                        "y": 100,
-                        "z": 100
-                    },
-                    "dynamic": false,
-                    "falloffRadius": 10,
-                    "intensity": 1,
-                    "isSpotlight": false,
-                    "localRotation": { w: 1, x: 0, y: 0, z: 0 },
-                    "name": CAMERA_NAME + "_Flash",
-                    "type": "Light",
-                    "parentID": camera
-                }, "avatar");
+                flash = genFlash(camera);
             }
             // Take the snapshot!
             maybeTake360Snapshot();
         }
+    }
+
+    function genFlash(parentID) {
+        return Entities.addEntity({
+            "collidesWith": "",
+            "collisionMask": 0,
+            "color": {
+                "blue": 173,
+                "green": 252,
+                "red": 255
+            },
+            "dimensions": {
+                "x": 100,
+                "y": 100,
+                "z": 100
+            },
+            "dynamic": false,
+            "falloffRadius": 10,
+            "intensity": 1,
+            "isSpotlight": false,
+            "localRotation": { w: 1, x: 0, y: 0, z: 0 },
+            "name": CAMERA_NAME + "_Flash",
+            "type": "Light",
+            "parentID": parentID
+        }, "local");
     }
 
     function capture() {
         if (!isThrowMode) {
             if (useFlash) {
-                flash = Entities.addEntity({
-                    "collidesWith": "",
-                    "collisionMask": 0,
-                    "color": {
-                        "blue": 173,
-                        "green": 252,
-                        "red": 255
-                    },
-                    "dimensions": {
-                        "x": 100,
-                        "y": 100,
-                        "z": 100
-                    },
-                    "dynamic": false,
-                    "falloffRadius": 10,
-                    "intensity": 1,
-                    "isSpotlight": false,
-                    "localRotation": { w: 1, x: 0, y: 0, z: 0 },
-                    "name": CAMERA_NAME + "_Flash",
-                    "type": "Light",
-                    "parentID": camera
-                }, "avatar");
+                flash = genFlash(camera);
             }
             // Take the snapshot!
             maybeTake360Snapshot();
         }
     }
 
-    // Function Name: rpo360Off()
     var WAIT_AFTER_DOMAIN_SWITCH_BEFORE_CAMERA_DELETE_MS = 1 * 1000;
     function rpo360Off(isChangingDomains) {
         if (velocityLoopInterval) {
@@ -246,7 +243,6 @@
                 Entities.deleteEntity(camera);
                 camera = false;
             }
-            //buttonActive(ui.isOpen);
         }
 
         secondaryCameraConfig.attachedEntityId = false;
@@ -311,25 +307,50 @@
             Entities.deleteEntity(flash);
             flash = false;
         }
-        //console.log('360 Snapshot taken. Path: ' + path);
 
-        //update UI
-        tablet.emitScriptEvent(JSON.stringify({
-            "channel": channel,
-            "method": "last360ThumbnailURL",
-            "last360ThumbnailURL": path
-        }));
-        last360ThumbnailURL = path;
-        Settings.setValue(SETTING_LAST_360_CAPTURE, last360ThumbnailURL);
+        updateSnapshot360HistorySetting(path);
+
+        updateVisualizer();
+        
         processing360Snapshot = false;
         tablet.emitScriptEvent(JSON.stringify({
             "channel": channel,
             "method": "finishedProcessing360Snapshot"
         }));
+        
+        if (isThrowMode) {
+            if (postShotBehavior === "TURNOFF") {
+                rpo360Off();
+                tablet.emitScriptEvent(JSON.stringify({
+                    "channel": channel,
+                    "method": "initializeUI",
+                    "masterSwitchOn": !!camera,
+                    "processing360Snapshot": processing360Snapshot,
+                    "useFlash": useFlash,
+                    "isThrowMode": isThrowMode,
+                    "postShotBehavior": postShotBehavior,
+                    "visualizerAlpha": visualizerAlpha
+                }));
+            } else if (postShotBehavior === "HOME") {
+                rpo360Off(false);
+                rpo360On();
+            }
+        }
+    }
+    
+    function updateSnapshot360HistorySetting(url) {
+        let updatedHistory = ["file:///" + url];
+        for (let i = 0; i < HISTORY_LENGTH - 1; i++ ) {
+            if (i >= last360ThumbnailURL.length) {
+                break;
+            }
+            updatedHistory.push(last360ThumbnailURL[i]);
+        }
+        last360ThumbnailURL = updatedHistory.slice(0, HISTORY_LENGTH);
+        Settings.setValue(SETTING_LAST_360_CAPTURE, last360ThumbnailURL);
     }
 
-
-    var last360ThumbnailURL = Settings.getValue(SETTING_LAST_360_CAPTURE, "");
+    var last360ThumbnailURL = Settings.getValue(SETTING_LAST_360_CAPTURE, [Script.resolvePath("resources/images/default.jpg")]);
     var used360AppToTakeThisSnapshot = false;
 
     function onDomainChanged() {
@@ -339,7 +360,7 @@
     // These functions will be called when the script is loaded.
     var SOUND_CAMERA_ON = SoundCache.getSound(Script.resolvePath("resources/sounds/cameraOn.wav"));
     var SOUND_SNAPSHOT = SoundCache.getSound(Script.resolvePath("resources/sounds/snap.wav"));
-
+    var SOUND_WHOOSH = SoundCache.getSound(Script.resolvePath("resources/sounds/whoosh.mp3"));
 
     var jsMainFileName = "cam360.js";
     var ROOT = Script.resolvePath('').split(jsMainFileName)[0];
@@ -377,10 +398,16 @@
             tablet.webEventReceived.disconnect(onAppWebEventReceived);
             tablet.gotoHomeScreen();
             appStatus = false;
+            if (visualizerID !== Uuid.NONE) {
+                Entities.deleteEntity(visualizerID);
+                visualizerID = Uuid.NONE;
+                Script.update.disconnect(whooshTimer);
+            }
         }else{
             tablet.gotoWebScreen(APP_URL);
             tablet.webEventReceived.connect(onAppWebEventReceived);
             appStatus = true;
+            registerButtonMappings();
         }
 
         button.editProperties({
@@ -432,10 +459,11 @@
                     "channel": channel,
                     "method": "initializeUI",
                     "masterSwitchOn": !!camera,
-                    "last360ThumbnailURL": last360ThumbnailURL,
                     "processing360Snapshot": processing360Snapshot,
                     "useFlash": useFlash,
-                    "isThrowMode": isThrowMode
+                    "isThrowMode": isThrowMode,
+                    "postShotBehavior": postShotBehavior,
+                    "visualizerAlpha": visualizerAlpha
                 }));
                 
             } else if (messageObj.method === "ThrowMode" && (n - timestamp) > INTERCALL_DELAY) {
@@ -460,21 +488,133 @@
                 if (camera) {
                     capture();
                 }
-            } 
-            
+            } else if (messageObj.method === "showLastCapture" && (n - timestamp) > INTERCALL_DELAY) {
+                d = new Date();
+                timestamp = d.getTime();
+                currentPreviewIndex = 0;
+                showVisualizer();
+            } else if (messageObj.method === "showPreviousCapture" && (n - timestamp) > INTERCALL_DELAY) {
+                d = new Date();
+                timestamp = d.getTime();
+                currentPreviewIndex = currentPreviewIndex + 1;
+                if (currentPreviewIndex === last360ThumbnailURL.length) {
+                    currentPreviewIndex = 0;
+                }
+                updateVisualizer();
+            } else if (messageObj.method === "showNextCapture" && (n - timestamp) > INTERCALL_DELAY) {
+                d = new Date();
+                timestamp = d.getTime();
+                currentPreviewIndex = currentPreviewIndex - 1;
+                if (currentPreviewIndex < 0) {
+                    currentPreviewIndex = last360ThumbnailURL.length - 1;
+                }
+                updateVisualizer();
+            } else if (messageObj.method === "setVisualizerAlpha" && (n - timestamp) > INTERCALL_DELAY) {
+                d = new Date();
+                timestamp = d.getTime();
+                visualizerAlpha = messageObj.alpha;
+                if (visualizerAlpha < 0.01 || visualizerAlpha > 1.0) {
+                    visualizerAlpha = 1.0;
+                }
+                Settings.setValue(SETTING_VISUALIZER_ALPHA, visualizerAlpha);
+                updateVisualizer();
+            } else if (messageObj.method === "setPostBehavior" && (n - timestamp) > INTERCALL_DELAY) {
+                d = new Date();
+                timestamp = d.getTime();
+                postShotBehavior = messageObj.postShotBehavior;
+                Settings.setValue(SETTING_POST_SHOT_BAHAVIOR, postShotBehavior);
+            } else if (messageObj.method === "SELF_UNINSTALL" && (n - timestamp) > INTERCALL_DELAY) {
+                d = new Date();
+                timestamp = d.getTime();
+                ScriptDiscoveryService.stopScript(Script.resolvePath(''), false);
+            }
         }
     }
-    var udateSignateDisconnected = true;
+
+    function showVisualizer() {
+        if (visualizerID === Uuid.NONE) {
+            visualizerID = Entities.addEntity({
+                "type": "Model",
+                "shapeType": "none",
+                "name": "Lastest 360 capture",
+                "dimensions": Vec3.multiply({ "x": 3.0, "y": 3.0, "z": 3.0 }, MyAvatar.scale),
+                "modelURL": Script.resolvePath("resources/models/invertedSphere.glb"),
+                "position": MyAvatar.getEyePosition(),
+                "grab": {
+                    "grabbable": false
+                },
+                "useOriginalPivot": true,
+                "canCastShadow": false,
+                "isVisibleInSecondaryCamera": false,
+                "ignorePickIntersection": true
+            }, "local");
+            
+            visualizerMaterialID = Entities.addEntity({
+                "type": "Material",
+                "parentID": visualizerID,
+                "materialURL": "materialData",
+                "priority": 2,
+                "materialData": JSON.stringify({
+                    "materialVersion": 1,
+                    "materials": {
+                        "albedo": [1.0, 1.0, 1.0],
+                        "albedoMap": last360ThumbnailURL[currentPreviewIndex],
+                        "unlit": true,
+                        "metallic": 0.01,
+                        "roughness": 0.5,
+                        "opacity": visualizerAlpha,
+                        "cullFaceMode": "CULL_BACK"
+                    }
+                })
+                
+            }, "local");
+
+            tablet.emitScriptEvent(JSON.stringify({
+                "channel": channel,
+                "method": "visualizator_is_active"
+            }));
+            Script.update.connect(whooshTimer);
+        } else {
+            Entities.deleteEntity(visualizerID);
+            visualizerID = Uuid.NONE;
+            tablet.emitScriptEvent(JSON.stringify({
+                "channel": channel,
+                "method": "visualizator_is_inactive"
+            }));
+            Script.update.disconnect(whooshTimer);
+        }
+        
+    }
+    
+    function updateVisualizer() {
+        if (visualizerID !== Uuid.NONE) {
+            Entities.editEntity(visualizerID, {"position": MyAvatar.getEyePosition()});
+            Entities.editEntity(visualizerMaterialID, {
+                "materialData": JSON.stringify({
+                    "materialVersion": 1,
+                    "materials": {
+                        "albedo": [1.0, 1.0, 1.0],
+                        "albedoMap": last360ThumbnailURL[currentPreviewIndex],
+                        "unlit": true,
+                        "metallic": 0.01,
+                        "roughness": 0.5,
+                        "opacity": visualizerAlpha,
+                        "cullFaceMode": "CULL_BACK"
+                    }
+                })
+            });
+        }
+    }
+    
     function onScreenChanged(type, url) {
         if (type === "Web" && url.indexOf(APP_URL) !== -1) {
             appStatus = true;
-            Script.update.connect(myTimer);
-            udateSignateDisconnected = false;
         } else {
             appStatus = false;
-            if (!udateSignateDisconnected) {
-                Script.update.disconnect(myTimer);
-                udateSignateDisconnected = true;
+            if (visualizerID !== Uuid.NONE) {
+                Entities.deleteEntity(visualizerID);
+                visualizerID = Uuid.NONE;
+                Script.update.disconnect(whooshTimer);
             }
         }
         
@@ -483,50 +623,19 @@
         });
     }
 
-    function myTimer(deltaTime) {
-        var yaw = 0.0;
-        var pitch = 0.0;
-        var roll = 0.0;
-        var euler;
-        if (!HMD.active) { 
-            //Use cuser camera for destop
-            euler = Quat.safeEulerAngles(Camera.orientation);
-            yaw = -euler.y;
-            pitch = -euler.x;
-            roll = -euler.z;
-        } else {
-            //Use Tablet orientation for HMD
-            var tabletRotation = Entities.getEntityProperties(HMD.tabletID, ["rotation"]).rotation;
-            var noRoll = Quat.cancelOutRoll(tabletRotation); //Pushing the roll is getting quite complexe
-            euler = Quat.safeEulerAngles(noRoll);
-            yaw = euler.y - 180;
-            if (yaw < -180) { yaw = yaw + 360;}
-            yaw = -yaw;
-            pitch = euler.x;
-            roll = 0;
-        }
-
-        tablet.emitScriptEvent(JSON.stringify({
-            "channel": channel,
-            "method": "yawPitchRoll",
-            "yaw": yaw,
-            "pitch": pitch,
-            "roll": roll
-        })); 
-        
-    }
-
     function cleanup() {
 
         if (appStatus) {
             tablet.gotoHomeScreen();
             tablet.webEventReceived.disconnect(onAppWebEventReceived);
-            if (!udateSignateDisconnected) {
-                Script.update.disconnect(myTimer);
-                udateSignateDisconnected = true;
-            }
         }
-
+        
+        if (visualizerID !== Uuid.NONE) {
+            Entities.deleteEntity(visualizerID);
+            visualizerID = Uuid.NONE;
+            Script.update.disconnect(whooshTimer);
+        }
+        
         tablet.screenChanged.disconnect(onScreenChanged);
         tablet.removeButton(button);
         
@@ -542,6 +651,31 @@
     }
 
     Script.scriptEnding.connect(cleanup);
+
+    //Whoosh viewer
+    function whooshTimer(deltaTime) {
+        if (HMD.active) {
+            checkHands();
+        }
+    }
+    
+    function checkHands() {
+        var myLeftHand = Controller.getPoseValue(controllerStandard.LeftHand);
+        var myRightHand = Controller.getPoseValue(controllerStandard.RightHand);
+        var eyesPosition = MyAvatar.getEyePosition();
+        var hipsPosition = MyAvatar.getJointPosition("Hips");
+        var eyesRelativeHeight = eyesPosition.y - hipsPosition.y;
+        if (myLeftHand.translation.y > eyesRelativeHeight || myRightHand.translation.y > eyesRelativeHeight) {
+            Audio.playSound(SOUND_WHOOSH, {
+                "position": MyAvatar.position,
+                "localOnly": true,
+                "volume": 1.0
+            });
+            if (visualizerID !== Uuid.NONE) {
+                showVisualizer();
+            }
+        }
+    }
  
     //controller 
     function setTakePhotoControllerMappingStatus() {
@@ -559,8 +693,8 @@
     var takePhotoControllerMappingName = 'Overte-cam360-Mapping-Capture';
     function registerTakePhotoControllerMapping() {
         takePhotoControllerMapping = Controller.newMapping(takePhotoControllerMappingName);
-        if (controllerType === "OculusTouch") {
-            takePhotoControllerMapping.from(Controller.Standard.RS).to(function (value) {
+        if (controllerType === "OculusTouch" || controllerType === "OpenXR") {
+            takePhotoControllerMapping.from(Controller.Standard.LS).to(function (value) {
                 if (value === 1.0) {
                     if (camera) {
                         capture();
@@ -569,7 +703,7 @@
                 return;
             });
         } else if (controllerType === "Vive") {
-            takePhotoControllerMapping.from(Controller.Standard.RightPrimaryThumb).to(function (value) {
+            takePhotoControllerMapping.from(Controller.Standard.LeftPrimaryThumb).to(function (value) {
                 if (value === 1.0) {
                     if (camera) {
                         capture();
@@ -588,8 +722,10 @@
                 controllerType = "Vive";
             } else if (VRDevices.indexOf("OculusTouch") !== -1) {
                 controllerType = "OculusTouch";
+            } else if (VRDevices.indexOf("OpenXR") !== -1) {
+                controllerType = "OpenXR";
             } else {
-                return; // Neither Vive nor Touch detected
+                return;
             }
         }
 
@@ -600,6 +736,6 @@
 
     function onHMDChanged(isHMDMode) {
         registerButtonMappings();
-    }    
+    }
 
 }());
