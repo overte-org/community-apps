@@ -1,0 +1,540 @@
+{
+   "version":2,
+   "title":"Overte Community Apps",
+   "baseApiUrl":"https://more.overte.org/applications",
+   "baseRepositoryUrl":"https://more.overte.org",
+   "applicationList":[
+      {
+         "appActive":true,
+         "appBaseDirectory":"emocam",
+         "appName":"Face tracking",
+         "appDescription":"Desktop mode face tracking application based on Mediapipe. This allows face tracking and head tracking in desktop mode using a single webcam. (Note: This application has external dependencies. It may stop working one day.)",
+         "appScriptVersions":{
+            "Stable":"emocam1.js"
+         },
+         "appIcon":"images/face.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"doppelganger-mirror",
+         "appName":"Doppelganger-Mirror",
+         "appDescription":"Generate a double of your avatar that only you can see. This allows you to examine your avatar and see how you move. The doppelganger can be grabbed and positioned however you want.",
+         "appScriptVersions":{
+            "Stable":"app-doppleganger.js"
+         },
+         "appIcon":"doppleganger-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"spectator-camera",
+         "appName":"Spectator Camera",
+         "appDescription":"Give you a video camera that can display its image on your monitor screen for video capture. It can capture from the camera or from the VR Headset. It can also take classic and spherical 360 snapshots (equirectangular format). Definitely a must.",
+         "appScriptVersions":{
+            "Stable":"spectatorCamera.js"
+         },
+         "appIcon":"spectator-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"gravimeter",
+         "appName":"Gravimeter",
+         "appDescription":"This application returns a record of the orientation and the position of your avatar. This tool becomes very helpful when you want to build on a sphere with a radial gravity, where it's arduous to evaluate the perpendicularity of the floor.",
+         "appScriptVersions":{
+            "Stable":"gravimeter.js"
+         },
+         "appIcon":"gravimeter_icon.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"record",
+         "appName":"Record",
+         "appDescription":"With this application, you can make a recording of your avatar (movements and voice), and replay it as a copy of yourself. (Requires an Assignment Client Script to be run on the domain.)",
+         "appScriptVersions":{
+            "Stable":"record.js"
+         },
+         "appIcon":"icon.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"domain-navigator",
+         "appName":"Domain Navigator",
+         "appDescription":"This tool is to help teleporting yourself rapidly where you need in a domain in a couple of clicks, without having to enter numbers in a path. Ideal for those who are working on large landscapes. (Precision: 80 meters.)",
+         "appScriptVersions":{
+            "Stable":"dom_nav.js"
+         },
+         "appIcon":"dom_nav_icon_i.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"vr-grabscale",
+         "appName":"VR Grabscale",
+         "appDescription":"This tool allows you to scale objects by grabbing them in VR.",
+         "appScriptVersions":{
+            "Stable":"VRBuildGrabScale.js"
+         },
+         "appIcon":"logo.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"radar",
+         "appName":"Radar",
+         "appDescription":"Show where people are and teleport in the domain.",
+         "appScriptVersions":{
+            "Stable":"radar.js"
+         },
+         "appIcon":"assets/radar-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"refresh-app",
+         "appName":"Refresh App",
+         "appDescription":"Add two buttons that refresh your avatar and attachments.",
+         "appScriptVersions":{
+            "Stable":"refreshApp.js"
+         },
+         "appIcon":"refresh-circle-w.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"nametags",
+         "appName":"Nametags",
+         "appDescription":"Display users' display names above their heads.",
+         "appScriptVersions":{
+            "Stable":"nametags.js"
+         },
+         "appIcon":"assets/nametags-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"blocks",
+         "appName":"Blocks",
+         "appDescription":"Script to create blocks in a Minecraft way",
+         "appScriptVersions":{
+            "Stable":"Blocks.js"
+         },
+         "appIcon":"blocks-inactive.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"odometer",
+         "appName":"Odometer",
+         "appDescription":"Tool to record the distance traveled by your avatar.",
+         "appScriptVersions":{
+            "Stable":"odometer.js"
+         },
+         "appIcon":"appicon_i.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"lightBulb",
+         "appName":"Light Bulb Generator",
+         "appDescription":"Generate rapidly a visible glowing light source with its light beam.",
+         "appScriptVersions":{
+            "Stable":"app-lightBulb.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"aaswitcher",
+         "appName":"Anti-Aliasing Switcher",
+         "appDescription":"Allow different Anti-Aliasing configuration for HMD and Desktop. This application changes automatically the Anti-Aliasing configuration as you put on or remove your VR Headset.",
+         "appScriptVersions":{
+            "Stable":"app-aaSwitcher.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"notes",
+         "appName":"Notes",
+         "appDescription":"A simple notepad that can be used while you are in-world.",
+         "appScriptVersions":{
+            "Stable":"app-notes.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"home",
+         "appName":"Home",
+         "appDescription":"Add a shortcut on your tablet to teleport home.",
+         "appScriptVersions":{
+            "Stable":"app_home.js"
+         },
+         "appIcon":"appicon_i.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"BodyPaint4",
+         "appName":"Body Paint",
+         "appDescription":"Paint with your finger in VR, or with mouse in desktop mode. You can paint in free space, on yourself, or even on other avatars, it's the fastest way to put cat-ears on all your friends.",
+         "appScriptVersions":{
+            "Stable":"bodyPaint4.js"
+         },
+         "appIcon":"content/appicons/body-paint-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"tabletCam",
+         "appName":"Camera Snap-Pro",
+         "appDescription":"The Camera 'Snap-Pro' allows you to take high quality in-world photos and selfies (Low, Normal, 4K, and 'EXTREME' resolution). It has two cameras on the tablet, front-facing/rear-facing, and one detachable to allow more flexibility. It supports different aspect ratio formats: 8x10, 2x3, 9x16 and 'Square'. It comes with an Optical Zoom, a trigger on the VR hand controller and other features.",
+         "appScriptVersions":{
+            "Stable":"tabletCam_app.js"
+         },
+         "appIcon":"appIcons/snap-pro-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"cam360",
+         "appName":"Camera 360",
+         "appDescription":"This camera takes spherical snapshots. It has two capture modes: The 'Throw' mode: Rez the cam, grab it, then toss it high in the sky to capture an incredible view of of any event. The 'Position' mode: Position then click to capture. Ideal to generate an ambient light texture for any scene. This includes a 360&deg; viewer.",
+         "appScriptVersions":{
+            "Stable":"cam360.js"
+         },
+         "appIcon":"resources/images/icons/cam360-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"DANCE",
+         "appName":"Dance App",
+         "appDescription":"Dance like nobody is watching. You can queue up different dance animations and let your avatar do all the dancing while you sit back and relax.",
+         "appScriptVersions":{
+            "Stable":"DANCE.js"
+         },
+         "appIcon":"icons/tablet-icons/DANCE-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"survivalKit",
+         "appName":"Exploration Survival Kit",
+         "appDescription":"Necessary tools for exploration: a COMPASS and a VR FLASHLIGHT.",
+         "appScriptVersions":{
+            "Stable":"app-survivalKit.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"cameras",
+         "appName":"cameras",
+         "appDescription":"Setup 12 cameras in desktop mode and switch viewpoints using F1 to F12 keys",
+         "appScriptVersions":{
+            "Stable":"CameraPositions.js"
+         },
+         "appIcon":"CameraPos-inactive.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"expozer",
+         "appName":"expozer",
+         "appDescription":"This tool allows you to browse all the possible entities of a domain (Domain, Avatar and Local entities). You can view the data from any domains, even those where you don't have the permission to edit. It has also an entity list grouped by parents. The tool also lets you see directly the content of different types of file (.js, .json, .fst). Perfect for: debugging, learning, or to see how thing are done.",
+         "appScriptVersions":{
+            "Stable":"app-expozer.js"
+         },
+         "appIcon":"images/appicon_i.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"scaleMe",
+         "appName":"SCALEME",
+         "appDescription":"A simple app for changing the player scale.",
+         "appScriptVersions":{
+            "Stable":"scaleMe.js"
+         },
+         "appIcon":"icons/inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"appreciate",
+         "appName":"appreciate",
+         "appDescription":"Show someone else that you like what they're doing. (By applauding, clapping, whistling...) Open the app to see usage instructions and some options.",
+         "appScriptVersions":{
+            "Stable":"appreciate_app.js"
+         },
+         "appIcon":"resources/images/icons/appreciate-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"zDebugger",
+         "appName":"zDebugger",
+         "appDescription":"Provides an improved console logging experience complete with filtering by keyword or output type.",
+         "appScriptVersions":{
+            "Stable":"zDebugger.js"
+         },
+         "appIcon":"icon-inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"scriptManager",
+         "appName":"scriptManager",
+         "appDescription":"Provides an improved script manager experience complete with the ability to bookmark scripts for quick recall.",
+         "appScriptVersions":{
+            "Stable":"scriptManager.js"
+         },
+         "appIcon":"icon-inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"inventory-app",
+         "appName":"Inventory App",
+         "appDescription":"The inventory app allows you to store, use, and share items in Overte.",
+         "appScriptVersions":{
+            "Stable":"dist/inventory.js"
+         },
+         "appIcon":"dist/inventory-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"calibration",
+         "appName":"Calibration - Full body Tracking",
+         "appDescription":"This adds a shortcut button in your tablet to open directly the Full Body Tracking 'Calibration' settings. This is mainly for people doing Full Body Tracking for whom it is a frequent use to do the calibration.",
+         "appScriptVersions":{
+            "Stable":"app-calibration.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"roomScaleMarker",
+         "appName":"Room Scale Marker",
+         "appDescription":"Designed for enthusiasts of 'Full Body Tracking,' this application prioritizes safety and performance precision by generating a central marker (local entity). Unlike the standard chaperone system in VR, which tends to signal boundaries reactively, this central marker enhances real-world reference awareness, enabling users to plan their moves more effectively to never reach those boundaries. Perfect for dancing. This marker self-delete as soon it stop matching the reality.",
+         "appScriptVersions":{
+            "Stable":"app-roomScaleMarker.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"flyAvatar",
+         "appName":"Fly Avatar",
+         "appDescription":"This application replaces your avatar for a specific one when you are flying. It reverts automatically the original avatar as soon as you land.",
+         "appScriptVersions":{
+            "Stable":"app-flyAvatar.js"
+         },
+         "appIcon":"icon_inactive.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"flyCam",
+         "appName":"Action Camera",
+         "appDescription":"The Action Camera is attached to your avatar, allowing you to capture video while moving, walking, or flying. Fully adjustable around your avatar, this camera is invisible and ensures optimal capture. It also includes most of the features found in the Spectator Camera.",
+         "appScriptVersions":{
+            "Stable":"flyCamera.js"
+         },
+         "appIcon":"flyCam-i.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"replica",
+         "appName":"Replica",
+         "appDescription":"Specifically for users who do 'Full Body Tracking', this application generates a double of your avatar that only you can see. This is useful to master your avatar moves. Good to have for dancing.",
+         "appScriptVersions":{
+            "Stable":"replica-app.js"
+         },
+         "appIcon":"replica-i.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"domainMapper",
+         "appName":"Domain Mapper",
+         "appDescription":"Generate a 3D miniature representation of your domain's zones. Useful if you have many 'Places' in your domain and are trying to visualize where you can add new ones. The domain overview  can also be used in parallel with the 'Create' application to help you adjust kilometers wide zones. This tool also displays where are the avatars in the domain. (It refreshes every 5 seconds.)",
+         "appScriptVersions":{
+            "Stable":"app-domainMapper.js"
+         },
+         "appIcon":"icon_inactive_white.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"hmd3rdPerson",
+         "appName":"HMD 3rd Person View",
+         "appDescription":"This application adds a button on your tablet to toggle rapidly between 1st and 3rd person view in HMD. It also prevents the distance of the 3rd person camera to be reset as the 'View' menu does. This application is only visible in HMD. It can be useful for people who want to capture their avatar performance in HMD while they are in movement.",
+         "appScriptVersions":{
+            "Stable":"app-hmd3rdPerson.js"
+         },
+         "appIcon":"icon_inactive_white.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"flow",
+         "appName":"Flow Bones",
+         "appDescription":"Effortlessly tweak and tune avatar flow bones.",
+         "appScriptVersions":{
+            "Stable":"flowAppCpp.js"
+         },
+         "appIcon":"flow-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":false,
+         "appBaseDirectory":"voting",
+         "appName":"General Assembly Voting",
+         "appDescription":"Vote in the General Assembly",
+         "appScriptVersions":{
+            "Stable":"vote.js"
+         },
+         "appIcon":"img/icon_white.png",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive":true,
+         "appBaseDirectory":"flex",
+         "appName":"Blendshape Buddy",
+         "appDescription":"Control your blendshapes.",
+         "appScriptVersions":{
+            "Stable":"blendshape_buddy.js"
+         },
+         "appIcon":"flex-i.svg",
+         "appAuthor":"Overte",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      }
+   ]
+}
