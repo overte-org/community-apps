@@ -122,6 +122,11 @@ body .hidden {
   display: none !important;
 }
 
+pre.tree {
+    font-family: FiraSans-Regular;
+    font-size: 16px;
+}
+
 @media (max-width: 900px) {
   body .center-align {
     width: 90%;
