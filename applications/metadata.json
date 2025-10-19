@@ -13,7 +13,7 @@
             "Stable":"emocam1.js"
          },
          "appIcon":"images/face.png",
-         "appAuthor":"Overte",
+         "appAuthor":"George Deac",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -27,7 +27,7 @@
             "Stable":"app-doppleganger.js"
          },
          "appIcon":"doppleganger-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Timothy Dedischew",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -41,7 +41,7 @@
             "Stable":"spectatorCamera.js"
          },
          "appIcon":"spectator-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Zach Fox",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -55,7 +55,7 @@
             "Stable":"gravimeter.js"
          },
          "appIcon":"gravimeter_icon.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -69,7 +69,7 @@
             "Stable":"record.js"
          },
          "appIcon":"icon.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"David Rowe",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -83,7 +83,7 @@
             "Stable":"dom_nav.js"
          },
          "appIcon":"dom_nav_icon_i.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -97,7 +97,7 @@
             "Stable":"VRBuildGrabScale.js"
          },
          "appIcon":"logo.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Basinsky",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -111,7 +111,7 @@
             "Stable":"radar.js"
          },
          "appIcon":"assets/radar-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"David Rowe",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -125,7 +125,7 @@
             "Stable":"refreshApp.js"
          },
          "appIcon":"refresh-circle-w.png",
-         "appAuthor":"Overte",
+         "appAuthor":"KasenVR",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -139,7 +139,7 @@
             "Stable":"nametags.js"
          },
          "appIcon":"assets/nametags-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Armored Dragon",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -153,7 +153,7 @@
             "Stable":"Blocks.js"
          },
          "appIcon":"blocks-inactive.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Basinsky",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -167,7 +167,7 @@
             "Stable":"odometer.js"
          },
          "appIcon":"appicon_i.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -181,7 +181,7 @@
             "Stable":"app-lightBulb.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -195,7 +195,7 @@
             "Stable":"app-aaSwitcher.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -209,7 +209,7 @@
             "Stable":"app-notes.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -223,7 +223,7 @@
             "Stable":"app_home.js"
          },
          "appIcon":"appicon_i.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -237,7 +237,7 @@
             "Stable":"bodyPaint4.js"
          },
          "appIcon":"content/appicons/body-paint-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"David Rowe",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -251,7 +251,7 @@
             "Stable":"tabletCam_app.js"
          },
          "appIcon":"appIcons/snap-pro-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Zach Fox",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -265,7 +265,7 @@
             "Stable":"cam360.js"
          },
          "appIcon":"resources/images/icons/cam360-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Zach Fox",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -279,7 +279,7 @@
             "Stable":"DANCE.js"
          },
          "appIcon":"icons/tablet-icons/DANCE-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Milad Nazeri",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -293,7 +293,7 @@
             "Stable":"app-survivalKit.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -307,7 +307,7 @@
             "Stable":"CameraPositions.js"
          },
          "appIcon":"CameraPos-inactive.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Basinsky",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -321,7 +321,7 @@
             "Stable":"app-expozer.js"
          },
          "appIcon":"images/appicon_i.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -335,7 +335,7 @@
             "Stable":"scaleMe.js"
          },
          "appIcon":"icons/inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"alizardguy",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -349,7 +349,7 @@
             "Stable":"appreciate_app.js"
          },
          "appIcon":"resources/images/icons/appreciate-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Zach Fox",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -363,7 +363,7 @@
             "Stable":"zDebugger.js"
          },
          "appIcon":"icon-inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Zetaphor",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -377,7 +377,7 @@
             "Stable":"scriptManager.js"
          },
          "appIcon":"icon-inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Zetaphor",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -391,7 +391,7 @@
             "Stable":"dist/inventory.js"
          },
          "appIcon":"dist/inventory-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"KasenVR",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -405,7 +405,7 @@
             "Stable":"app-calibration.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -419,7 +419,7 @@
             "Stable":"app-roomScaleMarker.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -433,7 +433,7 @@
             "Stable":"app-flyAvatar.js"
          },
          "appIcon":"icon_inactive.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -447,7 +447,7 @@
             "Stable":"flyCamera.js"
          },
          "appIcon":"flyCam-i.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -461,7 +461,7 @@
             "Stable":"replica-app.js"
          },
          "appIcon":"replica-i.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -475,7 +475,7 @@
             "Stable":"app-domainMapper.js"
          },
          "appIcon":"icon_inactive_white.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -489,7 +489,7 @@
             "Stable":"app-hmd3rdPerson.js"
          },
          "appIcon":"icon_inactive_white.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Alezia Kurdis",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -503,7 +503,7 @@
             "Stable":"flowAppCpp.js"
          },
          "appIcon":"flow-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Luis Cuenca",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -517,7 +517,7 @@
             "Stable":"vote.js"
          },
          "appIcon":"img/icon_white.png",
-         "appAuthor":"Overte",
+         "appAuthor":"Armored Dragon",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
@@ -531,7 +531,7 @@
             "Stable":"blendshape_buddy.js"
          },
          "appIcon":"flex-i.svg",
-         "appAuthor":"Overte",
+         "appAuthor":"Ada",
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
