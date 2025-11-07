@@ -127,6 +127,8 @@
 
   // Updates positions of existing nametags
   function _adjustNametags() {
+    if (!visible) return;
+
     if (last_camera_mode !== Camera.mode) {
       if (Camera.mode.includes("first person")) _removeUser(MyAvatar.sessionUUID);
       else _addUser(MyAvatar.sessionUUID);
