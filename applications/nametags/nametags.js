@@ -154,7 +154,10 @@
     Settings.setValue("Nametags_toggle", visible);
 
     if (!visible) Object.keys(user_nametags).forEach(_removeUser);
-    if (visible) _updateList();
+    if (visible){
+      last_camera_mode = Camera.mode; // Update camera before _adjustNametags runs again
+      _updateList();
+    }
   }
 
   function _scriptEnding() {
