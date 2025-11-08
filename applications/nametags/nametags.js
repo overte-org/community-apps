@@ -6,11 +6,21 @@
 // See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 
 (function () {
+
+  const ContextMenu = Script.require("contextMenu");
+
   "use strict";
   let user_nametags = {};
-  let visible = Settings.getValue("Nametags_toggle", true);
   let maximum_name_length = 50;
   let last_camera_mode = Camera.mode;
+
+  // Settings
+  let visible = Settings.getValue("Nametags_toggle", true);
+  let visibleSelf = Settings.getValue("Nametags_toggleself", false);
+
+  const COLOUR_ENABLED = "lightgreen";
+  const COLOUR_DISABLED = "red";
+  const COLOUR_INACTIVE = [128, 128, 128];
 
   _updateList();
 
@@ -41,7 +51,7 @@
   });
 
   function _updateList() {
-    const include_self = !HMD.active && !Camera.mode.includes("first person");
+    const include_self = visibleSelf && !HMD.active && !Camera.mode.includes("first person");
     var user_list = AvatarList.getAvatarIdentifiers();
     if (include_self) user_list.push(MyAvatar.sessionUUID);
 
@@ -63,8 +73,10 @@
 
   // Add a user to the user list
   function _addUser(user_uuid) {
-    if (!visible) return;
-    if (user_nametags[user_uuid]) return;
+    if (!visible
+        || (!visibleSelf
+            && user_uuid === MyAvatar.sessionUUID)
+        || user_nametags[user_uuid]) return;
 
     const user = AvatarList.getAvatar(user_uuid);
     const display_name = displayName(user);
@@ -148,10 +160,12 @@
   function _adjustNametags() {
     if (!visible) return;
 
-    if (last_camera_mode !== Camera.mode) {
-      if (Camera.mode.includes("first person")) _removeUser(MyAvatar.sessionUUID);
-      else _addUser(MyAvatar.sessionUUID);
-      last_camera_mode = Camera.mode;
+    if (visibleSelf) {
+      if (last_camera_mode !== Camera.mode) {
+        if (Camera.mode.includes("first person")) _removeUser(MyAvatar.sessionUUID);
+        else _addUser(MyAvatar.sessionUUID);
+        last_camera_mode = Camera.mode;
+      }
     }
 
     Object.keys(user_nametags).forEach((user_uuid) => {
@@ -197,12 +211,109 @@
     visible = !visible;
     tabletButton.editProperties({ isActive: visible });
     Settings.setValue("Nametags_toggle", visible);
+    _updateActionSet();
 
     if (!visible) Object.keys(user_nametags).forEach(_removeUser);
     if (visible){
       last_camera_mode = Camera.mode; // Update camera before _adjustNametags runs again
       _updateList();
     }
+  }
+
+  // Enable or disabled own nametag
+  function _toggleVisibleSelf() {
+    visibleSelf = !visibleSelf;
+    Settings.setValue("Nametags_toggleSelf", visibleSelf);
+    _updateActionSet()
+
+    if (visible) {
+      myUUID = MyAvatar.sessionUUID;
+      if (!visibleSelf && user_nametags[myUUID]) _removeUser(myUUID);
+      else if (visibleSelf){
+        last_camera_mode = Camera.mode; // Update camera before _adjustNametags runs again
+        _updateList();
+      }
+    }
+  }
+
+  var CHANNEL_CLICK_CONTEXT = ContextMenu.CLICK_FUNC_CHANNEL;
+  var handleMessage = function(channel, message, sender) {
+    if (channel === CHANNEL_CLICK_CONTEXT && sender === MyAvatar.sessionUUID) {
+      try {
+        data = JSON.parse(message)
+      } catch (err) {
+        console.error('Invalid JSON on Context Menu Click message:', message, err.message);
+        return
+      }
+
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const func = data.func;
+
+        if (typeof func !== 'undefined') {
+          console.log('Func:', func);
+          switch (func) {
+            case "nametags.toggle":
+              _toggleState();
+              break;
+            case "nametags.toggleSelf":
+              _toggleVisibleSelf();
+              break;
+          }
+
+        } else {
+          console.warn('"func" key not found in the JSON');
+        }
+      }
+    }
+  };
+
+  Messages.subscribe(CHANNEL_CLICK_CONTEXT);
+  Messages.messageReceived.connect(handleMessage);
+
+  function textToggle(boolean) {
+    return boolean ? "[X]" : "[   ]";
+  }
+
+  function textColour(boolean) {
+    return boolean ? COLOUR_ENABLED : COLOUR_DISABLED;
+  }
+
+  const actionSet = [
+    {
+      text: textToggle(visible)+" Nametags",
+ localClickFunc: "nametags.toggle",
+ textColor: textColour(visible),
+ priority: -5,
+    },
+    {
+      text: textToggle(visibleSelf)+" My Nametag",
+ localClickFunc: "nametags.toggleSelf",
+ textColor: visible ?
+              textColour(visibleSelf)
+              : COLOUR_INACTIVE,
+ priority: -4.9,
+    },
+  ];
+
+  ContextMenu.registerActionSet("nametags", [{
+    text: "> Nametags",
+    submenu: "nametags.menu",
+    backgroundColor: [0, 0, 0],
+    textColor: "white",
+    priority: -5,
+  }], "_SELF");
+
+  ContextMenu.registerActionSet("nametags.menu", actionSet, undefined, "Nametags");
+
+  function _updateActionSet() {
+    actionSet[0].text = textToggle(visible)+" Nametags";
+    actionSet[0].textColor = textColour(visible);
+    actionSet[1].text = textToggle(visibleSelf)+" My Nametag";
+    actionSet[1].textColor = visible ?
+    textColour(visibleSelf)
+    : COLOUR_INACTIVE;
+
+    ContextMenu.editActionSet("nametags.menu", actionSet);
   }
 
   function _scriptEnding() {
