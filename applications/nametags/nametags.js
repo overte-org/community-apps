@@ -61,12 +61,19 @@
     user_list.forEach(_addUser);
   }
 
+  // Nametag position for use in creating or adjusting nametag entities
   function _nametagPosition(user) {
     const headJointIndex = user.getJointIndex("Head");
     const jointInObjectFrame = user.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
-    return Vec3.sum(user.position, { x: 0.01, y: jointInObjectFrame.y + 0.4*Math.max(0.4, Math.min(user.scale, 4)), z: 0 })
+    return Vec3.sum(user.position,
+                    {
+                      x: 0.01,
+                      y: jointInObjectFrame.y + 0.4*Math.max(0.4, Math.min(user.scale, 4)),
+                      z: 0,
+                    });
   }
 
+  // Avatar display name as shown on nametags
   function displayName(user) {
     return user.displayName ? user.displayName.substring(0, maximum_name_length) : "Anonymous"
   }
@@ -126,11 +133,21 @@
       "local"
     );
 
+    if (!hasAvatarLoaded(user)) {
+      // Avatar has not finished loading yet;
+      //  we'll reposition when it's ready.
+      print("Avatar is not loaded yet. Will retry...");
+      Script.setTimeout(() => {
+        _adjustNametagPosition(user_uuid);
+      }, 100);
+    }
+
     // We need to have this on a timeout because "textSize" can not be determined instantly after the entity was created.
     // https://apidocs.overte.org/Entities.html#.textSize
     Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
   }
 
+  // Resize user's nametag entity
   function _adjustNametagSize(user_uuid) {
     const user = AvatarList.getAvatar(user_uuid);
     let textSize = Entities.textSize(user_nametags[user_uuid].text, displayName(user));
@@ -188,10 +205,7 @@
       // User has finished rescaling,
       //  but there may be a delay before the avatar finishes resizing.
       Script.setTimeout(() => {
-        if (user_nametags[user_uuid].rescaling === true) return;
-        Entities.editEntity(user_nametags[user_uuid].text, {
-          position: _nametagPosition(user),
-        });
+        _adjustNametagPosition(user_uuid);
       }, 3000);
 
       user_nametags[user_uuid].rescaling = false;
@@ -204,6 +218,36 @@
       });
       user_nametags[user_uuid].displayName = user.displayName;
     }
+  }
+
+  function _adjustNametagPosition(user_uuid) {
+    const user = AvatarList.getAvatar(user_uuid);
+    if (!user_nametags[user_uuid] || user_nametags[user_uuid]?.rescaling === true) return;
+
+    if (!hasAvatarLoaded(user)) {
+      // Avatar has not finished loading yet;
+      //  we'll wait and reposition it when it's ready.
+      Script.setTimeout(() => {
+        _adjustNametagPosition(user_uuid);
+      }, 100);
+      return;
+    }
+
+    Entities.editEntity(user_nametags[user_uuid].text, {
+      position: _nametagPosition(user),
+    });
+  }
+
+  // There is no built in way to know if an avatar
+  //  has fully loaded in, so we check for what we
+  //  know should be true of a fully loaded avatar
+  //    * The "Head" joint index will not be -1
+  //    * The "Head" joint y translation will not be `0`
+  //  An avatar which has not finished loading can can have a head index of > -1, whilst still not having a y value yet.
+  function hasAvatarLoaded(user) {
+    const headJointIndex = user.getJointIndex("Head");
+    return headJointIndex !== -1
+           && user.getAbsoluteJointTranslationInObjectFrame(headJointIndex).y != 0;
   }
 
   // Enable or disable nametags
@@ -223,7 +267,7 @@
   // Enable or disabled own nametag
   function _toggleVisibleSelf() {
     visibleSelf = !visibleSelf;
-    Settings.setValue("Nametags_toggleSelf", visibleSelf);
+    Settings.setValue("Nametags_toggleself", visibleSelf);
     _updateActionSet()
 
     if (visible) {
