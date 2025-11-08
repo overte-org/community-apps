@@ -127,6 +127,8 @@
 
   // Updates positions of existing nametags
   function _adjustNametags() {
+    if (!visible) return;
+
     if (last_camera_mode !== Camera.mode) {
       if (Camera.mode.includes("first person")) _removeUser(MyAvatar.sessionUUID);
       else _addUser(MyAvatar.sessionUUID);
@@ -152,7 +154,10 @@
     Settings.setValue("Nametags_toggle", visible);
 
     if (!visible) Object.keys(user_nametags).forEach(_removeUser);
-    if (visible) _updateList();
+    if (visible){
+      last_camera_mode = Camera.mode; // Update camera before _adjustNametags runs again
+      _updateList();
+    }
   }
 
   function _scriptEnding() {
