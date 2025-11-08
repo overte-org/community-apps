@@ -57,13 +57,17 @@
     return Vec3.sum(user.position, { x: 0.01, y: jointInObjectFrame.y + 0.4*Math.max(0.4, Math.min(user.scale, 4)), z: 0 })
   }
 
+  function displayName(user) {
+    return user.displayName ? user.displayName.substring(0, maximum_name_length) : "Anonymous"
+  }
+
   // Add a user to the user list
   function _addUser(user_uuid) {
     if (!visible) return;
     if (user_nametags[user_uuid]) return;
 
     const user = AvatarList.getAvatar(user_uuid);
-    const display_name = user.displayName ? user.displayName.substring(0, maximum_name_length) : "Anonymous";
+    const display_name = displayName(user);
 
     console.log(`Registering ${display_name} (${user_uuid}) nametag`);
 
@@ -112,13 +116,24 @@
 
     // We need to have this on a timeout because "textSize" can not be determined instantly after the entity was created.
     // https://apidocs.overte.org/Entities.html#.textSize
-    Script.setTimeout(() => {
-      let textSize = Entities.textSize(user_nametags[user_uuid].text, display_name);
-      Entities.editEntity(user_nametags[user_uuid].text, { dimensions: { x: textSize.width + 0.25, y: textSize.height + 0.07, z: 0.1 } });
-      Entities.editEntity(user_nametags[user_uuid].background, {
-        dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height + 0.05, z: 0.1 },
-      });
-    }, 100);
+    Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
+  }
+
+  function _adjustNametagSize(user_uuid) {
+    const user = AvatarList.getAvatar(user_uuid);
+    let textSize = Entities.textSize(user_nametags[user_uuid].text, displayName(user));
+
+    if (textSize.width === 0 || textSize.height === 0) {
+      // Text size cannot be calculated immediately after entity creation;
+      // We'll keep trying until textSize does not report 0.
+      Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
+      return;
+    }
+
+    Entities.editEntity(user_nametags[user_uuid].text, { dimensions: { x: textSize.width + 0.25, y: textSize.height + 0.07, z: 0.1 } });
+    Entities.editEntity(user_nametags[user_uuid].background, {
+      dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height + 0.05, z: 0.1 },
+    });
   }
 
   // Remove a user from the user list
