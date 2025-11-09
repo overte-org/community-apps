@@ -337,13 +337,26 @@
   // Resize user's nametag entity
   function _adjustNametagSize(user_uuid) {
     const user = AvatarList.getAvatar(user_uuid);
-    let textSize = Entities.textSize(user_nametags[user_uuid].text, _displayName(user));
+    const display_name = _displayName(user);
+    let textSize = Entities.textSize(user_nametags[user_uuid].text, display_name);
 
     if (textSize.width === 0 || textSize.height === 0) {
       // Text size cannot be calculated immediately after entity creation;
       // We'll keep trying until textSize does not report 0.
       Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
       return;
+    } else if (textSize.height <= 0.0001
+            || textSize.height >= 0.2
+            || textSize.height === null) {
+      // Text size returns unexpected values during entity
+      // creation. When entity sizes are too large, too small
+      // or invalid we ignore them.
+      // See https://github.com/overte-org/overte/issues/1897.
+      print(`!!! Text size for ${display_name} is an unexpected ${JSON.stringify(textSize)}; Not sizing yet.`);
+      Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
+      return;
+    } else {
+      print(`Text size for ${display_name} is ${JSON.stringify(textSize)}`);
     }
 
     Entities.editEntity(user_nametags[user_uuid].text,
