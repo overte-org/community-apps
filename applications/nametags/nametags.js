@@ -32,6 +32,10 @@
   Script.scriptEnding.connect(_scriptEnding); // Script was uninstalled
   Menu.menuItemEvent.connect(_toggleState); // Toggle the nametag
 
+  // Messages
+  Messages.subscribe(CHANNEL_CLICK_CONTEXT);
+  Messages.messageReceived.connect(_handleMessage);
+
   // Toolbar icon
   let tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
   let tabletButton = tablet.addButton({
@@ -51,6 +55,95 @@
     isChecked: visible,
   });
 
+
+  // ContextMenu
+  //
+
+  const actionSet = [
+    {
+      text: textToggle(visible)+" Nametags",
+ localClickFunc: "nametags.toggle",
+ textColor: textColour(visible),
+ priority: -5,
+    },
+    {
+      text: textToggle(visibleSelf)+" My Nametag",
+ localClickFunc: "nametags.toggleSelf",
+ textColor: visible ?
+ textColour(visibleSelf)
+ : COLOUR_INACTIVE,
+ priority: -4.9,
+    },
+  ];
+
+  ContextMenu.registerActionSet("nametags", [{
+    text: "> Nametags",
+    submenu: "nametags.menu",
+    backgroundColor: [0, 0, 0],
+    textColor: "white",
+    priority: -5,
+  }], "_SELF");
+
+  ContextMenu.registerActionSet("nametags.menu", actionSet, undefined, "Nametags");
+
+  function _updateActionSet() {
+    actionSet[0].text = textToggle(visible)+" Nametags";
+    actionSet[0].textColor = textColour(visible);
+    actionSet[1].text = textToggle(visibleSelf)+" My Nametag";
+    actionSet[1].textColor = visible ?
+    textColour(visibleSelf)
+    : COLOUR_INACTIVE;
+
+    ContextMenu.editActionSet("nametags.menu", actionSet);
+  }
+
+
+  // Helper functions
+  //
+
+  // Avatar display name as shown on nametags
+  function _displayName(user) {
+    return user.displayName ? user.displayName.substring(0, maximum_name_length) : "Anonymous"
+  }
+
+  // There is no built in way to know if an avatar
+  //  has fully loaded in, so we check for what we
+  //  know should be true of a fully loaded avatar
+  //    * The "Head" joint index will not be -1
+  //    * The "Head" joint y translation will not be `0`
+  //  An avatar which has not finished loading can can have a head index of > -1, whilst still not having a y value yet.
+  function _hasAvatarLoaded(user) {
+    const headJointIndex = user.getJointIndex("Head");
+    return headJointIndex !== -1
+    && user.getAbsoluteJointTranslationInObjectFrame(headJointIndex).y != 0;
+  }
+
+  // Nametag position for use in creating or adjusting nametag entities
+  function _nametagPosition(user) {
+    const headJointIndex = user.getJointIndex("Head");
+    const jointInObjectFrame = user.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
+    return Vec3.sum(user.position,
+                    {
+                      x: 0.01,
+                      y: jointInObjectFrame.y + 0.4*Math.max(0.4, Math.min(user.scale, 4)),
+                    z: 0,
+                    });
+  }
+
+  // ContextMenu helpers
+  //
+  function textToggle(boolean) {
+    return boolean ? "[X]" : "[   ]";
+  }
+  //
+  function textColour(boolean) {
+    return boolean ? COLOUR_ENABLED : COLOUR_DISABLED;
+  }
+
+
+  // Signal functions
+  //
+
   // Handle switching between worlds
   function _avatarSessionChanged(newSessionUUID, oldSessionUUID) {
     print("newSessionUUID:", newSessionUUID); // null if leaving
@@ -65,33 +158,44 @@
     }
   }
 
-  function _updateList() {
-    const include_self = visibleSelf && !HMD.active && !Camera.mode.includes("first person");
-    var user_list = AvatarList.getAvatarIdentifiers();
-    if (include_self) user_list.push(MyAvatar.sessionUUID);
+  // Message handling
+  //
+  // Channels
+  var CHANNEL_CLICK_CONTEXT = ContextMenu.CLICK_FUNC_CHANNEL;
+  //
+  function _handleMessage(channel, message, sender) {
+    if (channel === CHANNEL_CLICK_CONTEXT && sender === MyAvatar.sessionUUID) {
+      try {
+        data = JSON.parse(message)
+      } catch (err) {
+        console.error('Invalid JSON on Context Menu Click message:', message, err.message);
+        return
+      }
 
-    // Filter undefined values out
-    user_list = user_list.filter((uuid) => uuid);
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const func = data.func;
 
-    user_list.forEach(_addUser);
-  }
+        if (typeof func !== 'undefined') {
+          console.log('Func:', func);
+          switch (func) {
+            case "nametags.toggle":
+              _toggleState();
+              break;
+            case "nametags.toggleSelf":
+              _toggleVisibleSelf();
+              break;
+          }
 
-  // Nametag position for use in creating or adjusting nametag entities
-  function _nametagPosition(user) {
-    const headJointIndex = user.getJointIndex("Head");
-    const jointInObjectFrame = user.getAbsoluteJointTranslationInObjectFrame(headJointIndex);
-    return Vec3.sum(user.position,
-                    {
-                      x: 0.01,
-                      y: jointInObjectFrame.y + 0.4*Math.max(0.4, Math.min(user.scale, 4)),
-                      z: 0,
-                    });
-  }
+        } else {
+          console.warn('"func" key not found in the JSON');
+        }
+      }
+    }
+  };
 
-  // Avatar display name as shown on nametags
-  function displayName(user) {
-    return user.displayName ? user.displayName.substring(0, maximum_name_length) : "Anonymous"
-  }
+
+  // Business functions
+  //
 
   // Add a user to the user list
   function _addUser(user_uuid) {
@@ -101,7 +205,7 @@
         || user_nametags[user_uuid]) return;
 
     const user = AvatarList.getAvatar(user_uuid);
-    const display_name = displayName(user);
+    const display_name = _displayName(user);
 
     console.log(`Registering ${display_name} (${user_uuid}) nametag`);
 
@@ -148,7 +252,7 @@
       "local"
     );
 
-    if (!hasAvatarLoaded(user)) {
+    if (!_hasAvatarLoaded(user)) {
       // Avatar has not finished loading yet;
       //  we'll reposition when it's ready.
       print("Avatar is not loaded yet. Will retry...");
@@ -160,61 +264,6 @@
     // We need to have this on a timeout because "textSize" can not be determined instantly after the entity was created.
     // https://apidocs.overte.org/Entities.html#.textSize
     Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
-  }
-
-  // Resize user's nametag entity
-  function _adjustNametagSize(user_uuid) {
-    const user = AvatarList.getAvatar(user_uuid);
-    let textSize = Entities.textSize(user_nametags[user_uuid].text, displayName(user));
-
-    if (textSize.width === 0 || textSize.height === 0) {
-      // Text size cannot be calculated immediately after entity creation;
-      // We'll keep trying until textSize does not report 0.
-      Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
-      return;
-    }
-
-    Entities.editEntity(user_nametags[user_uuid].text,
-                        {
-                          dimensions: {
-                            x: textSize.width + 0.25,
-                            y: textSize.height + 0.07,
-                            z: 0.1,
-                          }
-                        });
-    Entities.editEntity(user_nametags[user_uuid].background,
-                        {
-                          dimensions: {
-                            x: Math.max(textSize.width + 0.25, 0.6),
-                            y: textSize.height + 0.05,
-                            z: 0.1,
-                          },
-                        });
-  }
-
-  // Remove a user from the user list
-  function _removeUser(user_uuid) {
-    console.log(`Deleting ${user_uuid} nametag`);
-    Entities.deleteEntity(user_nametags[user_uuid].text);
-    Entities.deleteEntity(user_nametags[user_uuid].background);
-    delete user_nametags[user_uuid];
-  }
-
-  // Updates positions of existing nametags
-  function _adjustNametags() {
-    if (!visible) return;
-
-    if (visibleSelf) {
-      if (last_camera_mode !== Camera.mode) {
-        if (Camera.mode.includes("first person")) _removeUser(MyAvatar.sessionUUID);
-        else _addUser(MyAvatar.sessionUUID);
-        last_camera_mode = Camera.mode;
-      }
-    }
-
-    Object.keys(user_nametags).forEach((user_uuid) => {
-      _adjustNametag(user_uuid);
-    });
   }
 
   function _adjustNametag(user_uuid) {
@@ -241,7 +290,7 @@
     const newName = user.displayName;
     const oldName = user_nametags[user_uuid].displayName;
     if (newName !== oldName) {
-      const display_name = displayName(user);
+      const display_name = _displayName(user);
       print(`New displayName ${display_name} (${newName}) for ${oldName}`)
       Entities.editEntity(user_nametags[user_uuid].text, {
         text: display_name,
@@ -250,11 +299,28 @@
     }
   }
 
+  // Updates positions of existing nametags
+  function _adjustNametags() {
+    if (!visible) return;
+
+    if (visibleSelf) {
+      if (last_camera_mode !== Camera.mode) {
+        if (Camera.mode.includes("first person")) _removeUser(MyAvatar.sessionUUID);
+        else _addUser(MyAvatar.sessionUUID);
+        last_camera_mode = Camera.mode;
+      }
+    }
+
+    Object.keys(user_nametags).forEach((user_uuid) => {
+      _adjustNametag(user_uuid);
+    });
+  }
+
   function _adjustNametagPosition(user_uuid) {
     const user = AvatarList.getAvatar(user_uuid);
     if (!user_nametags[user_uuid] || user_nametags[user_uuid]?.rescaling === true) return;
 
-    if (!hasAvatarLoaded(user)) {
+    if (!_hasAvatarLoaded(user)) {
       // Avatar has not finished loading yet;
       //  we'll wait and reposition it when it's ready.
       Script.setTimeout(() => {
@@ -268,16 +334,42 @@
     });
   }
 
-  // There is no built in way to know if an avatar
-  //  has fully loaded in, so we check for what we
-  //  know should be true of a fully loaded avatar
-  //    * The "Head" joint index will not be -1
-  //    * The "Head" joint y translation will not be `0`
-  //  An avatar which has not finished loading can can have a head index of > -1, whilst still not having a y value yet.
-  function hasAvatarLoaded(user) {
-    const headJointIndex = user.getJointIndex("Head");
-    return headJointIndex !== -1
-           && user.getAbsoluteJointTranslationInObjectFrame(headJointIndex).y != 0;
+  // Resize user's nametag entity
+  function _adjustNametagSize(user_uuid) {
+    const user = AvatarList.getAvatar(user_uuid);
+    let textSize = Entities.textSize(user_nametags[user_uuid].text, _displayName(user));
+
+    if (textSize.width === 0 || textSize.height === 0) {
+      // Text size cannot be calculated immediately after entity creation;
+      // We'll keep trying until textSize does not report 0.
+      Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
+      return;
+    }
+
+    Entities.editEntity(user_nametags[user_uuid].text,
+                        {
+                          dimensions: {
+                            x: textSize.width + 0.25,
+                            y: textSize.height + 0.07,
+                            z: 0.1,
+                          }
+                        });
+    Entities.editEntity(user_nametags[user_uuid].background,
+                        {
+                          dimensions: {
+                            x: Math.max(textSize.width + 0.25, 0.6),
+                        y: textSize.height + 0.05,
+                        z: 0.1,
+                          },
+                        });
+  }
+
+  // Remove a user from the user list
+  function _removeUser(user_uuid) {
+    console.log(`Deleting ${user_uuid} nametag`);
+    Entities.deleteEntity(user_nametags[user_uuid].text);
+    Entities.deleteEntity(user_nametags[user_uuid].background);
+    delete user_nametags[user_uuid];
   }
 
   // Enable or disable nametags
@@ -310,85 +402,19 @@
     }
   }
 
-  var CHANNEL_CLICK_CONTEXT = ContextMenu.CLICK_FUNC_CHANNEL;
-  var handleMessage = function(channel, message, sender) {
-    if (channel === CHANNEL_CLICK_CONTEXT && sender === MyAvatar.sessionUUID) {
-      try {
-        data = JSON.parse(message)
-      } catch (err) {
-        console.error('Invalid JSON on Context Menu Click message:', message, err.message);
-        return
-      }
+  function _updateList() {
+    const include_self = visibleSelf && !HMD.active && !Camera.mode.includes("first person");
+    var user_list = AvatarList.getAvatarIdentifiers();
+    if (include_self) user_list.push(MyAvatar.sessionUUID);
 
-      if (data && typeof data === 'object' && !Array.isArray(data)) {
-        const func = data.func;
+    // Filter undefined values out
+    user_list = user_list.filter((uuid) => uuid);
 
-        if (typeof func !== 'undefined') {
-          console.log('Func:', func);
-          switch (func) {
-            case "nametags.toggle":
-              _toggleState();
-              break;
-            case "nametags.toggleSelf":
-              _toggleVisibleSelf();
-              break;
-          }
-
-        } else {
-          console.warn('"func" key not found in the JSON');
-        }
-      }
-    }
-  };
-
-  Messages.subscribe(CHANNEL_CLICK_CONTEXT);
-  Messages.messageReceived.connect(handleMessage);
-
-  function textToggle(boolean) {
-    return boolean ? "[X]" : "[   ]";
+    user_list.forEach(_addUser);
   }
 
-  function textColour(boolean) {
-    return boolean ? COLOUR_ENABLED : COLOUR_DISABLED;
-  }
-
-  const actionSet = [
-    {
-      text: textToggle(visible)+" Nametags",
- localClickFunc: "nametags.toggle",
- textColor: textColour(visible),
- priority: -5,
-    },
-    {
-      text: textToggle(visibleSelf)+" My Nametag",
- localClickFunc: "nametags.toggleSelf",
- textColor: visible ?
-              textColour(visibleSelf)
-              : COLOUR_INACTIVE,
- priority: -4.9,
-    },
-  ];
-
-  ContextMenu.registerActionSet("nametags", [{
-    text: "> Nametags",
-    submenu: "nametags.menu",
-    backgroundColor: [0, 0, 0],
-    textColor: "white",
-    priority: -5,
-  }], "_SELF");
-
-  ContextMenu.registerActionSet("nametags.menu", actionSet, undefined, "Nametags");
-
-  function _updateActionSet() {
-    actionSet[0].text = textToggle(visible)+" Nametags";
-    actionSet[0].textColor = textColour(visible);
-    actionSet[1].text = textToggle(visibleSelf)+" My Nametag";
-    actionSet[1].textColor = visible ?
-    textColour(visibleSelf)
-    : COLOUR_INACTIVE;
-
-    ContextMenu.editActionSet("nametags.menu", actionSet);
-  }
+  // Clean up
+  //
 
   function _scriptEnding() {
     tablet.removeButton(tabletButton);
