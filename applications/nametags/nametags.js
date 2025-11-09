@@ -26,6 +26,7 @@
 
   AvatarManager.avatarAddedEvent.connect(_addUser); // New user connected
   AvatarManager.avatarRemovedEvent.connect(_removeUser); // User disconnected
+  AvatarManager.avatarSessionChangedEvent.connect(_avatarSessionChanged);
   Script.update.connect(_adjustNametags); // Delta time
 
   Script.scriptEnding.connect(_scriptEnding); // Script was uninstalled
@@ -49,6 +50,20 @@
     isCheckable: true,
     isChecked: visible,
   });
+
+  // Handle switching between worlds
+  function _avatarSessionChanged(newSessionUUID, oldSessionUUID) {
+    print("newSessionUUID:", newSessionUUID); // null if leaving
+    print("oldSessionUUID:", oldSessionUUID); // null if entering
+
+    if (oldSessionUUID !== null) {
+        _removeUser(oldSessionUUID);
+    }
+
+    if (newSessionUUID !== null) {
+      _addUser(newSessionUUID);
+    }
+  }
 
   function _updateList() {
     const include_self = visibleSelf && !HMD.active && !Camera.mode.includes("first person");
@@ -90,7 +105,7 @@
 
     console.log(`Registering ${display_name} (${user_uuid}) nametag`);
 
-    user_nametags[user_uuid] = { text: {}, background: {}, scale: user.scale, displayName: user.displayName };
+    user_nametags[user_uuid] = { text: {}, background: {}, scale: user.scale, displayName: display_name };
 
     user_nametags[user_uuid].text = Entities.addEntity(
       {
@@ -159,10 +174,22 @@
       return;
     }
 
-    Entities.editEntity(user_nametags[user_uuid].text, { dimensions: { x: textSize.width + 0.25, y: textSize.height + 0.07, z: 0.1 } });
-    Entities.editEntity(user_nametags[user_uuid].background, {
-      dimensions: { x: Math.max(textSize.width + 0.25, 0.6), y: textSize.height + 0.05, z: 0.1 },
-    });
+    Entities.editEntity(user_nametags[user_uuid].text,
+                        {
+                          dimensions: {
+                            x: textSize.width + 0.25,
+                            y: textSize.height + 0.07,
+                            z: 0.1,
+                          }
+                        });
+    Entities.editEntity(user_nametags[user_uuid].background,
+                        {
+                          dimensions: {
+                            x: Math.max(textSize.width + 0.25, 0.6),
+                            y: textSize.height + 0.05,
+                            z: 0.1,
+                          },
+                        });
   }
 
   // Remove a user from the user list
@@ -211,12 +238,15 @@
       user_nametags[user_uuid].rescaling = false;
     }
 
-    if (user.displayName !== user_nametags[user_uuid].displayName) {
-      const display_name = user.displayName ? user.displayName.substring(0, maximum_name_length) : "Anonymous";
+    const newName = user.displayName;
+    const oldName = user_nametags[user_uuid].displayName;
+    if (newName !== oldName) {
+      const display_name = displayName(user);
+      print(`New displayName ${display_name} (${newName}) for ${oldName}`)
       Entities.editEntity(user_nametags[user_uuid].text, {
         text: display_name,
       });
-      user_nametags[user_uuid].displayName = user.displayName;
+      user_nametags[user_uuid].displayName = newName;
     }
   }
 
