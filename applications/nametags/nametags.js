@@ -150,11 +150,21 @@
     print("oldSessionUUID:", oldSessionUUID); // null if entering
 
     if (oldSessionUUID !== null) {
-        _removeUser(oldSessionUUID);
+        if (user_nametags[oldSessionUUID]) _removeUser(oldSessionUUID);
     }
 
     if (newSessionUUID !== null) {
-      _addUser(newSessionUUID);
+      // This is MyAvatar only if MyAvatar.sessionUUID matches either oldSessionUUID, newSessionUUID or "{00000000-0000-0000-0000-000000000001}"
+      const isSelf = [oldSessionUUID, "{00000000-0000-0000-0000-000000000001}", newSessionUUID].includes(MyAvatar.sessionUUID);
+
+      if (!isSelf){
+        _addUser(MyAvatar.sessionUUID);
+      } else if (newSessionUUID !== "{00000000-0000-0000-0000-000000000001}"
+          && visibleSelf
+          && !Camera.mode.includes("first person")) {
+            _addUser(newSessionUUID);
+            last_camera_mode = Camera.mode;
+      }
     }
   }
 
