@@ -341,6 +341,24 @@ var metadata = { "applications":
             "jsfile": "flex/blendshape_buddy.js",
             "icon": "flex/flex-i.svg",
             "caption": "FLEX"
+        },
+        {
+            "isActive": true,
+            "directory": "avatarGrab",
+            "name": "Avatar Grab",
+            "description": "Allows you to pick up other players who also have this app installed. Grabs are triggered with the VR controller grips, or by the G key on your keyboard. Extra settings are available in your context menu under \"My Avatar\".",
+            "jsfile": "avatarGrab/avatarGrab.js",
+            "icon": "avatarGrab/icon-white.svg",
+            "caption": "GRAB"
+        },
+        {
+            "isActive": true,
+            "directory": "bodyPoser",
+            "name": "Body Poser",
+            "description": "Lets you grab and move your avatar's limbs into a pose. Available in your context menu under \"My Avatar\".",
+            "jsfile": "bodyPoser/bodyPoser.js",
+            "icon": "bodyPoser/icon-white.svg",
+            "caption": "POSE"
         }
     ]
 };
