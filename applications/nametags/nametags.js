@@ -355,7 +355,7 @@
       // We'll keep trying until textSize does not report 0.
       Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
       return;
-    } else if (textSize.height <= 0.0001
+    } else if (textSize.height <= 0.08
             || textSize.height >= 0.2
             || textSize.height === null) {
       // Text size returns unexpected values during entity
