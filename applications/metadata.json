@@ -535,6 +535,34 @@
          "appAgeMaturity":"EVERYONE",
          "appCategory":"UTILITY",
          "appHomeUrl":"https://more.overte.org"
+      },
+      {
+         "appActive": true,
+         "appBaseDirectory": "avatarGrab",
+         "appName": "Avatar Grab",
+         "appDescription": "Allows you to pick up other players who also have this app installed. Grabs are triggered with the VR controller grips, or by the G key on your keyboard. Extra settings are available in your context menu under \"My Avatar\".",
+         "appScriptVersions": {
+            "Stable": "avatarGrab.js"
+         },
+         "appIcon": "icon-white.svg",
+         "appAuthor": "ada.tv",
+         "appAgeMaturity": "EVERYONE",
+         "appCategory": "FUN",
+         "appHomeUrl": "https://thingvellir.net"
+      },
+      {
+         "appActive": true,
+         "appBaseDirectory": "bodyPoser",
+         "appName": "Body Poser",
+         "appDescription": "Lets you grab and move your avatars' limbs into a pose. Available in your context menu under \"My Avatar\".",
+         "appScriptVersions": {
+            "Stable": "bodyPoser.js"
+         },
+         "appIcon": "icon-white.svg",
+         "appAuthor": "ada.tv",
+         "appAgeMaturity": "EVERYONE",
+         "appCategory": "UTILITY",
+         "appHomeUrl": "https://thingvellir.net"
       }
    ]
 }
