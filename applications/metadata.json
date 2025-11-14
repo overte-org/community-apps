@@ -554,7 +554,7 @@
          "appActive": true,
          "appBaseDirectory": "bodyPoser",
          "appName": "Body Poser",
-         "appDescription": "Lets you grab and move your avatars' limbs into a pose. Available in your context menu under \"My Avatar\".",
+         "appDescription": "Lets you grab and move your avatar's limbs into a pose. Available in your context menu under \"My Avatar\".",
          "appScriptVersions": {
             "Stable": "bodyPoser.js"
          },

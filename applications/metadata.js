@@ -355,7 +355,7 @@ var metadata = { "applications":
             "isActive": true,
             "directory": "bodyPoser",
             "name": "Body Poser",
-            "description": "Lets you grab and move your avatars' limbs into a pose. Available in your context menu under \"My Avatar\".",
+            "description": "Lets you grab and move your avatar's limbs into a pose. Available in your context menu under \"My Avatar\".",
             "jsfile": "bodyPoser/bodyPoser.js",
             "icon": "bodyPoser/icon-white.svg",
             "caption": "POSE"
