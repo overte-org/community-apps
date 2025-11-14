@@ -389,10 +389,12 @@
 
   // Remove a user from the user list
   function _removeUser(user_uuid) {
-    console.log(`Deleting ${user_uuid} nametag`);
-    Entities.deleteEntity(user_nametags[user_uuid].text);
-    Entities.deleteEntity(user_nametags[user_uuid].background);
-    delete user_nametags[user_uuid];
+    if (user_nametags[user_uuid]) {
+      console.log(`Deleting ${user_uuid} nametag`);
+      Entities.deleteEntity(user_nametags[user_uuid].text);
+      Entities.deleteEntity(user_nametags[user_uuid].background);
+      delete user_nametags[user_uuid];
+    }
   }
 
   // Enable or disable nametags
