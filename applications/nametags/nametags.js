@@ -22,6 +22,9 @@
   const COLOUR_DISABLED = "red";
   const COLOUR_INACTIVE = [128, 128, 128];
 
+  const MENU_VISIBLE_MENU = "View";
+  const MENU_VISIBLE_NAME = "Nametags";
+
   _updateList();
 
   AvatarManager.avatarAddedEvent.connect(_addUser); // New user connected
@@ -30,7 +33,7 @@
   Script.update.connect(_adjustNametags); // Delta time
 
   Script.scriptEnding.connect(_scriptEnding); // Script was uninstalled
-  Menu.menuItemEvent.connect(_toggleState); // Toggle the nametag
+  Menu.menuItemEvent.connect(_handleMenuClick); // Toggle the nametag
 
   // Messages
   Messages.subscribe(CHANNEL_CLICK_CONTEXT);
@@ -48,8 +51,8 @@
 
   // Menu item
   Menu.addMenuItem({
-    menuName: "View",
-    menuItemName: "Nametags",
+    menuName: MENU_VISIBLE_MENU,
+    menuItemName: MENU_VISIBLE_NAME,
     shortcutKey: "CTRL+N",
     isCheckable: true,
     isChecked: visible,
@@ -165,6 +168,12 @@
             _addUser(newSessionUUID);
             last_camera_mode = Camera.mode;
       }
+    }
+  }
+
+  function _handleMenuClick(menuItem) {
+    if (MENU_VISIBLE_NAME === menuItem) {
+      _toggleState();
     }
   }
 
@@ -443,7 +452,7 @@
 
   function _scriptEnding() {
     tablet.removeButton(tabletButton);
-    Menu.removeMenuItem("View", "Nametags");
+    Menu.removeMenuItem(MENU_VISIBLE_MENU, MENU_VISIBLE_NAME);
 
     for (let i = 0; Object.keys(user_nametags).length > i; i++) {
       Entities.deleteEntity(user_nametags[Object.keys(user_nametags)[i]].text);
