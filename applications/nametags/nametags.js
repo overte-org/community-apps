@@ -228,7 +228,7 @@
 
     console.log(`Registering ${display_name} (${user_uuid}) nametag`);
 
-    user_nametags[user_uuid] = { text: {}, background: {}, scale: user.scale, displayName: display_name };
+    user_nametags[user_uuid] = { text: {}, background: {}, scale: user.scale, displayName: display_name, skeletonModelURL: user.skeletonModelURL };
 
     user_nametags[user_uuid].text = Entities.addEntity(
       {
@@ -275,14 +275,30 @@
       // Avatar has not finished loading yet;
       //  we'll reposition when it's ready.
       print("Avatar is not loaded yet. Will retry...");
-      Script.setTimeout(() => {
-        _adjustNametagPosition(user_uuid);
-      }, 100);
+      _adjustNametagPosition(user_uuid);
     }
 
     // We need to have this on a timeout because "textSize" can not be determined instantly after the entity was created.
     // https://apidocs.overte.org/Entities.html#.textSize
     Script.setTimeout(() => {_adjustNametagSize(user_uuid)}, 100);
+  }
+
+  function _MonitorAvatarLoading(user) {
+    if(_hasAvatarLoaded(user)) {
+      // We will delay setting the nametag position
+      // as some details of the avatar may not be fully
+      // loaded at this point, and may be subject to change
+      // whilst it settles in.
+      print(`${user.displayName}${user.sessionUUID} avatar loaded; moving nametag after delay...`);
+      Script.setTimeout(() => {
+        print(`${user.displayName}${user.sessionUUID} ...avatar nametag moved`);
+        _adjustNametagPosition(user.sessionUUID);
+      }, 10000);
+    } else {
+      Script.setTimeout(() => {
+        _MonitorAvatarLoading(user);
+      }, 100);
+    }
   }
 
   function _adjustNametag(user_uuid) {
@@ -304,6 +320,14 @@
       }, 3000);
 
       user_nametags[user_uuid].rescaling = false;
+    }
+
+    const newAvatar = user.skeletonModelURL;
+    const oldAvatar = user_nametags[user_uuid].skeletonModelURL
+    if (newAvatar != oldAvatar) {
+      print(`${user.displayName}${user.sessionUUID} changed skeleton. Adjusting nametag..`)
+      _MonitorAvatarLoading(user);
+      user_nametags[user_uuid].skeletonModelURL = newAvatar;
     }
 
     const newName = user.displayName;
@@ -341,11 +365,10 @@
 
     if (!_hasAvatarLoaded(user)) {
       // Avatar has not finished loading yet;
-      //  we'll wait and reposition it when it's ready.
-      Script.setTimeout(() => {
-        _adjustNametagPosition(user_uuid);
-      }, 100);
-      return;
+      //  we'll reposition when it's ready.
+      print("Avatar is not loaded yet. Will retry...");
+      _MonitorAvatarLoading(user);
+      return
     }
 
     Entities.editEntity(user_nametags[user_uuid].text, {
