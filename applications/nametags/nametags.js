@@ -339,6 +339,8 @@
         text: display_name,
       });
       user_nametags[user_uuid].displayName = newName;
+      // Adjust nametag size to accomodate new displayName
+      _adjustNametagSize(user_uuid);
     }
   }
 
