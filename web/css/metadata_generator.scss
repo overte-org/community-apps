@@ -1,0 +1,159 @@
+// 
+//  metadata_generator.scss
+//
+//  Created by Armored Dragon, June 2025.
+//  Copyright 2025 Overte e.V.
+//
+//  Distributed under the Apache License, Version 2.0.
+//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
+// 
+
+body {
+	margin: 0;
+	display:flex;
+	flex-direction: column;
+
+	.center-align {
+		margin: auto;
+		width: 800px;
+
+		h1 {
+			text-align: center;
+		}
+
+		h2 {
+			margin-top: 4rem;
+		}
+
+		a {
+			font-weight: bold;
+		}
+
+		.important {
+			color: #6667AB;
+		}
+		.button-horizontal-container {
+			display:flex;
+			flex-direction: row;
+			margin-top: 1rem;
+
+			button,.continue-button {
+				margin-left: auto;
+				width: 100px;
+				height: 30px;
+				border: 0;
+				background-color: #6667AB;
+				color:white;
+				border-radius: 5px;
+				font-size: 18px;
+				cursor: pointer;
+			}
+		}
+
+		.code-block{
+			padding: 1rem;
+			box-sizing: border-box;
+			background-color: #1f1f1f;
+			border-radius: 10px;
+			margin-top: 1rem;
+
+			.javascript-comment {
+				color: #00d100;
+				font-style: italic;
+			}
+
+			textarea {
+				max-width: 100%;
+				width: 100%;
+				min-width: 100%;
+				box-sizing: border-box;
+				background-color: transparent;
+				color: white;
+				border: 0;
+			}
+		}
+
+		.form-entry {
+			.form-area {
+				input[type="text"] {
+					width: 100%;
+					height: 30px;
+					text-align: center;
+				}
+
+				.form-textinput,.form-textarea,.form-combobox{
+					display: flex;
+					flex-direction: row;
+					margin-bottom: 1rem;
+
+					label {
+						margin: auto 0 auto 0;
+						font-size: 20px;
+					}
+				}
+
+				.form-textinput {
+					input {
+						width: 50%;
+						margin-left: auto;
+						text-align: left;
+					}
+				}
+
+				.form-textarea {
+					display: flex;
+					flex-direction: row;
+					margin-bottom: 1rem;
+
+					textarea {
+						width: 50%;
+						min-width: 50%;
+						max-width: 50%;
+						margin-left: auto;
+						height: 100px;
+					}
+				}
+
+				.form-combobox {
+					select {
+						width: 50%;
+						margin-left: auto;
+						height: 35px;
+					}
+				}
+			}
+
+
+		}
+
+	}
+
+	.error {
+		color: red;
+	}
+	.error-input {
+		border: 1px solid red;
+	}
+
+	.submit-button {
+		height: 30px;
+		width: 100px;
+		background-color: #6667AB;
+		border-radius: 10px;
+		color: white;
+		border: 0;
+		font-size: 18px;
+		margin: auto;
+	}
+	.hidden {
+		display:none !important; 
+	}
+}
+
+@media (max-width: 900px) {
+    body {
+        .center-align {
+			width: 90%;
+		}
+    }
+}
