@@ -65,17 +65,17 @@
   const actionSet = [
     {
       text: textToggle(visible)+" Nametags",
- localClickFunc: "nametags.toggle",
- textColor: textColour(visible),
- priority: -5,
+      localClickFunc: "nametags.toggle",
+      textColor: textColour(visible),
+      priority: -5,
     },
     {
       text: textToggle(visibleSelf)+" My Nametag",
- localClickFunc: "nametags.toggleSelf",
- textColor: visible ?
- textColour(visibleSelf)
- : COLOUR_INACTIVE,
- priority: -4.9,
+      localClickFunc: "nametags.toggleSelf",
+      textColor: visible ?
+      textColour(visibleSelf)
+      : COLOUR_INACTIVE,
+      priority: -4.9,
     },
   ];
 
