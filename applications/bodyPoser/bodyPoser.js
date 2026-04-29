@@ -232,6 +232,14 @@ function LP_ResizeHandles() {
 	}
 }
 
+function LP_CleanupDeadHandles() {
+	for (const { id, properties: props } of MyAvatar.getAvatarEntitiesVariant()) {
+		if (props.name.startsWith("Body poser handle")) {
+			Entities.deleteEntity(id);
+		}
+	}
+}
+
 Script.scriptEnding.connect(() => {
 	LP_DeleteHandles();
 	ContextMenu.unregisterActionSet("bodyPoser");
@@ -408,3 +416,8 @@ Messages.messageReceived.connect((channel, msg, senderID, _localOnly) => {
 });
 
 MyAvatar.sensorToWorldScaleChanged.connect(LP_ResizeHandles);
+
+// sometimes public handles get saved onto an avatar
+// (like if someone crashes or quits while posing)
+// and then get stuck there, so delete any old ones
+Script.setTimeout(LP_CleanupDeadHandles, 1000);
