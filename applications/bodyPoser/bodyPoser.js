@@ -15,6 +15,18 @@ let settings = Settings.getValue("Body Poser", {
 });
 //let presets = Settings.getValue("Body Poser/Presets", {});
 
+const SENSOR_TO_WORLD_MATRIX_INDEX = 65534;
+const DESKTOP_HANDLE_SIZE = [0.15, 0.15, 0.15];
+const VR_HANDLE_SIZE = [0.05, 0.05, 0.8];
+
+function LP_HMDActive() {
+	return HMD.active;
+}
+
+function LP_HandleSize() {
+	return Vec3.multiply(LP_HMDActive() ? VR_HANDLE_SIZE : DESKTOP_HANDLE_SIZE, MyAvatar.sensorToWorldScale);
+}
+
 let hasHandles = false;
 let enabled = false;
 let handlesVisible = true;
@@ -22,21 +34,23 @@ let frozenAnimation = false;
 
 let animHandler;
 const jointHandleEntities = {};
-const jointHandleVisuals = {};
 
 function LP_AnimHandlerFunc(_dummy) {
 	const data = {};
+	const handleOffset = LP_HandleSize()[1] / (2 * MyAvatar.sensorToWorldScale);
+	const posOffset = Vec3.multiply(Vec3.subtract(MyAvatar.getWorldFeetPosition(), MyAvatar.position), 1 / MyAvatar.sensorToWorldScale);
 	for (const [name, handle] of Object.entries(jointHandleEntities)) {
 		let { localPosition, localRotation } = Entities.getEntityProperties(handle, ["localPosition", "localRotation"]);
 		const Y_180 = Quat.fromPitchYawRollDegrees(0, 180, 0);
 		localRotation = Quat.multiply(Y_180, localRotation);
 		localRotation = Quat.multiply(localRotation, Y_180);
 		if (name.includes("Foot")) {
-			localRotation = Quat.multiply(localRotation, Quat.fromPitchYawRollDegrees(45, 0, 180));
-		} else if (name.includes("Hand")) {
+			localRotation = Quat.multiply(localRotation, Quat.fromPitchYawRollDegrees(45, 0, 0));
+		}/* else if (name.includes("Hand")) {
 			localRotation = Quat.multiply(localRotation, Quat.fromPitchYawRollDegrees(90, name.includes("Left") ? 90 : -90, 0));
-		}
-		localPosition = { x: -localPosition.x, y: localPosition.y, z: -localPosition.z };
+		}*/
+		localPosition = Vec3.sum({ x: -localPosition.x, y: localPosition.y - handleOffset, z: -localPosition.z }, posOffset);
+		localPosition = Vec3.multiply(localPosition, MyAvatar.sensorToWorldScale);
 		data[name] = { position: localPosition, rotation: localRotation };
 	}
 
@@ -66,19 +80,19 @@ function LP_AnimHandlerFunc(_dummy) {
 		hipsRotation: data["Hips"]["rotation"],
 	};
 
-	const head = HMD.active || !settings.upperBodyHandles || !settings.headHandle ? {} : {
+	const head = LP_HMDActive() || !settings.upperBodyHandles || !settings.headHandle ? {} : {
 		headType: 0,
 		headPosition: data["Head"]["position"],
 		headRotation: data["Head"]["rotation"],
 	};
 
-	const chest = HMD.active || !settings.upperBodyHandles || !settings.spine2Handle ? {} : {
+	const chest = LP_HMDActive() || !settings.upperBodyHandles || !settings.spine2Handle ? {} : {
 		spine2Type: 0,
 		spine2Position: data["Spine2"]["position"],
 		spine2Rotation: data["Spine2"]["rotation"],
 	};
 
-	const upperBody = HMD.active || !settings.upperBodyHandles ? {} : {
+	const upperBody = LP_HMDActive() || !settings.upperBodyHandles ? {} : {
 		leftHandType: 0,
 		leftHandIKPositionVar: "leftHandPosition",
 		leftHandIKRotationVar: "leftHandRotation",
@@ -104,7 +118,12 @@ function LP_AnimHandlerFunc(_dummy) {
 }
 
 function LP_CreateHandles(jointNames) {
-	const avatarScale = MyAvatar.scale;
+	for (const { index } of MyAvatar.getSkeleton()) {
+		MyAvatar.setJointData(index, MyAvatar.getDefaultJointRotation(index), MyAvatar.getDefaultJointTranslation(index));
+	}
+
+	// HACK because setJointData doesn't apply instantly
+	Script.setTimeout(() => {
 
 	for (const joint of jointNames) {
 		const jointIndex = MyAvatar.getJointIndex(joint);
@@ -117,25 +136,38 @@ function LP_CreateHandles(jointNames) {
 			color = [0, 0, 255];
 		}
 
-		const handleSize = Vec3.multiply(HMD.active ? [0.05, 0.05, 0.8] : [0.15, 0.15, 0.15], avatarScale);
+		const handleSize = LP_HandleSize();
+
+		const globalJointPos = Entities.localToWorldPosition([0, 0, 0], MyAvatar.sessionUUID, jointIndex, true);
+		const globalJointRotBasis = joint.includes("Foot") ? Quat.fromPitchYawRollDegrees(45, 180, 0) : Quat.fromPitchYawRollDegrees(0, 180, 0);
+		const globalJointRot = Entities.localToWorldRotation(globalJointRotBasis, MyAvatar.sessionUUID, jointIndex, true);
+
+		const localJointPos = Entities.worldToLocalPosition(globalJointPos, MyAvatar.sessionUUID, SENSOR_TO_WORLD_MATRIX_INDEX, false);
+		const localJointRot = Entities.worldToLocalRotation(globalJointRot, MyAvatar.sessionUUID, SENSOR_TO_WORLD_MATRIX_INDEX, false);
 
 		jointHandleEntities[joint] = Entities.addEntity({
-			type: "Box",
+			type: "Shape",
 			name: `Body poser handle (${joint})`,
+			shape: LP_HMDActive() ? "Cube" : "Cone",
 			parentID: MyAvatar.sessionUUID,
-			localPosition: MyAvatar.getAbsoluteDefaultJointTranslationInObjectFrame(jointIndex),
+			parentJointIndex: SENSOR_TO_WORLD_MATRIX_INDEX,
+			localPosition: localJointPos,
+			localRotation: localJointRot,
 			localDimensions: handleSize,
 			collisionless: true,
 			alpha: 0.5,
 			color: color,
 			unlit: true,
 			visible: handlesVisible,
-			grab: {grabbable: handlesVisible},
+			grab: { grabbable: handlesVisible },
+			ignorePickIntersection: !handlesVisible,
 			renderLayer: "front",
+			primitiveMode: "lines",
+			registrationPoint: [0.5, 0, 0.5],
 		}, settings.public ? "avatar" : "local");
 	}
 
-	if (!HMD.active && settings.upperBodyHandles && settings.lowerBodyHandles) {
+	if (!LP_HMDActive() && settings.upperBodyHandles && settings.lowerBodyHandles) {
 		frozenAnimation = true;
 
 		for (const role of MyAvatar.getAnimationRoles()) {
@@ -143,8 +175,11 @@ function LP_CreateHandles(jointNames) {
 		}
 	}
 
+	MyAvatar.clearJointsData();
 	animHandler = MyAvatar.addAnimationStateHandler(LP_AnimHandlerFunc, null);
 	hasHandles = true;
+
+	}, 100);
 }
 
 function LP_DeleteHandles() {
@@ -163,22 +198,17 @@ function LP_DeleteHandles() {
 		Entities.deleteEntity(jointHandleEntities[joint]);
 		delete jointHandleEntities[joint];
 	}
-
-	for (const joint in jointHandleVisuals) {
-		Entities.deleteEntity(jointHandleVisuals[joint]);
-		delete jointHandleVisuals[joint];
-	}
 }
 
 function LP_HideHandles() {
 	if (!hasHandles) { return; }
 
 	for (const handle of Object.values(jointHandleEntities)) {
-		Entities.editEntity(handle, {visible: false, grab: {grabbable:false}});
-	}
-
-	for (const handle of Object.values(jointHandleVisuals)) {
-		Entities.editEntity(handle, {visible: false});
+		Entities.editEntity(handle, {
+			visible: false,
+			grab: { grabbable: false },
+			ignorePickIntersection: true,
+		});
 	}
 }
 
@@ -186,11 +216,19 @@ function LP_ShowHandles() {
 	if (!hasHandles) { return; }
 
 	for (const handle of Object.values(jointHandleEntities)) {
-		Entities.editEntity(handle, {visible: true, grab: {grabbable:true}});
+		Entities.editEntity(handle, {
+			visible: true,
+			grab: { grabbable: true },
+			ignorePickIntersection: false,
+		});
 	}
+}
 
-	for (const handle of Object.values(jointHandleVisuals)) {
-		Entities.editEntity(handle, {visible: true});
+function LP_ResizeHandles() {
+	const handleSize = LP_HandleSize();
+
+	for (const handle of Object.values(jointHandleEntities)) {
+		Entities.editEntity(handle, { localDimensions: handleSize });
 	}
 }
 
@@ -247,17 +285,17 @@ const settingsActions = {
 	upperBody: {
 		localClickFunc: "bodyPoser.setting.toggleUpperBody",
 		text: settings.upperBodyHandles ? "[X] Upper body" : "[  ] Upper body",
-		textColor: HMD.active ? [128, 128, 128] : [255, 240, 0],
+		textColor: LP_HMDActive() ? [128, 128, 128] : [255, 240, 0],
 	},
 	chest: {
 		localClickFunc: "bodyPoser.setting.toggleSpine2",
 		text: settings.spine2Handle ? "[X] Chest handle" : "[  ] Chest handle",
-		textColor: HMD.active ? [128, 128, 128] : [255, 255, 255],
+		textColor: LP_HMDActive() ? [128, 128, 128] : [255, 255, 255],
 	},
 	head: {
 		localClickFunc: "bodyPoser.setting.toggleHead",
 		text: settings.headHandle ? "[X] Head handle" : "[  ] Head handle",
-		textColor: HMD.active ? [128, 128, 128] : [255, 255, 255],
+		textColor: LP_HMDActive() ? [128, 128, 128] : [255, 255, 255],
 	},
 };
 
@@ -274,10 +312,21 @@ ContextMenu.registerActionSet("bodyPoser.settings", settingsActions, undefined, 
 //ContextMenu.registerActionSet("bodyPoser.presets", [], undefined, "Body Poser/Presets");
 
 Messages.messageReceived.connect((channel, msg, senderID, _localOnly) => {
-	if (channel !== ContextMenu.CLICK_FUNC_CHANNEL) { return; }
-	if (senderID !== MyAvatar.sessionUUID) { return; }
+	if (channel !== ContextMenu.CLICK_FUNC_CHANNEL && channel !== "Hifi-Object-Manipulation") { return; }
 
 	const data = JSON.parse(msg);
+
+	if (channel === "Hifi-Object-Manipulation") {
+		for (const handle of Object.values(jointHandleEntities)) {
+			if (handle === data.grabbedEntity) {
+				LP_ResizeHandles();
+			}
+		}
+
+		return;
+	}
+
+	if (senderID !== MyAvatar.sessionUUID) { return; }
 
 	if (data.func === "bodyPoser.toggleHandles") {
 		handlesVisible = !handlesVisible;
@@ -299,7 +348,7 @@ Messages.messageReceived.connect((channel, msg, senderID, _localOnly) => {
 					handles.push("Hips");
 				}
 			}
-			if (settings.upperBodyHandles && !HMD.active) {
+			if (settings.upperBodyHandles && !LP_HMDActive()) {
 				handles.push("LeftHand", "RightHand");
 
 				if (settings.spine2Handle) {
@@ -357,3 +406,5 @@ Messages.messageReceived.connect((channel, msg, senderID, _localOnly) => {
 		Settings.setValue("Body Poser", settings);
 	}
 });
+
+MyAvatar.sensorToWorldScaleChanged.connect(LP_ResizeHandles);
