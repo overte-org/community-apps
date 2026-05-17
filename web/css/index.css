@@ -1,0 +1,52 @@
+@font-face {
+    font-family: FiraSans-SemiBold;
+    src: url(../fonts/FiraSans-SemiBold.ttf);
+}
+@font-face {
+    font-family: FiraSans-Regular;
+    src: url(../fonts/FiraSans-Regular.ttf);
+}
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: FiraSans-Regular;
+}
+body .center-align {
+  margin: auto;
+  width: 800px;
+}
+body .center-align h1 {
+  font-family: FiraSans-SemiBold;
+  text-align: center;
+}
+body .center-align h2 {
+  font-family: FiraSans-SemiBold;
+  margin-top: 4rem;
+}
+body .center-align ol li {
+  margin-bottom: 1rem;
+}
+body .center-align a {
+  font-weight: bold;
+}
+body .center-align .important {
+  color: #0052bb;
+}
+body .center-align .code-block {
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+body .center-align .code-block .javascript-comment {
+  color: #00d100;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  body .center-align {
+    width: 90%;
+  }
+}
