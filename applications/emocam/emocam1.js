@@ -17,7 +17,7 @@ var webWindow;
     var jsMainFileName = "emocam1.js";
     var ROOT = Script.resolvePath('').split(jsMainFileName)[0];
     var channel = "org.overte.application.emocam";
-
+    var avatarList = {};
     var button;
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
     var EMOTE_APP_QML_BASE = "view.qml";
@@ -107,9 +107,15 @@ var webWindow;
     }, propList);
 
     function onWebEventReceived(event) {
-
-        var parsed = JSON.parse(event);
         if (parsed.channel === channel) {
+                  //TODO: This should work?
+            if (parsed.type === "preset"){
+                Settings.setValue(parsed.name, parsed.data);
+            }
+                  ////TODO: This should work?
+            if (parsed.type === "preset_list"){             
+                Settings.setValue(parsed.name, parsed.data);
+            }  
             if (parsed.type === "tracking" || parsed.type === "trackingmotion") {
                 var emotion = parsed.data;
                 MyAvatar.hasScriptedBlendshapes = true;
