@@ -1,56 +1,97 @@
 <!--
 //  index.html
 //
-//  Created by Keb Helion, February 2020.
-//  Copyright 2020 Vircadia contributors.
-//  Copyright 2022 Overte e.V.
+//  Created by Armored Dragon, June 2025.
+//  Copyright 2025 Overte e.V.
 //
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 -->
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
-		<link href="css/styles.css" rel="stylesheet">
-	</head>
-	<body>
-		<div id="wrapper">
-			<div id="content">
-				<h1>Overte Community Applications Repository</h1>
-				<p>This repository stores optional <b>tablet applications</b> provided by the contributions of community members. 
-				If you have created an application for Overte and want to offer it to the community, this is where you can do it.</p>
+<html lang="en">
 
-				<h2>Before going further:</h2><ol>
-					<li>If your application is a <b>core feature</b> that you think should be <b>installed by default for all Overte users</b>, you should instead consider making your contribution directly in the <b>Overte code repository</b>. See the <b><a href = 'https://github.com/overte-org/overte'>Overte</a></b> repository and contact the core team.</li><br>
-					<li>If your application is <b>dependent on an external server or service</b> (if it has to deal in any way with servers other than a Overte Domain or Metaverse API), then this repository is not where you should publish your application. It will have to be published to a different source, like the <b>Marketplace</b> (when it is created) or another web site.</li>
-				</ol>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Overte Community Applications Repository</title>
+	<link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+	<div class="center-align">
+		<h1>Overte Community Applications Repository</h1>
+		<p>This repository stores optional applications provided by the contributions of community members. If
+			you have created an application for Overte and want to offer it to the community, this is where you can do
+			it.</p>
+
+		<h2>Before going further:</h2>
+		<ol>
+			<li>If your application is a <b>core feature</b> that should be <b>installed by default for all Overte
+					users.</b>
+				Consider contributing your work directly into the Overte repository.
+				See the <a href="https://github.com/overte-org/overte">Overte repository</a>.</li>
+
+			<li>If your application is dependent on an external server or service outside of Overte, then it should not
+				be contributed to this repository.
+				Consider hosting your own repository or webserver.
+				<!-- TODO: Guide for hosting your own webserver -->
+				<!-- TODO: Guide for hosting your own repository -->
+			</li>
+		</ol>
+
+		<h2>Conditions for acceptance:</h2>
+		<ol>
+			<li>
+				You must include a license reference in your files to make your script fully open source:
+				<div class="code-block">
+					<span class="javascript-comment">// Distributed under the Apache License, Version 2.0.</span>
+					<br><span class="javascript-comment">// See the accompanying file LICENSE or
+						http://www.apache.org/licenses/LICENSE-2.0.html</span>
+				</div>
+			</li>
+			<li>
+				Avoid <b>spaces</b> and <b>special characters</b> in your <b>folders</b> and <b>file names</b>.
 				<br>
-				<h2>Conditions for acceptance:</h2><ol>
-				<li>You must include a <b>license</b> reference in your files to make your script fully open source:<br>
-				<font class = 'greencommented' >//  Distributed under the Apache License, Version 2.0.<br>
-				//  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html</font><br>
-				</li><br>
-				<li>Avoid <b>spaces</b> and <b>special characters</b> in your <b>folders</b> and <b>file names</b>.<br><font class = 'greencommented' >(Stay with: "<b>a-z</b>", "<b>A-Z</b>", "<b>0-9</b>", "<b>-</b>", "<b>_</b>", "<b>.</b>")</font></li><br>
-
-				<li>Add your application in a <b>folder</b> under the "<b><a href = 'https://github.com/overte-org/community-apps/tree/master/applications'>applications</a></b>" directory.<br>
-				<font class = 'greencommented' >(Your main js file and your icon must be directly in that folder)</font></li><br>
-
-				<li>You must add your application to the "<b>metadata.js</b>" file (in the "<b><a href = 'https://github.com/overte-org/community-apps/tree/master/applications'>applications</a></b>" directory) by generating a new one using this tool: <b><a href='metadata_js_generator.html'>Metadata Generator</a></b></li>
-				</ol>
-
-				<p><b>Submit a "<u>Pull Request</u>" to add your "<u>application folder</u>" and the new "<u>metadata.js</u>" file.</b><br>
-				<font class = 'greencommented' >(If you are not comfortable with these procedures, contact <b>the core members</b> on Overte Discord.)</font></p>
-
-
+				<span class="important">(Stay with: "a-z", "A-Z", "0-9", "-", "_", ".")</span>
+			</li>
+			<li>
+				Add your application in a folder under the <a
+					href="https://github.com/overte-org/community-apps/tree/master/applications">/applications</a>
+				directory.
 				<br>
-				<h2>Guidelines for the code reviewer:</h2><ol>
-				<li>Test the applications in <b>Overte</b>.</li><br>
-				<li>Make sure that the <b>JSON</b> and <b>Javascript</b> contained in "<b>metadata.js</b>" are <u>valid</u> before accepting the pull request!<b> This will affect the production "More" application immediately for all users.</b></li><br>
-				<li>Test the "<b>More...</b>" application in <b>Overte</b>.</li>
-				</ol>
+				<span class="important">Your main JavaScript file and your icon <b>must</b> be located in the root of
+					your application folder.</span>
+			</li>
+			<li>You <b>must</b> add your application to the <a
+					href="https://github.com/overte-org/community-apps/blob/master/applications/metadata.json">metadata.json</a>
+				file.
+				You can generate a metadata.json file automatically by using the <a
+					href="https://more.overte.org/web/metadata_generator.html">Metadata Generator</a> web
+				tool.
+			</li>
+		</ol>
+		<p>
+			Once you have checked that you are in compliance, you can submit a <a
+				href="https://github.com/overte-org/overte/compare">Pull Request</a> with your
+			changes.
+		</p>
 
-			</div>
-		</div>	
-	</body>
+		<h2>Guidelines for the code reviewer:</h2>
+		<p>
+			This repository is used in production. Making changes to this repository <u>will affect everyone using the
+				<b>MORE</b> app in real time</u>.
+			It is important to express caution, and to be thorough with your review.
+		</p>
+		<ol>
+			<li>Test the application in <b>Overte</b>.</li>
+			<li>Ensure that metadata.json is valid.</li>
+			<li>Ensure the application works as expected.</li>
+			<li>Test the <b>MORE</b> application <u>before</u> merging the pull request, <u>and after</u> merging the
+				pull
+				request.
+			</li>
+		</ol>
+	</div>
+</body>
+
 </html>
