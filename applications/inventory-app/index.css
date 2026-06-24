@@ -1,0 +1,175 @@
+body {
+  background-color: black;
+  display: flex;
+  margin: 0;
+  flex-direction: column;
+  height: 100vh;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+body .header {
+  width: 100%;
+  height: 40px;
+}
+body .header button {
+  background-color: white;
+  width: 75px;
+  height: 100%;
+  color: black;
+  padding: 0.25rem;
+  box-sizing: border-box;
+  transition: width ease-in-out 0.1s;
+}
+body .header button .icon-container {
+  width: 100%;
+  height: 100%;
+}
+body .header button .icon-container img {
+  width: auto;
+  height: 100%;
+}
+body .header button.active {
+  background-color: #6667ab;
+  width: 100px;
+}
+body .header button.active img {
+  filter: invert(1);
+}
+body .body {
+  width: 100%;
+  flex-grow: 1;
+  background-color: #111111;
+}
+body .body .page {
+  padding: 0.5rem;
+}
+body .body .page .directory {
+  color: white;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  width: 100%;
+}
+body .body .page .directory .item {
+  padding: 0.25rem;
+  box-sizing: border-box;
+  color: white;
+  background-color: #4d4d4d;
+  margin-right: 0.2rem;
+  border-radius: 2px;
+  border-bottom: 1px solid white;
+  display: flex;
+}
+body .body .page .item-listing {
+  background-color: #4d4d4d;
+  border-radius: 5px;
+  min-height: 40px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  transition: background-color ease-in-out 0.1s;
+  cursor: pointer;
+}
+body .body .page .item-listing .icon {
+  height: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+  display: flex;
+  width: 50px;
+}
+body .body .page .item-listing .icon img {
+  height: 30px;
+  margin: auto;
+}
+body .body .page .item-listing .title {
+  flex-grow: 1;
+  margin: auto auto auto 10px;
+  color: white;
+  padding-left: 10px;
+}
+body .body .page .item-listing .action-buttons {
+  height: 40px;
+  width: 40px;
+}
+body .body .page .item-listing .action-buttons button {
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+}
+body .body .page .item-listing .action-buttons button img {
+  width: 100%;
+  height: 100%;
+}
+body .body .page .item-listing.active {
+  border-radius: 5px 5px 0 0;
+}
+body .body .page .item-settings,
+body .body .page .item-share-info {
+  width: 100%;
+  height: 40px;
+  background-color: #313131;
+  margin-bottom: 0.25rem;
+  border-radius: 0 0 5px 5px;
+  display: flex;
+  flex-direction: row;
+}
+body .body .page .item-settings button,
+body .body .page .item-share-info button {
+  width: 120px;
+  height: 30px;
+  margin: auto;
+}
+body .body .page .item-share-info {
+  display: flex;
+  flex-direction: column;
+  color: white;
+  padding: 1rem;
+  box-sizing: border-box;
+  height: inherit;
+}
+body .body .page .item-share-info .value {
+  margin-left: 0.5rem;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+body .body .page .item-share-info .horizontal-button-layout {
+  display: flex;
+}
+body .body .page .item-share-info button.good {
+  background-color: green;
+  color: white;
+}
+body .body .page .folder {
+  background-color: #17415e;
+}
+body .body .page .item-listing:not(.share):hover {
+  background-color: #313131;
+}
+body .footer {
+  width: 100%;
+  height: 40px;
+  color: white;
+  text-align: center;
+  display: flex;
+}
+body .footer span {
+  margin: auto;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  transition: filter ease-in-out 0.1s;
+}
+
+button:hover {
+  filter: brightness(60%);
+}
+
+.hidden {
+  display: none !important;
+}
