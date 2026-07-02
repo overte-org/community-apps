@@ -191,6 +191,7 @@ class Graph {
         this.nodeAddedEvent.emit(this.id, id); // TODO: Only emit if successfully added
         this.updateData();
         this.graphUpdatedEvent.emit(this.id, new Set([id]));
+        return id;
     }
 
     /**

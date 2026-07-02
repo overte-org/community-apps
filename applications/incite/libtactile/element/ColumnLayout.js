@@ -80,10 +80,24 @@ class ColumnLayout extends Layout {
         const innerWidth = finalWidth - this.margins.left - this.margins.right;
         const innerHeight = finalHeight - this.margins.top - this.margins.bottom;
 
+        const visibleElements = this.visibleElements;
+
+        // Count up each element's minWidth value to find the minimum space required purely for content
+        const minimumHeightsTotal = visibleElements.reduce((sum, element) => sum + element.minHeight, 0);
+
+        // Remaining space to distribute to elements in addition to their minimum size
+        const remainingHeight = innerHeight - minimumHeightsTotal - ((visibleElements.length-1)*this.spacing);
+
+        // Count up the sum of all element's potential for expansion.
+        const totalExpansionHeight = visibleElements.reduce((sum, element) => {
+            element.cache.preferredExpansionHeight = element.cache.measuredHeight - element.minHeight;
+            sum += element.cache.preferredExpansionHeight;
+            return sum;
+        }, 0);
+
         const scaleX = innerWidth / innerMeasuredWidth;
         const scaleY = innerHeight / innerMeasuredHeight;
 
-        const visibleElements = this.visibleElements;
         const numElements = visibleElements.length;
 
         const contentWidth = innerWidth;
@@ -104,8 +118,12 @@ class ColumnLayout extends Layout {
 
         console.log("Calculating positions...");
         this.visibleElements.forEach((element, index) => {
-            const cellWidth = contentWidth;
-            const cellHeight = genericCellHeight;
+            const elementExpansionHeight = (element.cache.preferredExpansionHeight / totalExpansionHeight) * remainingHeight;
+            console.log("prefExpansionHeight:", element.cache.preferredExpansionHeight, "totalExpansionHeight:", totalExpansionHeight, "remainingHeight:", remainingHeight);
+            const cellWidth = contentWidth; // Always the same width given as the restriction.
+            const cellHeight = element.minHeight + elementExpansionHeight;
+            console.log("..CellWidth:", cellWidth);
+            console.log("..CellHeight:", cellHeight, "minHeight:", element.minHeight, "expansionHeight:", elementExpansionHeight);
 
             if (index != 0) currentY += this.spacing;
 

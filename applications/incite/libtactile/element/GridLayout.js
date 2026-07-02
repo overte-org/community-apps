@@ -93,11 +93,17 @@ class GridLayout extends Layout{
 
         });
 
-        const totalWidth = this.cache.maxColumnWidths.reduce((total, width) => total + width, 0) + (this.spacing * (columns - 1) + this.margins.left + this.margins.right);
+        const idealWidth = this.cache.maxColumnWidths.reduce((total, width) => total + width, 0) + (this.spacing * (columns - 1) + this.margins.left + this.margins.right);
 
-        const totalHeight = this.cache.maxRowHeights.reduce((total, height) => total + height, 0) + (this.spacing * (rows - 1) + this.margins.top + this.margins.bottom);
+        const idealHeight = this.cache.maxRowHeights.reduce((total, height) => total + height, 0) + (this.spacing * (rows - 1) + this.margins.top + this.margins.bottom);
 
         console.log("... Measured!");
+
+        console.log(`width: ${idealWidth}, height: ${idealHeight}`);
+
+        const totalWidth = Math.max(this.minWidth, Math.min(Math.max(idealWidth, Number.isFinite(this.preferredWidth) ? this.preferredWidth : 0), this.maxWidth));
+
+        const totalHeight = Math.max(this.minWidth, Math.min(Math.max(idealHeight, Number.isFinite(this.preferredHeight) ? this.preferredHeight : 0), this.maxHeight));
 
         console.log(`width: ${totalWidth}, height: ${totalHeight}`);
 

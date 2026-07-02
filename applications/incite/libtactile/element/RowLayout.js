@@ -85,10 +85,24 @@ class RowLayout extends Layout {
         const innerWidth = finalWidth - this.margins.left - this.margins.right;
         const innerHeight = finalHeight - this.margins.top - this.margins.bottom;
 
+        const visibleElements = this.visibleElements;
+
+        // Count up each element's minWidth value to find the minimum space required purely for content
+        const minimumWidthsTotal = visibleElements.reduce((sum, element) => sum + element.minWidth, 0);
+
+        // Remaining space to distribute to elements in addition to their minimum size
+        const remainingWidth = innerWidth - minimumWidthsTotal - ((visibleElements.length-1)*this.spacing);
+
+        // Count up the sum of all element's potential for expansion.
+        const totalExpansionWidth = visibleElements.reduce((sum, element) => {
+            element.cache.preferredExpansionWidth = element.cache.measuredWidth - element.minWidth;
+            sum += element.cache.preferredExpansionWidth;
+            return sum;
+        }, 0);
+
         const scaleX = innerWidth / innerMeasuredWidth;
         const scaleY = innerHeight / innerMeasuredHeight;
 
-        const visibleElements = this.visibleElements;
         const numElements = visibleElements.length;
 
         const contentWidth = (innerWidth - (this.spacing * (numElements-1)));
@@ -109,8 +123,9 @@ class RowLayout extends Layout {
 
         console.log("Calculating positions...");
         visibleElements.forEach((element, index) => {
-            const cellWidth = genericCellWidth;
-            const cellHeight = contentHeight;
+            const elementExpansionWidth = (element.cache.preferredExpansionWidth / totalExpansionWidth) * remainingWidth;
+            const cellWidth = element.minWidth + elementExpansionWidth;
+            const cellHeight = contentHeight; // Always the same width given as the restriction.
 
             if (index != 0) currentX += this.spacing;
 

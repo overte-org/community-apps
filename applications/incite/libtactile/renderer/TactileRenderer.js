@@ -244,6 +244,10 @@ class TactileRenderer extends BaseRenderer {
                 friction: 0.5,
                 density: 1000,
                 dynamic: false,
+                grab: {
+                    grabbable: false,
+                    equipable: false,
+                }
             },
             GridElement: {
                 type: "Grid",
