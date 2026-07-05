@@ -217,7 +217,7 @@ class TactileRenderer extends BaseRenderer {
      * @param {Object} element
      */
     entityProperties(element) {
-        console.log("entityProperties - start");
+        console.log(element.id, "entityProperties - start");
         const DEFAULT_ENTITY_PROPERTIES = {
             All: {
                 description: "",
@@ -287,14 +287,14 @@ class TactileRenderer extends BaseRenderer {
                             unlit: element.unlit,
         }
 
-        console.log("entityProperties - switch time!");
+        console.log(element.id, "entityProperties - switch time!");
 
-        console.log("element.type is", element.type);
+        console.log(element.id, "element.type is", element.type);
 
         // Add variant-specific properties
         switch(element.type) {
             case 'TextElement':
-                console.log("entityProperties - TextElement!");
+                console.log(element.id, "entityProperties - TextElement!");
                 properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.TextElement }
                 properties.text = element.text;
                 properties.backgroundColor = element.color;
@@ -304,12 +304,12 @@ class TactileRenderer extends BaseRenderer {
                 properties.lineHeight = element.lineHeight;
                 break;
             case 'GridElement':
-                console.log("entityProperties - GridElement!");
+                console.log(element.id, "entityProperties - GridElement!");
                 properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.GridElement }
 
                 break;
             case 'LineElement':
-                console.log("entityProperties - LineElement!");
+                console.log(element.id, "entityProperties - LineElement!");
                 properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.LineElement };
                 properties.linePoints = element.linePoints.map(point => {
                     return {
@@ -326,7 +326,7 @@ class TactileRenderer extends BaseRenderer {
                 properties.faceCamera = element.faceCamera;
                 break;
             default:
-                console.log("entityProperties - default!")
+                console.log(element.id, "entityProperties - default!")
                 properties.type = "Box";
                 properties.color = element.color;
                 properties.alpha = element.alpha;
@@ -356,7 +356,40 @@ class TactileRenderer extends BaseRenderer {
         if (entityId) {
             this.updateEntity(element, isRoot);
         } else {
-            this.createEntity(element, isRoot); // TODO: IsRoot? need to check if it's a TactileDocument
+            const entityID = this.createEntity(element, isRoot); // TODO: IsRoot? need to check if it's a TactileDocument
+
+            // Setup interactive callbacks
+
+            // ButtonElement
+            // TODO: Disconnect when element is no longer being rendered
+            if (element instanceof TactileElements.ButtonElement) {
+                element.elementPressed.connect((documentId, elementId) => {
+                    console.log("renderElement button elementPressed");
+                    const document = documentManager.getDocument(documentId);
+                    const buttonElement = document.getElement(elementId);
+                    buttonElement.color = buttonElement.buttonColorPressed;
+                    buttonElement.zDepth = buttonElement.buttonPressDepth;
+                });
+                element.elementReleased.connect((documentId, elementId) => {
+                    console.log("renderElement button elementReleased");
+                    const document = documentManager.getDocument(documentId);
+                    const buttonElement = document.getElement(elementId);
+                    buttonElement.color = buttonElement.buttonColorHover;
+                    buttonElement.zDepth = 0.02; // TODO: This should not be hardcoded
+                });
+                element.elementHoverStarted.connect((documentId, elementId) => {
+                    console.log("renderElement button elementHoverStarted");
+                    const document = documentManager.getDocument(documentId);
+                    const buttonElement = document.getElement(elementId);
+                    buttonElement.color = buttonElement.buttonColorHover;
+                });
+                element.elementHoverStopped.connect((documentId, elementId) => {
+                    console.log("renderElement button elementHoverStopped");
+                    const document = documentManager.getDocument(documentId);
+                    const buttonElement = document.getElement(elementId);
+                    buttonElement.color = buttonElement.buttonColorReleased;
+                });
+            }
         }
     }
 

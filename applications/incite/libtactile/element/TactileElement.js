@@ -121,8 +121,16 @@ class TactileElement {
         return 'TactileElement';
     }
 
+    set preferredWidth(width) {
+        this.#preferredWidth = width;
+    }
+
     get preferredWidth() {
         return this.#cache?.totalWidth ?? this.#preferredWidth;
+    }
+
+    set preferredHeight(height) {
+        this.#preferredHeight = height;
     }
 
     get preferredHeight() {

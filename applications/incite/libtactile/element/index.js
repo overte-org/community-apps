@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const ButtonElement = require('./ButtonElement.js');
 const ColumnLayout = require('./ColumnLayout.js');
 const FloatingLayout = require('./FloatingLayout.js');
 const GridElement = require('./GridElement.js');
@@ -16,6 +17,7 @@ const TactileElement = require('./TactileElement.js');
 const TextElement = require('./TextElement.js');
 
 module.exports = {
+    ButtonElement,
     ColumnLayout,
     FloatingLayout,
     GridElement,
