@@ -89,6 +89,12 @@ function registerContextMenu() {
             textColor: "white",
             priority: -4.8,
         },
+        {
+            text: "Execute Graph",
+            localClickFunc: "incite.execute_graph",
+            textColor: "white",
+            priority: -4.7,
+        },
     ];
 
     ContextMenu.registerActionSet("incite", [{
@@ -141,6 +147,16 @@ function deleteGraph() {
         console.log("Could not delete graph; no such graph exists.");
     }
 
+}
+
+function executeGraph() {
+    if (incite.InciteStore.graphManager.graphs.length > 0) {
+        const graph = incite.InciteStore.graphManager.graphs[0];
+        graph.execute();
+        console.log("Executed graph");
+    } else {
+        console.log("Could not execute graph; no such graph exists.");
+    }
 }
 
 function addNodeToGraph(type) {
@@ -202,6 +218,10 @@ if (isOverte) {
                         case 'incite.delete_graph':
                             console.log("Deleting graph...");
                             deleteGraph();
+                            break;
+                        case 'incite.execute_graph':
+                            console.log("Executing graph...");
+                            executeGraph();
                             break;
                     }
                 } else {
