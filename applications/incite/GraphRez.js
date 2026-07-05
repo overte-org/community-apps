@@ -375,14 +375,13 @@ class GraphRez {
             position: this.position,
         });
 
-        const options = {
+        const layout = new tactile.element.FloatingLayout({
             rows: 4,
             flowDirection: 'column',
             spacing: 0.1,
             margins: { top: 0.1, right: 0.1, bottom: 0.1, left: 0.1 },
-        };
+        });
 
-        const layout = new tactile.element.FloatingLayout(options);
         const grid = new tactile.element.GridElement({
             preferredWidth: Infinity, preferredHeight: Infinity,
         });
