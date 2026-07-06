@@ -220,6 +220,9 @@ class Graph {
         const id = this.#connections.push(connection) - 1;
         this.#connectionsById.set(id, connection);
 
+        this.populateConnections();
+        this.#executionOrder = this.calculateExecutionOrder();
+
         this.connectionAddedEvent.emit(this.id, id);
 
         this.#valid = this.validateGraph();

@@ -157,6 +157,7 @@ class GraphRez {
                         port: index,
                     }
                 };
+                console.log("newConnection:", JSON.stringify(newConnection));
                 if (!this.#graph.validateConnection(newConnection)) {
                     console.warn("Connection is not valid; Ports are not compatable ");
                     return;

@@ -44,7 +44,7 @@ class Number extends Node {
     }
 
     execute() {
-        this.outputNumber = this.data.value;
+        this.outputNumber = this.outputNumber;
     }
 }
 

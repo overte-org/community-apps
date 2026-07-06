@@ -102,7 +102,7 @@ class Node {
         try {
             console.log("Execute", this.type);
             for(const port of this.inputs) {
-                console.log("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port");
+                console.log("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port"); // TODO: N value = no port; Should make more useful error messages.
             }
             this.execute();
             this.executed = true;
