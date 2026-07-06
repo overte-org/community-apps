@@ -179,6 +179,8 @@ if (isOverte) {
         ContextMenu.unregisterActionSet("incite.menu");
         ContextMenu.unregisterActionSet("incite");
 
+         Controller.keyPressEvent.disconnect(handleKeyPress);
+
         deleteGraph();
 
         console.log("Incite app has finished.");
@@ -231,6 +233,13 @@ if (isOverte) {
         };
     };
     Messages.messageReceived.connect(handleMessage);
+
+    function handleKeyPress(event) {
+        if (event.text === "e" && event.isControl && !event.isMeta && !event.isShifted && !event.isAlt) {
+            executeGraph();
+        }
+    }
+    Controller.keyPressEvent.connect(handleKeyPress);
 
 
 }
