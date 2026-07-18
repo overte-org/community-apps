@@ -374,6 +374,7 @@ class GraphRez {
     get DEFAULT_DOCUMENT() {
         const renderer = new tactile.renderer.TactileRenderer({ // TODO: Only attach renderer when we are ready to render
             position: this.position,
+            renderContext: "local"
         });
 
         const layout = new tactile.element.FloatingLayout({

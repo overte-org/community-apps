@@ -16,6 +16,7 @@ const documentManager = require("../TactileStore.js").documentManager;
 
 /**
  * Render TactileElements to an Overte world
+ * @property {string} renderContext
  * @property {string} rootEntityId
  * @property {array<string>} entities
  * @property {number} scale - The scale at which to render elements
@@ -41,6 +42,7 @@ class TactileRenderer extends BaseRenderer {
     constructor(options = {}) {
         super(options);
         //this.element = options.element ?? null;
+        this.renderContext = options.renderContext ?? "local";
         this.#rootEntityId = options.rootEntityId ?? null;
         this.entities = options.entities ?? [];
         this.scale = options.scale ?? 1;
@@ -356,7 +358,7 @@ class TactileRenderer extends BaseRenderer {
         if (entityId) {
             this.updateEntity(element, isRoot);
         } else {
-            const entityID = this.createEntity(element, isRoot); // TODO: IsRoot? need to check if it's a TactileDocument
+            const entityID = this.createEntity(element, isRoot, this.renderContext); // TODO: IsRoot? need to check if it's a TactileDocument
 
             // Setup interactive callbacks
 
