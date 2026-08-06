@@ -51,6 +51,32 @@ class BaseRenderer {
     }
 
     /**
+     * Called when an element is in need of removal.
+     * The renderer does not immediately remove the element,
+     * it will render the change on its next pass
+     */
+    onElementRemoved(document, element) {
+        console.log("onElementRemoved", document.id, element.id)
+        // TODO: Confirm it is an element
+
+        // Store the element and document tree in renderTask
+        // TODO: Do we want to store IDs instead of objects here? Documents do not yet have one.
+        const renderTask = {
+            element: element,
+            document: document,
+            action: "DELETE"
+        }
+
+        this.#renderTasks.push(renderTask);
+        console.log("Added renderTask for element", renderTask.element.id);
+
+        // Schedule a draw, if not already scheduled
+        if (!this.renderScheduled) {
+            this.scheduleRender();
+        }
+    }
+
+    /**
      * Schedules a new render pass of outstanding renderTasks
      * called when this renderer marks an element to be rendered
      */
@@ -80,7 +106,12 @@ class BaseRenderer {
         for (const renderTask of this.#renderTasks) {
             console.log("Executing render task for element ", renderTask.element.id, ",", renderTask.document.id);
             const element = renderTask.element;
-            this.renderElement(element);
+            if (renderTask.action == "DELETE") {
+                console.log("renderSchedule action to DELETE", element.id)
+                this.destroyElement(element);
+            } else {
+                this.renderElement(element);
+            }
         }
         this.#renderTasks = [];
     }
@@ -93,6 +124,16 @@ class BaseRenderer {
      */
     renderElement(element) {
         throw new Error("renderElement method must be implemented by a sub-class");
+    }
+
+    /**
+     * Render removal of a particular TactileElement.
+     * @param {TactileElement} element
+     *
+     * @abstract
+     */
+    destroyElement(element) {
+        throw new Error("destroyElement method must be implemented by a sub-class");
     }
 
     /**

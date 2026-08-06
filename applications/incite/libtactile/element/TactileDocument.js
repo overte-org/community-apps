@@ -102,6 +102,19 @@ class TactileDocument extends TactileElement {
         this._elementMap.set(id, element);
     }
 
+    /**
+     * Called when an element is removed as a child of this tree
+     */
+    _onElementRemovedFromTree(element) {
+        console.log("_onElementRemovedFromTree", element.id)
+        this._elementMap.delete(element.id);
+        this._availableIds.push(element.id);
+        for (const renderer of this.renderers) {
+            console.log("Informing rendered of validation.");
+            renderer.onElementRemoved(this, element);
+        }
+    }
+
     _onElementInvalidated(element) {
         console.info(`Element ${element.id} invalidated! What now?`);
 

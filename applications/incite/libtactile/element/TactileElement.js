@@ -107,6 +107,11 @@ class TactileElement {
         return this.parent?.documentId;
     }
 
+    get document() {
+        const tactileStore = require("../TactileStore.js");
+        return tactileStore.documentManager.getDocument(this.documentId);
+    }
+
     get absoluteZ() {
         let z = this.offsetZ+(this.zDepth/2);
         if (this.parent) z += this.parent.absoluteZ + (this.parent.zDepth/2);
@@ -236,9 +241,38 @@ class TactileElement {
     }
 
     /**
+     * Propogate removal notification up through the tree
+     */
+    _propogateRemoval(element) {
+        console.log("_propogateRemoval");
+        // An element has been removed below/within this element,
+        // so this element's geometry is no longer valid
+        this.valid = false;
+
+        // Notify this element
+        this._onElementRemovedFromTree(element);
+        console.log("_propogateRemoval post-_onElementRemovedFromTree");
+
+
+        if (this.parent) {
+            // Propogate up the tree
+            console.log(`Propogate up the tree; ${this.id} -> ${this.parent.id}`)
+            this.parent._propogateRemoval(element);
+        } else {
+            console.log(`${this.id}: parent is ${this.parent?.id}`);
+        }
+
+    }
+
+    /**
      * Called whenever either this or any child element below this one is added to the tree
      */
     _onElementAttachedToTree(element) {};
+
+    /**
+     * Called whenever either this or any child element below this one is removed from the tree
+     */
+    _onElementRemovedFromTree(element) {};
 
     /**
      * Called whenever either this or any child element below this one become invalid
@@ -304,8 +338,15 @@ class TactileElement {
      * Remove a child element of this element
      */
     removeElement(elementId) {
+        console.log("removeElement", elementId);
+        const element = this.document.getElement(elementId);
+        if (!element) {
+            console.warn(`Cannot remove element from tree #${this.document.id}, element#${elementId} does not exist.`);
+            return;
+        }
         this.elements = this.elements.filter(element => element.id != elementId);
-        this.valid = false;
+        this._propogateRemoval(element);
+        element._updateChildren();
         return this;
     }
 

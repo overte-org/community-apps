@@ -145,30 +145,48 @@ class GraphRez {
             inputPorts.addElement(inputElement);
             inputElement.elementPressed.connect((documentId, elementId) => {
                 console.log(`Element ${elementId} has been clicked! Input.`);
-                // check we are not already in connection mode (if this is the same output we were already trying to connect just cancel connection mode)
-                if (this.interactionMode != 'ConnectingPorts') return;
-                const newConnection = {
-                    in: {
-                        node: this.modeData.outputPort.nodeId, // modeData is undefined??
-                        port: this.modeData.outputPort.portId
-                    },
-                    out: {
-                        node: this.#elementNodeMap.get(nodeElement.id),
-                        port: index,
+                // check if we are in connection mode, so we can finalise the connection here.
+                if (this.interactionMode == 'ConnectingPorts') {
+                    const newConnection = {
+                        in: {
+                            node: this.modeData.outputPort.nodeId, // modeData is undefined??
+                            port: this.modeData.outputPort.portId
+                        },
+                        out: {
+                            node: this.#elementNodeMap.get(nodeElement.id),
+                            port: index,
+                        }
+                    };
+                    console.log("newConnection:", JSON.stringify(newConnection));
+                    if (!this.#graph.validateConnection(newConnection)) {
+                        console.warn("Connection is not valid; Ports are not compatable ");
+                        return;
                     }
-                };
-                console.log("newConnection:", JSON.stringify(newConnection));
-                if (!this.#graph.validateConnection(newConnection)) {
-                    console.warn("Connection is not valid; Ports are not compatable ");
-                    return;
+                    console.log("newConnection 1");
+
+                    // End ConnectingPorts interaction mode and clean up connecting line
+                    this.startInteractionMode('None');
+
+                    console.log("newConnection 2");
+
+                    // Connect nodes in the graph
+                    this.#graph.addConnection(newConnection);
+                    // Connection is drawn in response to new connection signal from Graph
+                    console.log("newConnection complete");
+                // Do we have an existing connection? We shall disconnect it.
+                } else {
+                    console.log("We are not currently connecting ports.");
+                    const connections = this.#graph.getConnections(node);
+                    connections?.inputs.forEach((connection, connectionIndex) => {
+                        console.log("Could we delete this connection?", connection.id, JSON.stringify(connection))
+                        if (connection.out.port === index) {
+                            console.log("Connection matches port", index);
+                            // This connection terminates at this node.
+                            this.#graph.deleteConnection(connection.id);
+                            console.log("Removed connection:", JSON.stringify(connection));
+                        }
+                    })
                 }
-
-                // End ConnectingPorts interaction mode and clean up connecting line
-                this.startInteractionMode('None');
-
-                // Connect nodes in the graph
-                this.#graph.addConnection(newConnection);
-                // Connection is drawn in response to new connection signal from Graph
             });
             // this.#elementPortMap.set(inputElement.id, port.id);
             onCompleteCommands.push(() => {
@@ -260,20 +278,29 @@ class GraphRez {
     }
 
     onConnectionRemoved(graphId, connectionId) {
-        const connectionElementid = this.#elementConnectionMap.get(connectionId);
+        console.log("onConnectionRemoved", graphId, connectionId);
+        const connectionElementId = this.#connectionElementMap.get(connectionId);
         this.#elementConnectionMap.delete(connectionElementId);
         this.#connectionElementMap.delete(connectionId);
-        thid.#document.removeConnection(connectionId);
+        this.#document.removeElement(connectionElementId);
     }
 
     startInteractionMode(newMode, newModeData = {}) {
+        console.log("startInteractionMode", newMode, JSON.stringify(newModeData));
+        console.log("startInteractionMode; current interactionMode:", this.interactionMode);
         // cleanup existing mode
         switch(this.interactionMode) {
             case "ConnectingPorts":
+                console.log("startInteractionMode ConnectingPorts");
                 // Cleanup polyline
-                const document = tactile.tactileStore.documentManager.getDocument(this.modeData.outputPort.documentId)
-                const line = document.getElement(this.modeData.elementId);
-                document.removeElement(line);
+                if (this.modeData.elementId) {
+                    const document = tactile.tactileStore.documentManager.getDocument(this.modeData.outputPort.documentId)
+                    console.log("startInteractionMode doc1");
+                    //const line = document.getElement(this.modeData.elementId);
+                    console.log("startInteractionMode doc2");
+                    document.removeElement(this.modeData.elementId);
+                    console.log("startInteractionMode doc3");
+                }
 
                 // Return port visuals to normal
 
@@ -320,6 +347,7 @@ class GraphRez {
     }
 
     onNodeRemoved(graphId, nodeId) {
+        console.log("onNodeRemoved", graphId, nodeId);
         const elementId = this.#nodeElementMap.get(nodeId);
         this.document.root.removeElement(elementId);
         this.#nodeElementMap.delete(nodeId);

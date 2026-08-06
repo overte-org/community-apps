@@ -178,20 +178,23 @@ class Graph {
         return [ ... this.#executionOrder ];
     }
 
+    get newId() {
+        console.log("nextId:", this.#nextId, "availableIds:", this.#availableIds);
+        return this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
+    }
+
     /**
      * Add a node to this graph
      * @property {Node}
      */
     addNode(node) {
-        console.log("nextId:", this.#nextId, "availableIds:", this.#availableIds);
-        const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
-        node.id = id;
+        node.id = this.newId;
         this.#nodes.add(node);
-        this.#nodesById.set(id, node);
-        this.nodeAddedEvent.emit(this.id, id); // TODO: Only emit if successfully added
+        this.#nodesById.set(node.id, node);
+        this.nodeAddedEvent.emit(this.id, node.id); // TODO: Only emit if successfully added
         this.updateData();
         this.graphUpdatedEvent.emit(this.id, new Set([id]));
-        return id;
+        return node.id;
     }
 
     /**
@@ -209,21 +212,24 @@ class Graph {
         const node = this.#nodes.get(nodeId);
         this.#nodes.delete(node);
         this.#nodesById.delete(nodeId);
-        this.#availableIds.add(nodeId);
-        this.nodeDeletedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
+        this.#availableIds.push(nodeId);
+        this.nodeRemovedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
         this.updateData();
         this.graphUpdatedEvent.emit(this.id, new Set([id]));
     }
 
     addConnection(connection) {
+        console.log("graph.addConnection:", JSON.stringify(connection));
         //const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
-        const id = this.#connections.push(connection) - 1;
-        this.#connectionsById.set(id, connection);
+        connection.id = this.newId;
+        console.log("graph.addConnection with id", connection.id);
+        this.#connections.push(connection);
+        this.#connectionsById.set(connection.id, connection);
 
         this.populateConnections();
         this.#executionOrder = this.calculateExecutionOrder();
 
-        this.connectionAddedEvent.emit(this.id, id);
+        this.connectionAddedEvent.emit(this.id, connection.id);
 
         this.#valid = this.validateGraph();
     }
@@ -233,12 +239,14 @@ class Graph {
     }
 
     deleteConnection(connectionId) {
+        console.log("graph.deleteConnection:", connectionId);
         const connection = this.#connectionsById.get(connectionId);
-        this.#connections.delete(connection);
+        const index = this.#connections.findIndex((connection) => connection.id == connectionId);
+        this.#connections.splice(index, 1);
         this.#connectionsById.delete(connectionId);
-        this.#availableIds.add(nodeId);
+        this.#availableIds.push(connectionId);
 
-        this.connectionDeletedEvent.emit(this.id, nodeId);
+        this.connectionRemovedEvent.emit(this.id, connectionId);
 
         this.#valid = this.validateGraph();
     }
@@ -262,6 +270,7 @@ class Graph {
      * @type {GraphJson-Connection}
      */
     validateConnection(connection){
+        console.log("graph.validateConnection", JSON.stringify(connection));
         let inPort;
         let outPort;
         let bothPortsDefined = false;

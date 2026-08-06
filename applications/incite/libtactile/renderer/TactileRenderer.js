@@ -396,6 +396,25 @@ class TactileRenderer extends BaseRenderer {
     }
 
     /**
+     * Renders the absence of the given element into the world
+     */
+    destroyElement(element) {
+        console.log("Destroying element", element.id);
+        const entityId = this.entityMap.get(element.id);
+        if (entityId) {
+            Entities.deleteEntity(entityId);
+
+            const index = this.entities.indexOf(entityId);
+            this.entities.splice(index, 1);
+            this.entityMap.delete(element.id);
+            this.elementMap.delete(entityId);
+            this.entityToDocumentAndElementIds.delete(entityId);
+        } else {
+            console.log("Asked to destroy element entity, but element has not been rendered; no such entity known to exist.", element.id);
+        }
+    }
+
+    /**
      * Convert 2D coordinates to 3D coordinates for rendering to world
      */
     TwoToThreeD(x,
