@@ -41,6 +41,10 @@ class Equals extends Node {
         return 'equals';
     }
 
+    get pure() {
+        return true;
+    }
+
     get inputAValue() {
         return this.inputs[0].connectedPort?.value ?? false;
     }

@@ -41,6 +41,10 @@ class Subtract extends Node {
         return 'subtract';
     }
 
+    get pure() {
+        return true;
+    }
+
     get inputAValue() {
         return this.inputs[0].connectedPort?.value ?? 0;
     }

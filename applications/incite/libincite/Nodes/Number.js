@@ -27,6 +27,10 @@ class Number extends Node {
         return 'number';
     }
 
+    get pure() {
+        return true;
+    }
+
     get inputNumber() {
         return this.inputs[0].value;
     }

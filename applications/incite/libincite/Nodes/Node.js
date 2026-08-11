@@ -61,6 +61,24 @@ class Node {
         return this.#data;
     }
 
+    /**
+     * Whether this node is pure
+     * A node is pure when:
+     *  * The output is deterministic base on its input values
+     *  * It has no side-effects beyond simply setting its output value(s)
+     *
+     * If true, the output will always be the same when given certain values on its inputs.
+     * if false, the output cannot be determined based exclusively on its input values.
+     *
+     * NOTE: Pure nodes will not re-execute unless the input values have changed.
+     *
+     * @returns {bool}
+     * @abstract
+     */
+    get pure() {
+        throw new Error(`Node type ${type} must set its own pure value`);
+    }
+
     // JSON.stringify
     toJSON() {
         return {

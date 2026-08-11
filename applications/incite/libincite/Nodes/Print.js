@@ -28,6 +28,12 @@ class Print extends Node {
         return 'print';
     }
 
+    // This node has a side-effect as it sends a message
+    // to the log, thus it must always execute with the graph.
+    get pure() {
+        return false;
+    }
+
     get inputMessage() {
         return this.inputs[0].connectedPort?.value ?? "";
     }
