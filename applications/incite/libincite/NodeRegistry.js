@@ -1,9 +1,8 @@
-"use strict"
 //
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
-
+"use strict"
 
 const Nodes = require('./Nodes/index.js');
 
@@ -60,7 +59,41 @@ class NodeRegistry {
      */
     register(node) {
         console.log("...node", node.type);
+        // Validate node before registering it.
+        try {
+            this.validate(node)
+        } catch (err) {
+            const reasonString = err.name === 'Error'
+                                    ? `${err.name}: ${err.message}`
+                                    : err.stack
+            console.warn(`Cannot register node type ${node.type} because it failed validation; Reason: ${reasonString}`);
+            return false;
+        }
         this.#nodes.set(node.type, node);
+        return true;
+    }
+
+    validate(node) {
+
+        function validateInputs() {
+            return !(node.defaultInputs === undefined);
+        }
+
+        function validateOutputs() {
+            return !(node.defaultOutputs === undefined);
+        }
+
+        if (node.type === 'node' || node.type === "") {
+            throw new Error(`A node has not provided a unique type value ('${node.type}')`);
+        }
+        if (!validateInputs()) {
+            throw new Error(`${node.type} defined invalid inputs`);
+        }
+        if (!validateOutputs()) {
+            throw new Error(`${node.type} defined invalid outputs`);
+        }
+
+        return true;
     }
 
     /**

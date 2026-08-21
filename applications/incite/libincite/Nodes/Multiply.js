@@ -2,13 +2,21 @@
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
+"use strict"
 
 const Node = require('./Node.js');
 
 class Multiply extends Node {
     constructor(data = {}) {
         super(data);
-        this.inputs = [
+    }
+
+    static get type() {
+        return 'multiply';
+    }
+
+    static get defaultInputs() {
+        return  [
             {
                 name: "a",
                 types: [
@@ -25,7 +33,10 @@ class Multiply extends Node {
             },
 
         ];
-        this.outputs = [
+    }
+
+    static get defaultOutputs() {
+        return  [
             {
                 name: "product",
                 types: [
@@ -35,10 +46,6 @@ class Multiply extends Node {
             },
 
         ];
-    }
-
-    static get type() {
-        return 'multiply';
     }
 
     get pure() {

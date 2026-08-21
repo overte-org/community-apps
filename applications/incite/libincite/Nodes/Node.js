@@ -2,6 +2,7 @@
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
+"use strict"
 
 /**
  * typedef {object} NodePort
@@ -27,6 +28,9 @@ class Node {
     #data
 
     constructor(data = {}) {
+        this.inputs = this.constructor.defaultInputs;
+        this.outputs = this.constructor.defaultOutputs;
+
         this.#id = data.id ?? null;
         this.#data = data.data ?? {};
     };
@@ -34,6 +38,20 @@ class Node {
 
     static get type() {
         return 'node';
+    }
+
+    /**
+     * @abstract
+     */
+    static get defaultInputs() {
+        throw new Error(`Node type ${this.type} must set its own defaultInputs`);
+    }
+
+    /**
+     * @abstract
+     */
+    static get defaultOutputs() {
+        throw new Error(`Node type ${this.type} must set its own defaultOutputs`);
     }
 
     get type() {

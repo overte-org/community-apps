@@ -2,6 +2,7 @@
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
+"use strict"
 
 const Node = require('./Node.js');
 
@@ -9,8 +10,18 @@ class Number extends Node {
 
     constructor(data = {}) {
         super(data);
-        this.inputs = [];
-        this.outputs = [
+    }
+
+    static get type() {
+        return 'number';
+    }
+
+    static get defaultInputs() {
+        return  [];
+    }
+
+    static get defaultOutputs() {
+        return [
             {
                 name: "number",
                 types: [
@@ -21,10 +32,6 @@ class Number extends Node {
             },
 
         ];
-    }
-
-    static get type() {
-        return 'number';
     }
 
     get pure() {

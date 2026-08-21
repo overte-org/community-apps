@@ -2,13 +2,23 @@
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
+"use strict"
 
 const Node = require('./Node.js');
 
 class Print extends Node {
     constructor(data = {}) {
         super(data);
-        this.inputs = [
+    }
+
+
+
+    static get type() {
+        return 'print';
+    }
+
+    static get defaultInputs() {
+        return  [
             {
                 name: "message",
                 types: [
@@ -18,14 +28,11 @@ class Print extends Node {
 
             },
 
-        ],
-        this.outputs = [];
+        ];
     }
 
-
-
-    static get type() {
-        return 'print';
+    static get defaultOutputs() {
+        return [];
     }
 
     // This node has a side-effect as it sends a message

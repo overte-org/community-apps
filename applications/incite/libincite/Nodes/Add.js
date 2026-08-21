@@ -8,7 +8,14 @@ const Node = require('./Node.js');
 class Add extends Node {
     constructor(data = {}) {
         super(data);
-        this.inputs = [
+    }
+
+    static get type() {
+        return 'add';
+    }
+
+    static get defaultInputs() {
+        return [
             {
                 name: "a",
                 types: [
@@ -25,7 +32,10 @@ class Add extends Node {
             },
 
         ];
-        this.outputs = [
+    }
+
+    static get defaultOutputs() {
+        return [
             {
                 name: "sum",
                 types: [
@@ -35,10 +45,6 @@ class Add extends Node {
             },
 
         ];
-    }
-
-    static get type() {
-        return 'add';
     }
 
     get pure() {

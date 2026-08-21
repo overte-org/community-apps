@@ -2,13 +2,21 @@
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
+"use strict"
 
 const Node = require('./Node.js');
 
 class Equals extends Node {
     constructor(data = {}) {
         super(data);
-        this.inputs = [
+    }
+
+    static get type() {
+        return 'equals';
+    }
+
+    static get defaultInputs() {
+        return  [
             {
                 name: "a",
                 types: [
@@ -25,7 +33,10 @@ class Equals extends Node {
             },
 
         ];
-        this.outputs = [
+    }
+
+    static get defaultOutputs() {
+        return  [
             {
                 name: "equals",
                 types: [
@@ -35,10 +46,6 @@ class Equals extends Node {
             },
 
         ];
-    }
-
-    static get type() {
-        return 'equals';
     }
 
     get pure() {

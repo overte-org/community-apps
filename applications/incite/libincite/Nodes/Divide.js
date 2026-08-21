@@ -2,13 +2,21 @@
 //  Created by Zedwick, 2026
 //  Copyright 2026 Overte e.V.
 //
+"use strict"
 
 const Node = require('./Node.js');
 
 class Divide extends Node {
     constructor(data = {}) {
         super(data);
-        this.inputs = [
+    }
+
+    static get type() {
+        return 'divide';
+    }
+
+    static get defaultInputs() {
+        return [
             {
                 name: "a",
                 types: [
@@ -25,7 +33,10 @@ class Divide extends Node {
             },
 
         ];
-        this.outputs = [
+    }
+
+    static get defaultOutputs() {
+        return [
             {
                 name: "quotient",
                 types: [
@@ -35,10 +46,6 @@ class Divide extends Node {
             },
 
         ];
-    }
-
-    static get type() {
-        return 'divide';
     }
 
     get pure() {
