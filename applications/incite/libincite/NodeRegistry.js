@@ -75,11 +75,45 @@ class NodeRegistry {
 
     validate(node) {
 
+        // Collect all port IDs, both input and output, to ensure uniqueness.
+        const IDs = new Set();
+
         function validateInputs() {
+            // Validate IDs; unique across both inputs and outputs
+            for (const port of node.defaultInputs) {
+                if (port.id != undefined && typeof port.id === 'number') {
+                    if (IDs.has(port.id)) {
+                        throw new Error(`Node type ${node.type} has multiple ports with the same ID: ${port.id}`);
+                    }
+                    IDs.add(port.id);
+                }
+                else {
+                    throw new Error(`Node type ${node.type} has a port with an invalid ID: ${port.id}`);
+                }
+            }
+
+            // Validate types TODO
+
+
             return !(node.defaultInputs === undefined);
         }
 
         function validateOutputs() {
+            // Validate IDs; unique across both inputs and outputs
+            for (const port of node.defaultOutputs) {
+                if (port.id != undefined && typeof port.id === 'number') {
+                    if (IDs.has(port.id)) {
+                        throw new Error(`Node type ${node.type} has multiple ports with the same ID: ${port.id}`);
+                    }
+                    IDs.add(port.id);
+                }
+                else {
+                    throw new Error(`Node type ${node.type} has a port with an invalid ID: ${port.id}`);
+                }
+            }
+
+            // Validate types TODO
+
             return !(node.defaultOutputs === undefined);
         }
 

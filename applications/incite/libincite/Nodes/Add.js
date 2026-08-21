@@ -18,6 +18,7 @@ class Add extends Node {
         return [
             {
                 name: "a",
+                id: 0,
                 types: [
                     'number',
                 ],
@@ -25,6 +26,7 @@ class Add extends Node {
             },
             {
                 name: "b",
+                id: 1,
                 types: [
                     'number',
                 ],
@@ -38,6 +40,7 @@ class Add extends Node {
         return [
             {
                 name: "sum",
+                id: 2,
                 types: [
                     'number',
                 ],

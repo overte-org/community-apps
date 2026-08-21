@@ -19,6 +19,7 @@ class Subtract extends Node {
         return  [
             {
                 name: "a",
+                id: 0,
                 types: [
                     'number',
                 ],
@@ -26,6 +27,7 @@ class Subtract extends Node {
             },
             {
                 name: "b",
+                id: 1,
                 types: [
                     'number',
                 ],
@@ -39,6 +41,7 @@ class Subtract extends Node {
         return  [
             {
                 name: "difference",
+                id: 2,
                 types: [
                     'number',
                 ],

@@ -19,6 +19,7 @@ class Equals extends Node {
         return  [
             {
                 name: "a",
+                id: 0,
                 types: [
                     'number',
                 ],
@@ -26,6 +27,7 @@ class Equals extends Node {
             },
             {
                 name: "b",
+                id: 1,
                 types: [
                     'number',
                 ],
@@ -39,6 +41,7 @@ class Equals extends Node {
         return  [
             {
                 name: "equals",
+                id: 2,
                 types: [
                     'number',
                 ],

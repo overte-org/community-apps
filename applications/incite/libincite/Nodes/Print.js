@@ -21,6 +21,7 @@ class Print extends Node {
         return  [
             {
                 name: "message",
+                id: 0,
                 types: [
                     'string',
                 ],

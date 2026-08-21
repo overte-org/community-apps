@@ -24,6 +24,7 @@ class Number extends Node {
         return [
             {
                 name: "number",
+                id: 0,
                 types: [
                     'number',
                 ],
