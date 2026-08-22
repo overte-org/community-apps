@@ -274,6 +274,7 @@ class Graph {
         let inPort;
         let outPort;
         let bothPortsDefined = false;
+        let bothPortTypesCorrect = false;
         if (typeof connection == 'object') {
             // Does this connection have an in node?
             if (typeof connection.in == 'object') {
@@ -284,8 +285,8 @@ class Graph {
                         && typeof inPortId == 'number') { // Connection claims an in port
                     const inNode = this.getNode(inNodeId);
                     // Does the inNode exist? TODO
-                    if (typeof inNode == 'object') {
-                        inPort = inNode.outputs[inPortId];
+                    if (typeof inNode == 'object') { // TODO instanceof Node
+                        inPort = inNode.getPort(inPortId);
                     }
                 }
             }
@@ -299,27 +300,32 @@ class Graph {
                         && typeof outPortId == 'number') { // Connection claims an out port
                     const outNode = this.getNode(outNodeId);
                     // Does the outNode exist? TODO
-                    if (typeof outNode == 'object') {
-                        outPort = outNode.inputs[outPortId];
+                    if (typeof outNode == 'object') { // TODO instanceof Node
+                        outPort = outNode.getPort(outPortId);
                     }
                 }
             }
 
             // Does the port type match the in port?
             bothPortsDefined = (typeof inPort != 'undefined' && typeof outPort != 'undefined');
+
             if (bothPortsDefined) {
-                const inTypes = inPort.types;
-                // Here we check if the inNode of this connection will output
-                // only the types which the outNode accepts on its input
-                // If it may output a type which would not be accepted, the connection will
-                // be rejected even if it can output a type which would be accepted.
-                if (outPort.types.some(outType =>
-                                        inTypes.length < (Graph.TYPE_COMPATIBLES[outType] ?? new Set()).size && inPort.types.every(inType =>
-                                            (Graph.TYPE_COMPATIBLES[outType] ?? new Set()).has(inType)))) { // TODO: improve validation by matching against specific type currently being output
-                    return true;
-                } else {
-                    console.log("Cannot validate", inPort.types, "Connecting to", outPort.types);
-                }
+                // Are both port PortTypes correct?
+                bothPortTypesCorrect = (inPort.type === inPort.constructor.PortType.OUTPUT && outPort.type === outPort.constructor.PortType.INPUT);
+                if (bothPortTypesCorrect) {
+                    const inTypes = inPort.types;
+                    // Here we check if the inNode of this connection will output
+                    // only the types which the outNode accepts on its input
+                    // If it may output a type which would not be accepted, the connection will
+                    // be rejected even if it can output a type which would be accepted.
+                    if (outPort.types.some(outType =>
+                                            inTypes.length < (Graph.TYPE_COMPATIBLES[outType] ?? new Set()).size && inPort.types.every(inType =>
+                                                (Graph.TYPE_COMPATIBLES[outType] ?? new Set()).has(inType)))) { // TODO: improve validation by matching against specific type currently being output
+                        return true;
+                    } else {
+                        console.log("Cannot validate", inPort.types, "Connecting to", outPort.types);
+                    }
+                };
             }
         }
 
@@ -328,6 +334,7 @@ class Graph {
         if (!inPort) message.push("From node "+connection.in.node+", port "+connection.in.port+" does not exist.");
         if (!outPort) message.push("To node:port "+connection.out.node+":"+connection.out.port+" does not exist.");
         if (bothPortsDefined) message.push("inPort", inPort, "outPort:", outPort);
+        if (!bothPortTypesCorrect) message.push("One or more port type is incorrect; inPort:", inPort.type, "outPort:", outPort.type);
         message.push(JSON.stringify(connection));
         console.warn(... message);
         return false;
@@ -507,8 +514,8 @@ class Graph {
 
             //console.log("inNode:", inNode, "outNode:", outNode);
 
-            const outputPort = inNode.outputs[connection.in.port];
-            const inputPort = outNode.inputs[connection.out.port];
+            const outputPort = inNode.getPort(connection.in.port);
+            const inputPort = outNode.getPort(connection.out.port);
 
             // Set connectedPort on in side
             outputPort.connectedPort = inputPort
@@ -528,7 +535,7 @@ class Graph {
         while (queue.length > 0) {
             const assertion = queue.shift();
             const node = this.nodes[assertion.nodeId];
-            const port = node.outputs[assertion.portId];
+            const port = node.getPort(assertion.portId);
             const value = assertion.value;
 
             //console.log(`Verifying assertion ${assertion.nodeId}:${assertion.portId} == ${assertion.value}`);

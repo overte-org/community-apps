@@ -5,6 +5,7 @@
 "use strict"
 
 const Nodes = require('./Nodes/index.js');
+const NodePort = require('./NodePort.js');
 
 /**
  * This is a javascript library and is not included by default. To use the method(s) below, you must first include the library.
@@ -79,8 +80,13 @@ class NodeRegistry {
         const IDs = new Set();
 
         function validateInputs() {
-            // Validate IDs; unique across both inputs and outputs
             for (const port of node.defaultInputs) {
+                // check port is a NodePort
+                if (!(port instanceof NodePort)) {
+                    throw new Error(`Node type ${node.type} has an input port which is not an instance of NodePort: ${typeof port} (${port.constructor?.name})`);
+                }
+
+                // Validate IDs; unique across both inputs and outputs
                 if (port.id != undefined && typeof port.id === 'number') {
                     if (IDs.has(port.id)) {
                         throw new Error(`Node type ${node.type} has multiple ports with the same ID: ${port.id}`);
@@ -90,7 +96,13 @@ class NodeRegistry {
                 else {
                     throw new Error(`Node type ${node.type} has a port with an invalid ID: ${port.id}`);
                 }
+
+                // Validate PortTypes
+                if (!port.constructor.PortTypes.has(port.type)) {
+                    throw new Error(`Node type ${node.type} has a port with an invalid type: ${port.type}`);
+                }
             }
+
 
             // Validate types TODO
 
@@ -99,8 +111,13 @@ class NodeRegistry {
         }
 
         function validateOutputs() {
-            // Validate IDs; unique across both inputs and outputs
             for (const port of node.defaultOutputs) {
+                // check port is a NodePort
+                if (!(port instanceof NodePort)) {
+                    throw new Error(`Node type ${node.type} has an output port which is not an instance of NodePort: ${typeof port} (${port.constructor?.name})`);
+                }
+
+                // Validate IDs; unique across both inputs and outputs
                 if (port.id != undefined && typeof port.id === 'number') {
                     if (IDs.has(port.id)) {
                         throw new Error(`Node type ${node.type} has multiple ports with the same ID: ${port.id}`);
@@ -109,6 +126,11 @@ class NodeRegistry {
                 }
                 else {
                     throw new Error(`Node type ${node.type} has a port with an invalid ID: ${port.id}`);
+                }
+
+                // Validate PortTypes
+                if (!port.constructor.PortTypes.has(port.type)) {
+                    throw new Error(`Node type ${node.type} has a port with an invalid type: ${port.type}`);
                 }
             }
 

@@ -4,13 +4,7 @@
 //
 "use strict"
 
-/**
- * typedef {object} NodePort
- * @property {string} name - The name of this port
- * @property {array<string>} types - The list of types this port accepts
- * @property {object} value - The current value of this port, typically the output
- * @property {object} connectedPort - The port of another node this port is connected to, if connected to a port.
- */
+const NodePort = require("../NodePort.js");
 
 /**
  * The base executable Node which all other nodes should extend
@@ -26,10 +20,16 @@ class Node {
     #graph
     #node
     #data
+    #ports
+
+    static NodePort = NodePort;
 
     constructor(data = {}) {
         this.inputs = this.constructor.defaultInputs;
         this.outputs = this.constructor.defaultOutputs;
+        this.#ports = {};
+        this.inputs.forEach((port) => this.#ports[port.id] = port);
+        this.outputs.forEach((port) => this.#ports[port.id] = port);
 
         this.#id = data.id ?? null;
         this.#data = data.data ?? {};
@@ -42,6 +42,7 @@ class Node {
 
     /**
      * @abstract
+     * @returns {Array<NodePort>} input ports
      */
     static get defaultInputs() {
         throw new Error(`Node type ${this.type} must set its own defaultInputs`);
@@ -49,6 +50,7 @@ class Node {
 
     /**
      * @abstract
+     * @returns {Array<NodePort>} output ports
      */
     static get defaultOutputs() {
         throw new Error(`Node type ${this.type} must set its own defaultOutputs`);
@@ -79,6 +81,10 @@ class Node {
         return this.#data;
     }
 
+    get ports() {
+        return this.#ports;
+    }
+
     /**
      * Whether this node is pure
      * A node is pure when:
@@ -95,6 +101,13 @@ class Node {
      */
     get pure() {
         throw new Error(`Node type ${type} must set its own pure value`);
+    }
+
+    /**
+     * Returns the port with the given ID
+     */
+    getPort(portId) {
+        return this.ports[portId];
     }
 
     // JSON.stringify

@@ -17,36 +17,39 @@ class Subtract extends Node {
 
     static get defaultInputs() {
         return  [
-            {
+            new Node.NodePort({
                 name: "a",
                 id: 0,
+                type: Node.NodePort.PortType.INPUT,
                 types: [
                     'number',
                 ],
                 value: 0,
-            },
-            {
+            }),
+            new Node.NodePort({
                 name: "b",
                 id: 1,
+                type: Node.NodePort.PortType.INPUT,
                 types: [
                     'number',
                 ],
                 value: 0,
-            },
+            }),
 
         ];
     }
 
     static get defaultOutputs() {
         return  [
-            {
+            new Node.NodePort({
                 name: "difference",
                 id: 2,
+                type: Node.NodePort.PortType.OUTPUT,
                 types: [
                     'number',
                 ],
                 value: 0,
-            },
+            }),
 
         ];
     }
@@ -56,19 +59,19 @@ class Subtract extends Node {
     }
 
     get inputAValue() {
-        return this.inputs[0].connectedPort?.value ?? 0;
+        return this.getPort(0).connectedPort?.value ?? 0;
     }
 
     get inputBValue() {
-        return this.inputs[1].connectedPort?.value ?? 0;
+        return this.getPort(1).connectedPort?.value ?? 0;
     }
 
     get outputDifferenceValue() {
-        return this.outputs[0].value;
+        return this.getPort(2).value;
     }
 
     set outputDifferenceValue(value) {
-        this.outputs[0].value = value;
+        this.getPort(2).value = value;
     }
 
     execute() {

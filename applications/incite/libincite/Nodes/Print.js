@@ -19,15 +19,16 @@ class Print extends Node {
 
     static get defaultInputs() {
         return  [
-            {
+             new Node.NodePort({
                 name: "message",
                 id: 0,
+                type: Node.NodePort.PortType.INPUT,
                 types: [
                     'string',
                 ],
                 value: "",
 
-            },
+            }),
 
         ];
     }
@@ -43,7 +44,7 @@ class Print extends Node {
     }
 
     get inputMessage() {
-        return this.inputs[0].connectedPort?.value ?? "";
+        return this.getPort(0).connectedPort?.value ?? "";
     }
 
     execute() {

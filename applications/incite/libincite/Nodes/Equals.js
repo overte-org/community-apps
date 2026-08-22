@@ -17,36 +17,39 @@ class Equals extends Node {
 
     static get defaultInputs() {
         return  [
-            {
+            new Node.NodePort({
                 name: "a",
                 id: 0,
+                type: Node.NodePort.PortType.INPUT,
                 types: [
                     'number',
                 ],
                 value: 0,
-            },
-            {
+            }),
+            new Node.NodePort({
                 name: "b",
                 id: 1,
+                type: Node.NodePort.PortType.INPUT,
                 types: [
                     'number',
                 ],
                 value: 0,
-            },
+            }),
 
         ];
     }
 
     static get defaultOutputs() {
         return  [
-            {
+            new Node.NodePort({
                 name: "equals",
                 id: 2,
+                type: Node.NodePort.PortType.OUTPUT,
                 types: [
                     'number',
                 ],
                 value: 0,
-            },
+            }),
 
         ];
     }
@@ -56,19 +59,19 @@ class Equals extends Node {
     }
 
     get inputAValue() {
-        return this.inputs[0].connectedPort?.value ?? false;
+        return this.getPort(0).connectedPort?.value ?? false;
     }
 
     get inputBValue() {
-        return this.inputs[1].connectedPort?.value ?? true;
+        return this.getPort(1).connectedPort?.value ?? true;
     }
 
     get outputEqualsValue() {
-        return this.outputs[0].value;
+        return this.getPort(2).value;
     }
 
     set outputEqualsValue(value) {
-        this.outputs[0].value = value;
+        this.getPort(2).value = value;
     }
 
     execute() {

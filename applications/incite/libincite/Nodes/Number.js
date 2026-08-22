@@ -22,15 +22,16 @@ class Number extends Node {
 
     static get defaultOutputs() {
         return [
-            {
+             new Node.NodePort({
                 name: "number",
+                type: Node.NodePort.PortType.OUTPUT,
                 id: 0,
                 types: [
                     'number',
                 ],
                 value: 1,
 
-            },
+            }),
 
         ];
     }
@@ -39,20 +40,12 @@ class Number extends Node {
         return true;
     }
 
-    get inputNumber() {
-        return this.inputs[0].value;
-    }
-
-    set inputNumber(num) {
-        this.inputs[0].value = num;
-    }
-
     get outputNumber() {
-        return this.outputs[0].value;
+        return this.getPort(0).value;
     }
 
     set outputNumber(value) {
-        this.outputs[0].value = value;
+        this.getPort(0).value = value;
     }
 
     execute() {

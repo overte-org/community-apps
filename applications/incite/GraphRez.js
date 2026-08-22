@@ -154,7 +154,7 @@ class GraphRez {
                         },
                         out: {
                             node: this.#elementNodeMap.get(nodeElement.id),
-                            port: index,
+                            port: port.id,
                         }
                     };
                     console.log("newConnection:", JSON.stringify(newConnection));
@@ -179,8 +179,8 @@ class GraphRez {
                     const connections = this.#graph.getConnections(node);
                     connections?.inputs.forEach((connection, connectionIndex) => {
                         console.log("Could we delete this connection?", connection.id, JSON.stringify(connection))
-                        if (connection.out.port === index) {
-                            console.log("Connection matches port", index);
+                        if (connection.out.port === port.id) {
+                            console.log("Connection matches port", port.id);
                             // This connection terminates at this node.
                             this.#graph.deleteConnection(connection.id);
                             console.log("Removed connection:", JSON.stringify(connection));
@@ -190,7 +190,7 @@ class GraphRez {
             });
             // this.#elementPortMap.set(inputElement.id, port.id);
             onCompleteCommands.push(() => {
-                this.setNodeInputportElementToMap(node.id, index, inputElement.id);
+                this.setNodeInputportElementToMap(node.id, port.id, inputElement.id);
             });
         });
         portsContainer.addElement(inputPorts);
@@ -226,7 +226,7 @@ class GraphRez {
                         documentId: documentId,
                         elementId: elementId,
                         nodeId: this.#elementNodeMap.get(nodeElement.id),
-                        portId: index,
+                        portId: port.id,
                         types: port.types,
                     }
                 });
@@ -234,7 +234,7 @@ class GraphRez {
                 // Update port visually
             });
             onCompleteCommands.push(() => {
-                this.setNodeOutputportElementToMap(node.id, index, outputElement.id);
+                this.setNodeOutputportElementToMap(node.id, port.id, outputElement.id);
             });
         });
         portsContainer.addElement(outputPorts);
