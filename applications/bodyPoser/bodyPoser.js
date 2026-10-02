@@ -15,6 +15,12 @@ let settings = Settings.getValue("Body Poser", {
 });
 //let presets = Settings.getValue("Body Poser/Presets", {});
 
+let oldRecenterState = {
+	rotationThreshold: MyAvatar.rotationThreshold,
+	enableStepResetRotation: MyAvatar.enableStepResetRotation,
+	hmdLeanRecenterEnabled: MyAvatar.hmdLeanRecenterEnabled,
+};
+
 let hasHandles = false;
 let enabled = false;
 let handlesVisible = true;
@@ -104,6 +110,14 @@ function LP_AnimHandlerFunc(_dummy) {
 }
 
 function LP_CreateHandles(jointNames) {
+	oldRecenterState.rotationThreshold = MyAvatar.rotationThreshold;
+	oldRecenterState.enableStepResetRotation = MyAvatar.enableStepResetRotation;
+	oldRecenterState.hmdLeanRecenterEnabled = MyAvatar.hmdLeanRecenterEnabled;
+
+	MyAvatar.rotationThreshold = Math.PI * 2.0;
+	MyAvatar.enableStepResetRotation = false;
+	MyAvatar.hmdLeanRecenterEnabled = false;
+
 	const avatarScale = MyAvatar.scale;
 
 	for (const joint of jointNames) {
@@ -168,6 +182,10 @@ function LP_DeleteHandles() {
 		Entities.deleteEntity(jointHandleVisuals[joint]);
 		delete jointHandleVisuals[joint];
 	}
+
+	MyAvatar.rotationThreshold = oldRecenterState.rotationThreshold;
+	MyAvatar.enableStepResetRotation = oldRecenterState.enableStepResetRotation;
+	MyAvatar.hmdLeanRecenterEnabled = oldRecenterState.hmdLeanRecenterEnabled;
 }
 
 function LP_HideHandles() {
