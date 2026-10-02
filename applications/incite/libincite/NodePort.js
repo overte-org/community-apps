@@ -10,7 +10,6 @@ class NodePort {
     #type
     #types
     #name
-    #value
 
     /**
      * @enum {string}
@@ -30,7 +29,6 @@ class NodePort {
         this.#type = data.type;
         this.#types = data.types ?? [];
         this.#name = data.name;
-        this.#value = data.value;
     };
 
     /**
@@ -72,17 +70,6 @@ class NodePort {
      */
     get name() {
         return this.#name;
-    }
-
-    /**
-     * The data value currently associated with this port.
-     */
-    get value() {
-        return this.#value;
-    }
-
-    set value(value) {
-        this.#value = value;
     }
 }
 

@@ -58,23 +58,20 @@ class Add extends Node {
     }
 
     get inputAValue() {
-        return this.getPort(0).connectedPort?.value ?? 0;
+        return this.getInputResult(0).value;
     }
 
     get inputBValue() {
-        return this.getPort(1).connectedPort?.value ?? 0;
+        // return this.getPort(1).connectedPort?.value ?? 0;
+        return this.getInputResult(1).value;
     }
 
     get outputSumValue() {
-        return this.getPort(2).value;
-    }
-
-    set outputSumValue(value) {
-        this.getPort(2).value = value;
+        return this.getOutputResult(2).value;
     }
 
     execute() {
-        this.outputSumValue = (this.inputAValue + this.inputBValue);
+        this.setPortResult(2, this.inputAValue + this.inputBValue);
     }
 }
 

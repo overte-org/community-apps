@@ -5,6 +5,8 @@
 "use strict"
 
 const NodePort = require("../NodePort.js");
+const NodeResult = require("../NodeResult.js");
+const PortResult = require("../PortResult.js");
 
 /**
  * The base executable Node which all other nodes should extend
@@ -77,6 +79,10 @@ class Node {
         this.#graph = graph;
     }
 
+    get graphId() {
+        return this.graph.id;
+    }
+
     get data() {
         return this.#data;
     }
@@ -110,6 +116,45 @@ class Node {
         return this.ports[portId];
     }
 
+    getInputResult(portId) {
+        // Confirm this is an input port
+        const port = this.getPort(portId);
+        if (port.type !== Node.NodePort.PortType.INPUT) {
+            throw new Error(`Port ${portId} is not a valid input port`);
+        }
+        console.log("getInputResult", portId);
+
+        // Return port result
+        return this.graph.getConnectedResult(this.id, portId);
+    }
+
+    getOutputResult(portId) {
+        // Confirm this is an input port
+        const port = this.getPort(portId);
+        if (port.type !== Node.NodePort.PortType.OUTPUT) {
+            throw new Error(`Port ${portId} is not a valid output port`);
+        }
+
+        // return port result
+        return this.graph.getPortResult(this.id, portId);
+    }
+
+    setPortResult(portId, value) {
+        // TODO check if there is a NodeResult set
+        // TODO Validate value; type, range, etc.
+        console.log("setPortResult", this.graphId, this.id, portId, value);
+        const result = PortResult.success(this.graphId,
+                                          this.id,
+                                          portId,
+                                          value); // TODO mark valueChanged
+        this.nodeResult.setPortResult(result);
+        return result;
+    }
+
+    setParentGraph(graph) {
+        this.#graph = graph;
+    }
+
     // JSON.stringify
     toJSON() {
         return {
@@ -134,7 +179,9 @@ class Node {
 
     /**
      * Node's logic
-     * The code which runs when node would execute within the graph
+     * The code which runs when node would execute within the graph.
+     * All output ports should have a result set via `setPortResult` by the
+     * end of this function.
      *
      * @abstract
      */
@@ -145,18 +192,36 @@ class Node {
     /**
      * Runs this node's executable code, whilst handling errors
      */
-    run() {
-        if (this.executed) return;
+    run(executionFrame) {
+        // TODO If a node is pure and its inputs did not re-execute or
+        // their values match the previous input values, we do not need
+        // to re-execute; provide the previously computed values.
+
+        // Create NodeResult for current execution
+        this.nodeResult =  new NodeResult(this.graphId, this.id);
 
         try {
             console.log("Execute", this.type);
             for(const port of this.inputs) {
                 console.log("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port"); // TODO: N value = no port; Should make more useful error messages.
             }
+
+            // Execute
             this.execute();
-            this.executed = true;
+            // Verify and store result of execution
+            executionFrame.storeNodeResult(this.nodeResult);
+            // Cache results
+            for (const portResult of this.nodeResult.portResults) {
+                console.log("Node.run portResult", JSON.stringify(portResult));
+                this.graph.setPortResult(this.id, portResult.id, portResult);
+            }
+
+            return executionFrame;
+
         } catch (error) {
-            console.error(`Error executing node $${this.id} ($${this.type}):`, error);
+            console.error(`Error executing node $${this.id} ($${this.type}):`, error.stack);
+            this.nodeResult.setError(error);
+            executionFrame.storeNodeResult(this.nodeResult);
         }
     }
 

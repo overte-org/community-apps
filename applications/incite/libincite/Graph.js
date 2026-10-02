@@ -35,6 +35,8 @@
  */
 
 const Signal = require("./Signal.js");
+const ExecutionFrame = require("./ExecutionFrame.js");
+const ExecutionReel = require("./ExecutionReel.js");
 
 /**
  * A visual scripting graph containing nodes and their connections
@@ -99,6 +101,16 @@ class Graph {
     #executionOrder
 
     /**
+     * The current results to be used to provide input values during execution.
+     */
+    #resultCache
+
+    /**
+     * The reel of previous ExecutionFrames
+     */
+    #exectutionReel
+
+    /**
      * Which output types can be connected to which input types
      */
     static get TYPE_COMPATIBLES() {
@@ -128,7 +140,7 @@ class Graph {
         this.#connections = data.connections ?? [];
         this.#connectionsById = new Map();
         this.#connections.forEach((connection, index) => {
-            this.#connectionsById.set(index, connection);
+            this.#connectionsById.set(index, connection); // FIXME: Wrong ID
         })
         this.#assertions = data.assertions ?? [];
 
@@ -138,6 +150,9 @@ class Graph {
 
         this.populateConnections();
         this.#executionOrder = this.calculateExecutionOrder();
+
+        this.#resultCache = {};
+        this.executionReel = new ExecutionReel(this.id);
     }
 
     /**
@@ -191,9 +206,10 @@ class Graph {
         node.id = this.newId;
         this.#nodes.add(node);
         this.#nodesById.set(node.id, node);
+        node.setParentGraph(this);
         this.nodeAddedEvent.emit(this.id, node.id); // TODO: Only emit if successfully added
         this.updateData();
-        this.graphUpdatedEvent.emit(this.id, new Set([id]));
+        this.graphUpdatedEvent.emit(this.id, new Set([node.id]));
         return node.id;
     }
 
@@ -215,7 +231,7 @@ class Graph {
         this.#availableIds.push(nodeId);
         this.nodeRemovedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
         this.updateData();
-        this.graphUpdatedEvent.emit(this.id, new Set([id]));
+        this.graphUpdatedEvent.emit(this.id, new Set([nodeId]));
     }
 
     addConnection(connection) {
@@ -249,6 +265,62 @@ class Graph {
         this.connectionRemovedEvent.emit(this.id, connectionId);
 
         this.#valid = this.validateGraph();
+    }
+
+    /**
+     * Get the cached result for the connected output port
+     * of the given input port.
+     * Will return null if no connected port.
+     */
+    getConnectedResult(nodeId, portId) {
+        for (const connection of this.#connections) {
+            const inNodeId = connection.in.node;
+            const outNodeId = connection.out.node;
+
+            // if (inNodeId == nodeId) {
+            //     const inPortId = connection.in.port;
+            //     if (inPortId == portId) {
+            //         return this.getPortResult(outNodeId, outPortId);
+            //     }
+            // }
+            if (outNodeId == nodeId) {
+                const outPortId = connection.out.port;
+                if (outPortId == portId) {
+                    return this.getPortResult(inNodeId, connection.in.port);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    getPortResult(nodeId, portId) {
+        return this.#resultCache[`${nodeId}:${portId}`];
+    }
+
+    setPortResult(nodeId, portId, result) {
+        this.#resultCache[`${nodeId}:${portId}`] = result;
+    }
+
+    /**
+     * Clear results for a node.
+     * To be used when the node is removed from the graph.
+     */
+    clearResults(nodeId) {
+        // TODO
+        const keys = new Set();
+
+        // Collect keys to delete
+        for (const key of this.#resultCache.keys()) {
+            if (key.startsWith(`${nodeId}:`)) {
+                keys.add(key);
+            }
+        }
+
+        // Delete the matching results
+        for (const key of keys) {
+            delete this.#resultCache[key];
+        }
     }
 
     /**
@@ -382,7 +454,7 @@ class Graph {
         // Calculate the number of dependencies which must be resolved before each node can execute
         if(!force && !this.#valid) return [];
         const queue = this.executionOrder;
-        let results = [];
+        const executionFrame = new ExecutionFrame(this.id);
 
         console.log("Execution order:", queue);
 
@@ -390,20 +462,20 @@ class Graph {
         while (queue.length > 0) {
             const currentId = queue.shift();
             const currentNode = this.#nodesById.get(currentId);
-            currentNode.run();
-            const result = {
-                nodeId: currentNode.id,
-                outputValues: currentNode.outputs.map(item => item.value)
-            };
-            console.log(currentNode.id, " = ", currentNode.outputs[0]?.value ?? "No Value")
-            results.push(result);
+            currentNode.run(executionFrame); // TODO
+            // Iterate all port results of this nodeResult
+            const nodeResult = executionFrame.getNodeResult(currentNode.id)
+            for (const portResult of nodeResult.portResults) {
+                console.log(`${portResult.nodeId}:${portResult.portId} = ${portResult.value ?? "No Value"}`);
+            }
         }
 
-        this.verifyAssertions(results);
+        this.verifyAssertions(executionFrame);
 
-        this.graphExecutedEvent.emit(this.id, results);
+        this.executionReel.add(executionFrame);
+        this.graphExecutedEvent.emit(this.id, executionFrame);
 
-        return results;
+        return executionFrame;
     }
 
     /**
@@ -526,7 +598,7 @@ class Graph {
         return true;
     }
 
-    verifyAssertions(executionResults){
+    verifyAssertions(executionFrame){
         const queue = [ ... this.assertions ];
         let result = true;
 
@@ -536,17 +608,16 @@ class Graph {
             const assertion = queue.shift();
             const node = this.nodes[assertion.nodeId];
             const port = node.getPort(assertion.portId);
+            const nodeResult = executionFrame.getResult(assertion.nodeId);
+            const portResult = executionFrame.getPortResult(assertion.portId);
             const value = assertion.value;
 
             //console.log(`Verifying assertion ${assertion.nodeId}:${assertion.portId} == ${assertion.value}`);
 
-            if (port.value != value) {
-                console.warn(`!! Graph assertion failure !! Node ${assertion.nodeId}, Port ${assertion.portId} should have value ${value} but has ${port.value} instead.`);
+            if (!portResult.success || portResult.value != value) {
+                console.warn(`!! Graph assertion failure !! Node ${assertion.nodeId}, Port ${assertion.portId} should have value ${value} but has ${portResult.value} instead. ${portResult.success ? "success" : "failure"}`);
                 result = false;
-                console.log("Execution results:");
-                for (const [index,result] of executionResults.entries()) {
-                    console.log(`  Node ${result.nodeId} result: ${result.outputValues}`);
-                }
+                console.log(`Node Execution Result: ${JSON.stringify(nodeResult)}`);
             }
         }
 
@@ -639,7 +710,7 @@ class Graph {
     /**
      * Emits when this graph has executed
      *
-     * @type Signal<(graphId: number, results: object) => void>
+     * @type Signal<(graphId: number, executionFrame: ExecutionFrame) => void>
      */
     graphExecutedEvent = new Signal("GraphExecutedEvent");
 

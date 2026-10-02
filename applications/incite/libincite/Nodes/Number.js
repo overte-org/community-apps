@@ -41,15 +41,11 @@ class Number extends Node {
     }
 
     get outputNumber() {
-        return this.getPort(0).value;
-    }
-
-    set outputNumber(value) {
-        this.getPort(0).value = value;
+        return 1;
     }
 
     execute() {
-        this.outputNumber = this.outputNumber;
+        this.setPortResult(0, this.outputNumber);
     }
 }
 

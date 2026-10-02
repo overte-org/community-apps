@@ -44,7 +44,7 @@ class Print extends Node {
     }
 
     get inputMessage() {
-        return this.getPort(0).connectedPort?.value ?? "";
+        return this.getInputResult(0).value ?? "";
     }
 
     execute() {

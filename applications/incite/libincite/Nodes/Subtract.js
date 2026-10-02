@@ -59,23 +59,19 @@ class Subtract extends Node {
     }
 
     get inputAValue() {
-        return this.getPort(0).connectedPort?.value ?? 0;
+        return this.getInputResult(0).value ?? 0;
     }
 
     get inputBValue() {
-        return this.getPort(1).connectedPort?.value ?? 0;
+        return this.getInputResult(1).value ?? 0;
     }
 
     get outputDifferenceValue() {
-        return this.getPort(2).value;
-    }
-
-    set outputDifferenceValue(value) {
-        this.getPort(2).value = value;
+        return this.getOutputResult(2).value;
     }
 
     execute() {
-        this.outputDifferenceValue = (this.inputAValue - this.inputBValue);
+        this.setPortResult(2, this.inputAValue - this.inputBValue);
     }
 }
 

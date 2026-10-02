@@ -46,9 +46,9 @@ class Equals extends Node {
                 id: 2,
                 type: Node.NodePort.PortType.OUTPUT,
                 types: [
-                    'number',
+                    'boolean',
                 ],
-                value: 0,
+                value: false,
             }),
 
         ];
@@ -59,23 +59,19 @@ class Equals extends Node {
     }
 
     get inputAValue() {
-        return this.getPort(0).connectedPort?.value ?? false;
+        return this.getInputResult(0).value ?? false;
     }
 
     get inputBValue() {
-        return this.getPort(1).connectedPort?.value ?? true;
+        return this.getInputResult(1).value ?? true;
     }
 
     get outputEqualsValue() {
-        return this.getPort(2).value;
-    }
-
-    set outputEqualsValue(value) {
-        this.getPort(2).value = value;
+        return this.getOutputResult(2).value;
     }
 
     execute() {
-        this.outputEqualsValue = (this.inputAValue == this.inputBValue);
+        this.setPortResult(2, this.inputAValue == this.inputBValue);
     }
 }
 
