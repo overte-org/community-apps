@@ -131,7 +131,7 @@ function LP_CreateHandles(jointNames) {
 			color = [0, 0, 255];
 		}
 
-		const handleSize = Vec3.multiply(HMD.active ? [0.05, 0.05, 0.8] : [0.15, 0.15, 0.15], avatarScale);
+		const handleSize = Vec3.multiply([0.05, 0.05, 0.8], avatarScale);
 
 		jointHandleEntities[joint] = Entities.addEntity({
 			type: "Box",
@@ -140,12 +140,11 @@ function LP_CreateHandles(jointNames) {
 			localPosition: MyAvatar.getAbsoluteDefaultJointTranslationInObjectFrame(jointIndex),
 			localDimensions: handleSize,
 			collisionless: true,
-			alpha: 0.5,
+			alpha: 0.3,
 			color: color,
 			unlit: true,
 			visible: handlesVisible,
 			grab: {grabbable: handlesVisible},
-			renderLayer: "front",
 		}, settings.public ? "avatar" : "local");
 	}
 
