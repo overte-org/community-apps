@@ -21,10 +21,12 @@ class GraphRez {
     #outputportElementMap
     #nodeElementMap
     #position
+    #orientation
 
-    constructor(graph, position) {
+    constructor(graph, position, orientation) {
         this.#graph = graph
         this.#position = position;
+        this.#orientation = orientation;
         this.#entityHostType = "local";
         this.#document = this.DEFAULT_DOCUMENT;
 
@@ -402,6 +404,7 @@ class GraphRez {
     get DEFAULT_DOCUMENT() {
         const renderer = new tactile.renderer.TactileRenderer({ // TODO: Only attach renderer when we are ready to render
             position: this.position,
+            orientation: this.orientation,
             renderContext: "local"
         });
 
@@ -443,15 +446,33 @@ class GraphRez {
 
     set position(pos) {
         this.#position = pos;
-        // TODO rerender when the position changes
+        this.#document.renderers[0].position = pos;
+        this.#document.valid = false;
+    }
+
+    /**
+     * The world orientation where this Graph has been Rez'd.
+     * Note: This should be updated when the entity moves around the world, but it may not be strictly up to date at all times
+     */
+    get orientation() {
+        // TODO update cached orientation if cache TTL has expired
+        return this.#orientation;
+    }
+
+    set orientation(orien) {
+        this.#orientation = orien;
+        this.#document.renderers[0].orientation = orien;
+        this.#document.valid = false;
     }
 
     /**
      * Rez or relocate this graph in the world at the specified posiition
      * @param {Vec3} [position] - The world coordinates where this graph should be
+     * @param {Quat} [orientation] - The orientation how this graph is shown
      */
-    rez(position = this.position) {
-
+    rez(position = this.position, orientation = this.orientation) {
+        this.position = position;
+        this.orientation = orientation;
     }
 
     /**
