@@ -58,7 +58,6 @@ function loadGraph(graphURL) {
 
     req.open("GET", graphURL);
     req.send();
-
 };
 
 const baseUrl = "http://localhost:8079"
@@ -67,12 +66,24 @@ const baseUrl = "http://localhost:8079"
 
 // Woo proper app stuff!
 
-function registerContextMenu() {
+function updateContextMenu() {
+    ContextMenu.unregisterActionSet("incite.menu_nodes");
+    ContextMenu.unregisterActionSet("incite.menu");
+    ContextMenu.unregisterActionSet("incite");
 
-    const actionSet = [
-        {
+    const actionSet = [];
+
+    if (incite.InciteStore.graphManager.graphs.length === 0) {
+        actionSet.push({
             text: "Create Graph",
             localClickFunc: "incite.create_graph",
+            textColor: "white",
+            priority: -5,
+        });
+    } else {
+        actionSet.push({
+            text: "Move here",
+            localClickFunc: "incite.move_here",
             textColor: "white",
             priority: -5,
         },
@@ -94,8 +105,8 @@ function registerContextMenu() {
             localClickFunc: "incite.execute_graph",
             textColor: "white",
             priority: -4.7,
-        },
-    ];
+        });
+    }
 
     ContextMenu.registerActionSet("incite", [{
         text: "Incite",
@@ -112,7 +123,7 @@ function registerContextMenu() {
     for (const [index, node] of incite.InciteStore.nodeRegistry.nodes.entries()) {
         const nodeAction = {
             text: node.type,
-            localClickFunc: "incite.add_node_"+node.type,
+            localClickFunc: "incite.add_node." + node.type,
             textColor: "white",
             priority: -5-(index*0.01),
             keepMenuOpen: true,
@@ -124,17 +135,43 @@ function registerContextMenu() {
 };
 
 function createNewGraph() {
-
-    if (incite.InciteStore.graphManager.graphs.length == 0) {
+    if (incite.InciteStore.graphManager.graphs.length === 0) {
         const graph = new incite.GraphBuilder().build();
         incite.InciteStore.graphManager.addGraph(graph);
         // Render graph into the world
-        InciteRezzer.rezGraph(graph, Vec3.sum(MyAvatar.getHeadPosition(),
-                                        Vec3.multiplyQbyV(MyAvatar.orientation,
-                                                          { x: 0, y: 0, z: -2 }))); // TODO rotation
+        InciteRezzer.rezGraph(
+            graph,
+            Vec3.sum(
+                MyAvatar.getHeadPosition(),
+                Vec3.multiplyQbyV(
+                    MyAvatar.headOrientation,
+                    { x: 0, y: 0, z: -2 }
+                )
+            ),
+            MyAvatar.headOrientation
+        );
         console.log("Created graph");
     } else {
         console.log("Could not create graph; a graph already exists");
+    }
+}
+
+function moveGraph() {
+    if (incite.InciteStore.graphManager.graphs.length > 0) {
+        const graph = InciteRezzer.getGraphRez(0);
+        graph.rez(
+            Vec3.sum(
+                MyAvatar.getHeadPosition(),
+                Vec3.multiplyQbyV(
+                    MyAvatar.headOrientation,
+                    { x: 0, y: 0, z: -2 }
+                )
+            ),
+            MyAvatar.headOrientation
+        );
+        console.log("Moved graph");
+    } else {
+        console.log("Could not move graph; no such graph exists.");
     }
 }
 
@@ -171,21 +208,18 @@ function deleteNode(graphId) {
 }
 
 if (isOverte) {
-    registerContextMenu();
-
+    updateContextMenu();
 
     Script.scriptEnding.connect(() => {
         ContextMenu.unregisterActionSet("incite.menu_nodes");
         ContextMenu.unregisterActionSet("incite.menu");
         ContextMenu.unregisterActionSet("incite");
 
-         Controller.keyPressEvent.disconnect(handleKeyPress);
+        Controller.keyPressEvent.disconnect(handleKeyPress);
 
         deleteGraph();
 
         console.log("Incite app has finished.");
-
-
     });
 
     const handleMessage = function(channel, message, sender) {
@@ -205,26 +239,31 @@ if (isOverte) {
 
                 if (typeof func === 'string') {
                     console.log("Received ContextMenu func string");
-                    if (func.substring(7, 16) === 'add_node_') {
+                    if (func.indexOf('incite.add_node.') === 0) {
                         console.log("Adding node...");
                         const nodeType = func.substring(16);
 
                         addNodeToGraph(nodeType);
-                    }
-
-                    switch(func) {
-                        case 'incite.create_graph':
-                            console.log("Creating graph...");
-                            createNewGraph();
-                            break;
-                        case 'incite.delete_graph':
-                            console.log("Deleting graph...");
-                            deleteGraph();
-                            break;
-                        case 'incite.execute_graph':
-                            console.log("Executing graph...");
-                            executeGraph();
-                            break;
+                    } else {
+                        switch(func) {
+                            case 'incite.create_graph':
+                                console.log("Creating graph...");
+                                createNewGraph();
+                                break;
+                            case 'incite.move_here':
+                                console.log("Moving graph...");
+                                moveGraph();
+                                break;
+                            case 'incite.delete_graph':
+                                console.log("Deleting graph...");
+                                deleteGraph();
+                                break;
+                            case 'incite.execute_graph':
+                                console.log("Executing graph...");
+                                executeGraph();
+                                break;
+                        }
+                        updateContextMenu();
                     }
                 } else {
                     console.error(`Received invalid data from ${ContextMenu.CLICK_FUNC_CHANNEL}:`, data);
@@ -240,6 +279,4 @@ if (isOverte) {
         }
     }
     Controller.keyPressEvent.connect(handleKeyPress);
-
-
 }
