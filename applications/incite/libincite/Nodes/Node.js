@@ -44,7 +44,7 @@ class Node {
 
     /**
      * @abstract
-     * @returns {Array<NodePort>} input ports
+     * @returns {array<NodePort>} input ports
      */
     static get defaultInputs() {
         throw new Error(`Node type ${this.type} must set its own defaultInputs`);
@@ -52,17 +52,26 @@ class Node {
 
     /**
      * @abstract
-     * @returns {Array<NodePort>} output ports
+     * @returns {array<NodePort>} output ports
      */
     static get defaultOutputs() {
         throw new Error(`Node type ${this.type} must set its own defaultOutputs`);
     }
 
+    /**
+     * The unique type which represents this node
+     *
+     * @type {string}
+     */
     get type() {
         return this.constructor.type;
     }
 
-
+    /**
+     * This node's unique id within the graph it is currently attached to
+     *
+     * @type {number}
+     */
     get id() {
         return this.#id;
     }
@@ -71,6 +80,11 @@ class Node {
         this.#id = id;
     }
 
+    /**
+     * The graph this node is currently attached to.
+     *
+     * @type {Graph}
+     */
     get graph() {
         return this.#graph;
     }
@@ -79,6 +93,11 @@ class Node {
         this.#graph = graph;
     }
 
+    /**
+     * The id of the graph this node is currently attached to.
+     *
+     * @type {number}
+     */
     get graphId() {
         return this.graph.id;
     }
@@ -87,6 +106,11 @@ class Node {
         return this.#data;
     }
 
+    /**
+     * This node's ports.
+     *
+     * @type {object<number, NodePort>}
+     */
     get ports() {
         return this.#ports;
     }
@@ -111,11 +135,20 @@ class Node {
 
     /**
      * Returns the port with the given ID
+     *
+     * @type {NodePort}
      */
     getPort(portId) {
         return this.ports[portId];
     }
 
+    /**
+     * Get the PortResult of the port which the provided input port is connect to.
+     *
+     * @param {number} portId - The id of an input port on this node.
+     * @returns {PortResult} - The PortResult from the connected port.
+     * @throws {Error} When the given port id is not associated with an input port.
+     */
     getInputResult(portId) {
         // Confirm this is an input port
         const port = this.getPort(portId);
@@ -128,8 +161,15 @@ class Node {
         return this.graph.getConnectedResult(this.id, portId);
     }
 
+    /**
+     * Get the PortResult of the output port with the provided id.
+     *
+     * @param {number} portId - The id of the output port
+     * @returns {PortResult} - The PortResult of the output port with the specified Id.
+     * @throws {Error} When the given port id is not associated with an output port.
+     */
     getOutputResult(portId) {
-        // Confirm this is an input port
+        // Confirm this is an output port
         const port = this.getPort(portId);
         if (port.type !== Node.NodePort.PortType.OUTPUT) {
             throw new Error(`Port ${portId} is not a valid output port`);
@@ -139,6 +179,13 @@ class Node {
         return this.graph.getPortResult(this.id, portId);
     }
 
+    /**
+     * Create a new PortResult for the given value and output port id.
+     *
+     * @param {number} portId - The id of the output port
+     * @param {*} value - The value output to the port
+     * @returns {PortResult} - The created PortResult
+     */
     setPortResult(portId, value) {
         // TODO check if there is a NodeResult set
         // TODO Validate value; type, range, etc.
@@ -151,6 +198,11 @@ class Node {
         return result;
     }
 
+    /**
+     * Set the graph this node is attached to.
+     *
+     * @param {Graph}
+     */
     setParentGraph(graph) {
         this.#graph = graph;
     }
