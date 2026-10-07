@@ -4,6 +4,14 @@
 //
 "use strict"
 
+/**
+ * Node port.
+ * @module NodePort
+ */
+
+/**
+ * Class representing a node's port.
+ */
 class NodePort {
     #id
     #connectedPort
@@ -12,6 +20,7 @@ class NodePort {
     #name
 
     /**
+     * All possible types a port can be.
      * @enum {string}
      */
     static get PortType() {
@@ -21,8 +30,18 @@ class NodePort {
         }
     }
 
+    /**
+     * All possible PortType values
+     *
+     * @type {array<PortType>}
+     */
     static PortTypes = new Set(Object.values(NodePort.PortType));
 
+    /**
+     * Create a port for a node.
+     *
+     * @param {object} data
+     */
     constructor(data = {}) {
         this.#id = data.id;
         this.#connectedPort = data.connectedPort;
@@ -33,17 +52,23 @@ class NodePort {
 
     /**
      * The unique ID representing this port within its Node.
+     *
+     * @type {number}
      */
     get id() {
         return this.#id;
     }
 
     /**
-     * The port which this port is currently connected to
+     * The port which this port is currently connected to; null if unconnected.
+     *
+     * @default null;
+     * @type {NodePort}
      */
     get connectedPort() {
         return this.#connectedPort;
     }
+
 
     set connectedPort(port) {
         this.#connectedPort = port;
@@ -51,14 +76,17 @@ class NodePort {
 
     /**
      * The type of port.
-     * typedef {PortType}
+     *
+     * @type {PortType}
      */
     get type() {
         return this.#type;
     }
 
     /**
-     * Valid data types which this port is compatible with
+     * Valid data types which this port is compatible with.
+     *
+     * @type {array}
      */
     get types() {
         return this.#types;
@@ -67,6 +95,8 @@ class NodePort {
     /**
      * The friendly name of this port;
      * helps identify what its purpose is.
+     *
+     * @type {string}
      */
     get name() {
         return this.#name;
