@@ -198,7 +198,7 @@ class Node {
         // to re-execute; provide the previously computed values.
 
         // Create NodeResult for current execution
-        this.nodeResult =  new NodeResult(this.graphId, this.id);
+        this.nodeResult = new NodeResult(this.graphId, this.id);
 
         try {
             console.log("Execute", this.type);
@@ -217,7 +217,6 @@ class Node {
             }
 
             return executionFrame;
-
         } catch (error) {
             console.error(`Error executing node $${this.id} ($${this.type}):`, error.stack);
             this.nodeResult.setError(error);

@@ -37,9 +37,10 @@ class InciteRezzer {
      * Rez a graph in the world
      * @param {InciteGraph} graph
      * @param {Vec3} position
+     * @param {Quat} orientation
      */
-    rezGraph(graph, position) {
-        const graphRez = new GraphRez(graph, position);
+    rezGraph(graph, position, orientation) {
+        const graphRez = new GraphRez(graph, position, orientation);
         this.addGraphRez(graphRez);
     }
 

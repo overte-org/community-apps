@@ -21,13 +21,12 @@ const documentManager = require("../TactileStore.js").documentManager;
  * @property {array<string>} entities
  * @property {number} scale - The scale at which to render elements
  * @property {Vec3} originOffset
- * @property {Quant} orientation
  * @property {Map} entityMap - entityId, elementId
  * @property {Map} elementMap
  * @property {Map} clickableElementMap
  * @property {Map<string,DocumentElementIds>} entityToDocumentAndElementIds
- * @property {Vec3} position
- * @property {Quant} rotation
+ * @property {Vec3} position - The position in the world
+ * @property {Quat} orientation - The orientation in the world
  * @property {Vec3} dimensions
  * @property {number} rootWidth
  * @property {number} rootHeight
@@ -47,7 +46,6 @@ class TactileRenderer extends BaseRenderer {
         this.entities = options.entities ?? [];
         this.scale = options.scale ?? 1;
         this.originOffset = options.originOffset ?? { x: 0, y: 0, z: 0 };
-        this.orientation = options.orientation ?? { x: 0, y: 0, z: 0, w: 1 };
         this.entityMap = new Map();
         this.elementMap = new Map();
 
@@ -56,7 +54,7 @@ class TactileRenderer extends BaseRenderer {
         this.entityToDocumentAndElementIds = new Map() // entityId: { documentId, elementId }
 
         this.position = options.position ?? { x: 0, y: 0, z: 0 };
-        this.rotation = options.rotation ?? { x: 0, y: 0, z: 0, w: 1 };
+        this.orientation = options.orientation ?? { x: 0, y: 0, z: 0, w: 1 };
         this.dimensions = {x: 0, y: 0, z: 0}
         this.rootWidth = 0;
         this.rootHeight = 0;
@@ -139,7 +137,7 @@ class TactileRenderer extends BaseRenderer {
     }
 
     get rootEntityRotation() {
-        return this.rotation; // TODO: Get updated entity rotation
+        return this.orientation; // TODO: Get updated entity orientation
     }
 
     get rootPosition() {
@@ -423,25 +421,24 @@ class TactileRenderer extends BaseRenderer {
                 height = 0,
                 offsetZ = 0,
                 isRoot = false) {
-        // true origin
-        const rootPosition = this.rootPosition;
-
         // Adjusted origin
         // 2D elements are positioned by their top left corner, whilst 3D entities are positioned by their center;
         //
-        const originX = rootPosition.x -(this.dimensions.x/2);
-        const originY = rootPosition.y +(this.dimensions.y/2);
+        const origin = Vec3.sum(this.rootPosition, {
+            x: -(this.dimensions.x/2),
+            y: (this.dimensions.y/2),
+            z: 0
+        });
 
-        // Offset from origin
-        offsetZ = rootPosition.z + offsetZ;
+        const offsetFromOrigin = Vec3.multiplyQbyV(this.orientation, {
+            x: (x) * this.scale + (width/2),
+            y: (-y) * this.scale - (height/2),
+            z: offsetZ,
+        });
 
-        print(`TwoToThreeD .. x=${x}, y=${y}, originX=${originX}, originY=${originY}, offsetZ=${offsetZ}, width=${width}, height=${height}, isRoot=${isRoot}`);
+        print(`TwoToThreeD .. x=${x}, y=${y}, offsetZ=${offsetZ}, width=${width}, height=${height}, isRoot=${isRoot}, origin={x:${origin.x},y:${origin.y},z:${origin.z}}, offsetFromOrigin={x:${offsetFromOrigin.x},y:${offsetFromOrigin.y},z:${offsetFromOrigin.z}}`);
 
-        return {
-            x: (x) * this.scale + originX + (width/2),
-            y: (-y) * this.scale + originY - (height/2), // NOTE: If we need to use this for the root element position after the very first time, this could be wrong
-            z: offsetZ, // Bring forward based on depth
-        };
+        return Vec3.sum(origin, offsetFromOrigin);
     }
 }
 
