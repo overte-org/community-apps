@@ -1,9 +1,15 @@
 // Body poser
 // Created by Ada <ada@thingvellir.net> on 2025-06-02
 // SPDX-License-Identifier: CC0-1.0
+// vim: noet:sw=4:ts=4
 "use strict";
 
 const ContextMenu = Script.require("contextMenu");
+
+const HANDLE_MODEL_CENTER_URL = Script.resolvePath("./handle.fst");
+const HANDLE_MODEL_LEFT_URL = Script.resolvePath("./handle_left.fst");
+const HANDLE_MODEL_RIGHT_URL = Script.resolvePath("./handle_right.fst");
+const QUAT_Y_180 = Quat.fromPitchYawRollDegrees(0, 180, 0);
 
 let settings = Settings.getValue("Body Poser", {
 	upperBodyHandles: true,
@@ -34,14 +40,25 @@ function LP_AnimHandlerFunc(_dummy) {
 	const data = {};
 	for (const [name, handle] of Object.entries(jointHandleEntities)) {
 		let { localPosition, localRotation } = Entities.getEntityProperties(handle, ["localPosition", "localRotation"]);
-		const Y_180 = Quat.fromPitchYawRollDegrees(0, 180, 0);
-		localRotation = Quat.multiply(Y_180, localRotation);
-		localRotation = Quat.multiply(localRotation, Y_180);
+
+		// HACK: Avatar entities inherit MyAvatar.scale, but the IK targets don't,
+		// so scale up the handle position to match the avatar
+		if (settings.public) {
+			localPosition = Vec3.multiply(localPosition, MyAvatar.scale);
+		}
+
+		// Flip the handles around so they're facing model-forward (-Z)
+		// as opposed to world-forward (+Z)
+		localRotation = Quat.multiply(QUAT_Y_180, localRotation);
+		localRotation = Quat.multiply(localRotation, QUAT_Y_180);
+
 		if (name.includes("Foot")) {
 			localRotation = Quat.multiply(localRotation, Quat.fromPitchYawRollDegrees(45, 0, 180));
 		} else if (name.includes("Hand")) {
-			localRotation = Quat.multiply(localRotation, Quat.fromPitchYawRollDegrees(90, name.includes("Left") ? 90 : -90, 0));
+			localRotation = Quat.multiply(localRotation, Quat.fromPitchYawRollDegrees(90, 0, 0));
 		}
+
+		// -x, y, -z is equivalent to the 180° flip done on rotation, see above
 		localPosition = { x: -localPosition.x, y: localPosition.y, z: -localPosition.z };
 		data[name] = { position: localPosition, rotation: localRotation };
 	}
@@ -114,37 +131,63 @@ function LP_CreateHandles(jointNames) {
 	oldRecenterState.enableStepResetRotation = MyAvatar.enableStepResetRotation;
 	oldRecenterState.hmdLeanRecenterEnabled = MyAvatar.hmdLeanRecenterEnabled;
 
+	// Effectively disables recentering in VR so the handles don't get dragged around
+	// by the head, desktop rotates the character body differently so this doesn't apply
+	// TODO: "handles follow avatar movement" setting
 	MyAvatar.rotationThreshold = Math.PI * 2.0;
 	MyAvatar.enableStepResetRotation = false;
 	MyAvatar.hmdLeanRecenterEnabled = false;
 
-	const avatarScale = MyAvatar.scale;
+	// Avatar entities inherit MyAvatar.scale, but we want the handles to have the same
+	// size relative to the user's playspace (so they always appear about 1m long)
+	const avatarScale = settings.public ?
+		MyAvatar.scale / MyAvatar.sensorToWorldScale :
+		MyAvatar.sensorToWorldScale;
 
 	for (const joint of jointNames) {
 		const jointIndex = MyAvatar.getJointIndex(joint);
 
-		let color = [255, 255, 255];
+		let modelURL = HANDLE_MODEL_CENTER_URL;
 
 		if (joint.includes("Left")) {
-			color = [255, 0, 0];
+			modelURL = HANDLE_MODEL_LEFT_URL;
 		} else if (joint.includes("Right")) {
-			color = [0, 0, 255];
+			modelURL = HANDLE_MODEL_RIGHT_URL;
 		}
 
-		const handleSize = Vec3.multiply([0.05, 0.05, 0.8], avatarScale);
+		// must be kept up to date with handle.glb
+		const handleSize = Vec3.multiply([0.36, 0.075, 0.98], avatarScale);
+
+		let localPosition = MyAvatar.getAbsoluteDefaultJointTranslationInObjectFrame(jointIndex);
+
+		// HACK: getAbsoluteDefaultJointTranslationInObjectFrame is post-scale, and
+		// avatar entities inherit MyAvatar.scale, so undo one level of scaling to
+		// get the handles into the correct avatar-relative position
+		if (settings.public) {
+			localPosition = Vec3.multiply(localPosition, 1.0 / MyAvatar.scale);
+		}
+
+		let localRotation = Quat.IDENTITY;
+
+		if (joint === "LeftHand") {
+			localRotation = Quat.fromPitchYawRollDegrees(0, 90, 0);
+		} else if (joint === "RightHand") {
+			localRotation = Quat.fromPitchYawRollDegrees(0, -90, 0);
+		}
 
 		jointHandleEntities[joint] = Entities.addEntity({
-			type: "Box",
+			type: "Model",
 			name: `Body poser handle (${joint})`,
 			parentID: MyAvatar.sessionUUID,
-			localPosition: MyAvatar.getAbsoluteDefaultJointTranslationInObjectFrame(jointIndex),
+			localPosition,
+			localRotation,
 			localDimensions: handleSize,
+			modelURL,
+			useOriginalPivot: true,
 			collisionless: true,
-			alpha: 0.3,
-			color: color,
-			unlit: true,
 			visible: handlesVisible,
 			grab: {grabbable: handlesVisible},
+			renderLayer: "front",
 		}, settings.public ? "avatar" : "local");
 	}
 
