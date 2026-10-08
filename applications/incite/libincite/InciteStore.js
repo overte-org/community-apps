@@ -8,6 +8,12 @@ const GraphManager = require("./GraphManager.js");
 
 /**
  * Store for all your inciteful needs.
+ *
+ * @example
+ * // Load Incite
+ * const incite = require("https://github.com/overte-org/community-aps/applications/incite/libincite/incite.js");
+ * // Get InciteStore instance
+ * const inciteStore = incite.InciteStore;
  */
 class InciteStore {
     #nodeRegistry
@@ -18,10 +24,32 @@ class InciteStore {
         this.#graphManager = new GraphManager();
     }
 
+    /**
+     * The NodeRegistry instance.
+     *
+     * @type {NodeRegistry}
+     *
+     * @example
+     * // Load Incite
+     * const incite = require("https://github.com/overte-org/community-aps/applications/incite/libincite/incite.js");
+     * // Access nodeRegistry instance via InciteStore
+     * const nodeRegistry = incite.InciteStore.nodeRegistry;
+     */
     get nodeRegistry() {
         return this.#nodeRegistry;
     }
 
+    /**
+     * The GraphManager instance.
+     *
+     * @type {GraphManager}
+     *
+     * @example
+     * // Load Incite
+     * const incite = require("https://github.com/overte-org/community-aps/applications/incite/libincite/incite.js");
+     * // Access graphManager instance via InciteStore
+     * const graphManager = incite.InciteStore.graphManager;
+     */
     get graphManager() {
         return this.#graphManager;
     }
