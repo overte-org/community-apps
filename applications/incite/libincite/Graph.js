@@ -112,6 +112,13 @@ class Graph {
     #exectutionReel
 
     /**
+     * The execution order of unpure nodes
+     *
+     * TODO: this is a temporary helper to make execution of unpure nodes work
+     */
+     #unpureNodesOrdering
+
+    /**
      * Which output types can be connected to which input types
      */
     static get TYPE_COMPATIBLES() {
@@ -131,6 +138,7 @@ class Graph {
         this.#nodesById = new Map();
         this.#nextId = 0;
         this.#availableIds = [];
+        this.#unpureNodesOrdering = [];
         for (const node of this.#nodes) {
             if (node.id === undefined) node.id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
             if (node.id <= this.#nextId) this.#nextId = node.id+1;
@@ -215,6 +223,9 @@ class Graph {
         node.id = this.newId;
         this.#nodes.add(node);
         this.#nodesById.set(node.id, node);
+        if (!node.pure) {
+            this.#unpureNodesOrdering.push(node.id);
+        }
         node.setParentGraph(this);
         this.nodeAddedEvent.emit(this.id, node.id); // TODO: Only emit if successfully added
         this.updateData();
@@ -241,10 +252,31 @@ class Graph {
         const node = this.#nodes.get(nodeId);
         this.#nodes.delete(node);
         this.#nodesById.delete(nodeId);
+        this.#unpureNodesOrdering = this.#unpureNodesOrdering.filter(e => e !== nodeId);
         this.#availableIds.push(nodeId);
         this.nodeRemovedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
         this.updateData();
         this.graphUpdatedEvent.emit(this.id, new Set([nodeId]));
+    }
+
+    /**
+     * changes the position of a node in the unpure node ordering.
+     *
+     * The new index is the one after the nodeId was removed
+     *
+     * @param {Number} orderPosition - the wanted position
+     * @param {Number} nodeId - the id of the node to be changed
+     */
+    setUnpureNodeOrder(orderPosition, nodeId) {
+        const node = this.#nodesById.get(nodeId);
+        if (node === undefined) {
+            throw new Error(`${nodeId} does not exist`);
+        }
+        if (node.pure) {
+            throw new Error(`${nodeId}(${node.type}) was passed, but it's not unpure`);
+        }
+        this.#unpureNodesOrdering = this.#unpureNodesOrdering.filter(e => e !== nodeId);
+        this.#unpureNodesOrdering.splice(orderPosition, 0, nodeId);
     }
 
     addConnection(connection) {
@@ -522,57 +554,35 @@ class Graph {
      * @returns {Array<number>} - This Graph's GraphNodes as a list of ids in executable order
      */
     calculateExecutionOrder() {
-        // All nodes get a dependency value based on its input connections
-        //  ; nodes with no inputs have 0
-        //  ; nodes which have been processed present as a 0 on the input of the next node
-        //  ; nodes with all inputs processed have 0
-        // We process all nodes with 0 dependencies, and once those are complete
-        // we should have new nodes with 0 dependencies. Keep processing until all nodes
-        // are complete.
+        // We calculate the execution order by taking the list of unpure nodes in their order of execution and insert the dependencies of those
+        //
+        // We expect a directed acyclic graph, so we just DFS to get the ordering
 
-        const inputDependencies = new Map();
-        for (const node of this.#nodes) {
-            inputDependencies.set(node.id, this.connections.filter(item => item.out.node === node.id).length); // Number of inputs connected on each node
+        const connDependenciesMap = new Map();
+
+        for (const conn of this.#connections) {
+            if (!connDependenciesMap.has(conn.out.node)) {
+                connDependenciesMap.set(conn.out.node, []);
+            }
+            connDependenciesMap.get(conn.out.node).push(conn.in.node);
         }
 
-        const queue = [];
-        const result = []; // nodeIDs in execution order
-        const processedIds = new Set(); // TODO: Ensure we don't loop back in on ourselves.
-
-        // Nodes with 0 inputDependencies are ready to execute
-        for (const [id, count] of inputDependencies.entries()) {
-            if (count === 0) {
-                queue.push(id);
-            }
-        }
-
-        while (queue.length > 0) {
-            const currentId = queue.shift();
-            const currentNode = this.#nodesById.get(currentId);
-
-            result.push(currentId);
-            processedIds.add(currentId);
-
-            // Find downstream connected nodes
-            const connectedNodes = [];
-            for( const connection of this.#connections) {
-                if (connection.in.node === currentId) {
-                    connectedNodes.push(connection.out.node);
+        // initialize with unpure nodes order, because of no connection in code
+        const stack = [ ...this.#unpureNodesOrdering ].reverse().map(el => [el, 0]);
+        const result = [];
+        while (stack.length > 0) {
+            const [currNodeIdx, workIndex] = stack.pop();
+            const currNodeDependencies = connDependenciesMap.get(currNodeIdx);
+            if (currNodeDependencies !== undefined) {
+                const nextDependencyId = currNodeDependencies.findIndex((el, idx) => idx >= workIndex && result.indexOf(el) === -1);
+                const nextNodeIdx = currNodeDependencies[nextDependencyId];
+                if (nextNodeIdx !== undefined) {
+                    stack.push([currNodeIdx, nextDependencyId + 1]);
+                    stack.push([nextNodeIdx, 0]);
+                    continue;
                 }
             }
-
-            // Update downstream node dependency value
-            for (const connectedNodeId of connectedNodes) {
-                const connectedNode = this.#nodesById.get(connectedNodeId);
-                const dependencies = inputDependencies.get(connectedNode.id)
-                inputDependencies.set(connectedNode.id, dependencies - 1);
-
-                // If all dependencies are resolved, add to queue.
-                if (inputDependencies.get(connectedNode.id) === 0) {
-                    queue.push(connectedNode.id);
-                }
-            }
-
+            result.push(currNodeIdx);
         }
 
         if (result.length !== this.#nodes.size) {
