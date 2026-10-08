@@ -4,6 +4,7 @@
 //
 "use strict"
 
+const Logger = require("../Logger.js");
 const NodePort = require("../NodePort.js");
 const NodeResult = require("../NodeResult.js");
 const PortResult = require("../PortResult.js");
@@ -155,7 +156,7 @@ class Node {
         if (port.type !== Node.NodePort.PortType.INPUT) {
             throw new Error(`Port ${portId} is not a valid input port`);
         }
-        console.log("getInputResult", portId);
+        Logger.log("getInputResult", portId);
 
         // Return port result
         return this.graph.getConnectedResult(this.id, portId);
@@ -189,7 +190,7 @@ class Node {
     setPortResult(portId, value) {
         // TODO check if there is a NodeResult set
         // TODO Validate value; type, range, etc.
-        console.log("setPortResult", this.graphId, this.id, portId, value);
+        Logger.log("setPortResult", this.graphId, this.id, portId, value);
         const result = PortResult.createSuccess(this.graphId,
                                                 this.id,
                                                 portId,
@@ -253,9 +254,9 @@ class Node {
         this.nodeResult = new NodeResult(this.graphId, this.id);
 
         try {
-            console.log("Execute", this.type);
+            Logger.log("Execute", this.type);
             for(const port of this.inputs) {
-                console.log("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port"); // TODO: N value = no port; Should make more useful error messages.
+                Logger.log("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port"); // TODO: N value = no port; Should make more useful error messages.
             }
 
             // Execute
@@ -264,13 +265,13 @@ class Node {
             executionFrame.storeNodeResult(this.nodeResult);
             // Cache results
             for (const portResult of this.nodeResult.portResults) {
-                console.log("Node.run portResult", JSON.stringify(portResult));
+                Logger.log("Node.run portResult", JSON.stringify(portResult));
                 this.graph.setPortResult(this.id, portResult.id, portResult);
             }
 
             return executionFrame;
         } catch (error) {
-            console.error(`Error executing node $${this.id} ($${this.type}):`, error.stack);
+            Logger.error(`Error executing node $${this.id} ($${this.type}):`, error.stack);
             this.nodeResult.setError(error);
             executionFrame.storeNodeResult(this.nodeResult);
         }

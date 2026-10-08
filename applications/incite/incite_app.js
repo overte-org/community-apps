@@ -11,6 +11,7 @@ const isOverte = platform === 'overte';
 
 const ContextMenu = isOverte ? require("contextMenu") : undefined;
 const InciteRezzer = isOverte ? require("./InciteRezzer.js") : undefined;
+const Logger = isOverte ? require("./Logger.js") : Logger;
 
 switch (platform) {
     case 'overte':
@@ -18,8 +19,8 @@ switch (platform) {
         Script.clearCache(); // TODO: Don't clear cache in production'
         break;
     case 'node':
-        console.log("Setting up for Node.js ")
-        console.log("process.versions.node:", process.versions.node);
+        Logger.log("Setting up for Node.js ")
+        Logger.log("process.versions.node:", process.versions.node);
         globalThis['XMLHttpRequest'] = require("xmlhttprequest").XMLHttpRequest;
         break;
 }
@@ -27,10 +28,10 @@ switch (platform) {
 
 const incite = require("./libincite/incite.js");
 
-console.log("Welcome to Incite!");
+Logger.log("Welcome to Incite!");
 
 function loadGraph(graphURL) {
-    console.log("Loading", graphURL, "...")
+    Logger.log("Loading", graphURL, "...")
     let graph = null;
 
     var req = new XMLHttpRequest();
@@ -38,9 +39,9 @@ function loadGraph(graphURL) {
     req.onreadystatechange = function () {
         if (req.readyState === req.DONE) {
             if (req.status === 200) {
-                //console.log("Success");
-                //console.log("Content type:", req.getResponseHeader("content-type"));
-                //console.log("Content:", req.responseText.slice(0, 100), "...");
+                //Logger.log("Success");
+                //Logger.log("Content type:", req.getResponseHeader("content-type"));
+                //Logger.log("Content:", req.responseText.slice(0, 100), "...");
 
                 graph = new incite.GraphBuilder().fromJson(req.responseText).build();
 
@@ -49,7 +50,7 @@ function loadGraph(graphURL) {
                 graph.execute();
 
             } else {
-                console.log("Error", req.status, req.statusText);
+                Logger.log("Error", req.status, req.statusText);
             }
 
             req = null;
@@ -150,9 +151,9 @@ function createNewGraph() {
             ),
             MyAvatar.headOrientation
         );
-        console.log("Created graph");
+        Logger.log("Created graph");
     } else {
-        console.log("Could not create graph; a graph already exists");
+        Logger.log("Could not create graph; a graph already exists");
     }
 }
 
@@ -169,9 +170,9 @@ function moveGraph() {
             ),
             MyAvatar.headOrientation
         );
-        console.log("Moved graph");
+        Logger.log("Moved graph");
     } else {
-        console.log("Could not move graph; no such graph exists.");
+        Logger.log("Could not move graph; no such graph exists.");
     }
 }
 
@@ -179,9 +180,9 @@ function deleteGraph() {
     if (incite.InciteStore.graphManager.graphs.length > 0) {
         incite.InciteStore.graphManager.graphs.shift();
         incite.InciteStore.graphManager.deleteGraph(0); // TODO: Support more than one graph
-        console.log("Deleted graph");
+        Logger.log("Deleted graph");
     } else {
-        console.log("Could not delete graph; no such graph exists.");
+        Logger.log("Could not delete graph; no such graph exists.");
     }
 
 }
@@ -190,15 +191,15 @@ function executeGraph() {
     if (incite.InciteStore.graphManager.graphs.length > 0) {
         const graph = incite.InciteStore.graphManager.graphs[0];
         graph.execute();
-        console.log("Executed graph");
+        Logger.log("Executed graph");
     } else {
-        console.log("Could not execute graph; no such graph exists.");
+        Logger.log("Could not execute graph; no such graph exists.");
     }
 }
 
 function addNodeToGraph(type) {
     const node = new (incite.InciteStore.nodeRegistry.get(type))();
-    console.log("Adding node", type, "to graph");
+    Logger.log("Adding node", type, "to graph");
 
     incite.InciteStore.graphManager.getGraph(0).addNode(node);
 }
@@ -219,54 +220,54 @@ if (isOverte) {
 
         deleteGraph();
 
-        console.log("Incite app has finished.");
+        Logger.log("Incite app has finished.");
     });
 
     const handleMessage = function(channel, message, sender) {
         if (channel === ContextMenu.CLICK_FUNC_CHANNEL && sender === MyAvatar.sessionUUID) {
-            console.log("Received ContextMenu FUNC");
+            Logger.log("Received ContextMenu FUNC");
             let data;
             try {
                 data = JSON.parse(message)
             } catch (err) {
-                console.error(`Received invalid JSON on ${ContextMenu.CLICK_FUNC_CHANNEL}`, message, err.message);
+                Logger.error(`Received invalid JSON on ${ContextMenu.CLICK_FUNC_CHANNEL}`, message, err.message);
                 return
             }
 
             if (data && typeof data === 'object') {
-                console.log("Received ContextMenu object");
+                Logger.log("Received ContextMenu object");
                 const func = data.func;
 
                 if (typeof func === 'string') {
-                    console.log("Received ContextMenu func string");
+                    Logger.log("Received ContextMenu func string");
                     if (func.indexOf('incite.add_node.') === 0) {
-                        console.log("Adding node...");
+                        Logger.log("Adding node...");
                         const nodeType = func.substring(16);
 
                         addNodeToGraph(nodeType);
                     } else {
                         switch(func) {
                             case 'incite.create_graph':
-                                console.log("Creating graph...");
+                                Logger.log("Creating graph...");
                                 createNewGraph();
                                 break;
                             case 'incite.move_here':
-                                console.log("Moving graph...");
+                                Logger.log("Moving graph...");
                                 moveGraph();
                                 break;
                             case 'incite.delete_graph':
-                                console.log("Deleting graph...");
+                                Logger.log("Deleting graph...");
                                 deleteGraph();
                                 break;
                             case 'incite.execute_graph':
-                                console.log("Executing graph...");
+                                Logger.log("Executing graph...");
                                 executeGraph();
                                 break;
                         }
                         updateContextMenu();
                     }
                 } else {
-                    console.error(`Received invalid data from ${ContextMenu.CLICK_FUNC_CHANNEL}:`, data);
+                    Logger.error(`Received invalid data from ${ContextMenu.CLICK_FUNC_CHANNEL}:`, data);
                 }
             }
         };

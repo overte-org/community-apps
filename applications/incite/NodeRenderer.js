@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("./Logger.js");
 const incite = require("./libincite/incite.js");
 
 /**
@@ -27,7 +28,7 @@ class NodeRenderer {
      * @param {number} nodeId
      */
     constructor(graphRenderer, nodeId) {
-        console.log("NodeRender");
+        Logger.log("NodeRender");
         this.#graphRenderer = graphRenderer;
         this.#nodeId = nodeId;
         this.#entities = new Set();
@@ -36,7 +37,7 @@ class NodeRenderer {
     }
 
     setup() {
-    console.log("Node Render setup");
+    Logger.log("Node Render setup");
         // get node
         const node = this.#node;
 
@@ -44,7 +45,7 @@ class NodeRenderer {
 
         const properties = Entities.getEntityProperties(graphEntityId, "position");
 
-        console.log("Graph entity", graphEntityId, "position", properties.position);
+        Logger.log("Graph entity", graphEntityId, "position", properties.position);
 
         const nodeEntityId = Entities.addEntity({
             type: "Box",
@@ -58,7 +59,7 @@ class NodeRenderer {
 
         });
 
-        console.log("New node entity", nodeEntityId);
+        Logger.log("New node entity", nodeEntityId);
 
         this.#entities.add(nodeEntityId);
     }

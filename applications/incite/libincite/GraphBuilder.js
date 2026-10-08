@@ -198,7 +198,6 @@ class GraphBuilder {
                     id: Number(index),
                     data: nodeData.data ?? {}
                 });
-                //console.log(graphNode);
                 this._nodes.push(graphNode);
             }
         }

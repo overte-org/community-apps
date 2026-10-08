@@ -4,6 +4,7 @@
 //
 "use strict"
 
+const Logger = require("./Logger.js");
 const Nodes = require('./Nodes/index.js');
 const NodePort = require('./NodePort.js');
 
@@ -26,7 +27,7 @@ class NodeRegistry {
      */
     loadDefaultNodes() {
 
-        console.log("Registering nodes...")
+        Logger.log("Registering nodes...")
 
         this.register(Nodes.Add);
         this.register(Nodes.Divide);
@@ -38,7 +39,7 @@ class NodeRegistry {
 
         const nodes = this.nodes;
 
-        console.log("Registered", nodes.size, "nodes");
+        Logger.log("Registered", nodes.size, "nodes");
 
     };
 
@@ -58,7 +59,7 @@ class NodeRegistry {
      * @returns {boolean} - If the node has been registed successfully
      */
     register(node) {
-        console.log("...node", node.type);
+        Logger.log("...node", node.type);
         // Validate node before registering it.
         try {
             this.validate(node)
@@ -66,7 +67,7 @@ class NodeRegistry {
             const reasonString = err.name === 'Error'
                                     ? `${err.name}: ${err.message}`
                                     : err.stack
-            console.warn(`Cannot register node type ${node.type} because it failed validation; Reason: ${reasonString}`);
+            Logger.warn(`Cannot register node type ${node.type} because it failed validation; Reason: ${reasonString}`);
             return false;
         }
         this.#nodes.set(node.type, node);
