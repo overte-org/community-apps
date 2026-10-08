@@ -25,32 +25,70 @@ class PortResult {
         this.#nodeId = nodeId;
         this.#portId = portId;
         this.#success = options.success ?? true;
-        this.#error = options.error ?? null;
+        this.#error = options.error ?? undefined;
         this.#warnings = options.warnings ?? [];
         this.#value = value;
         this.#valueChanged = options.valueChanged ?? false;
     }
 
+    /**
+     * Create a PortResult which is successful
+     *
+     * @param {number} graphId
+     * @param {number} nodeId
+     * @param {number} portId
+     * @param {*} value
+     * @param {object} options
+     * @returns {PortResult}
+     */
     static success(graphId, nodeId, portId, value, options = {}) {
         return new PortResult(graphId, nodeId, portId, value, { ...options, success: true});
     }
 
+    /**
+     * Creates a failed PortResult with the provided error.
+     *
+     * @param {number} graphId
+     * @param {number} nodeId
+     * @param {number} portId
+     * @param {Error} error
+     * @param {object} options
+     * @returns {PortResult}
+     */
     static failure(graphId, nodeId, portId, error, options = {}) {
         return new PortResult(graphId, nodeId, portId, null, {...options, success: false, error});
     }
 
+    /**
+     * The Id of the graph this PortResult is associated with
+     *
+     * @type {number}
+     */
     get graphId() {
         return this.#graphId;
     }
 
+    /**
+     * The Id of the node with PortResult is associated with.
+     *
+     * @type {number}
+     */
     get nodeId() {
         return this.#nodeId;
     }
 
+    /**
+     * The Id of the port of this PortResult.
+     *
+     * @type {number}
+     */
     get portId() {
         return this.#portId;
     }
 
+    /**
+     * The Id of this PortResult, unique within the NodeResult.
+     */
     get id() {
         return this.#portId;
     }
@@ -58,6 +96,8 @@ class PortResult {
     /**
      * The success state of this result
      * Will be true if the node executed successfully
+     *
+     * @type {boolean}
      */
     get success() {
         return this.#success;
@@ -67,14 +107,27 @@ class PortResult {
         this.#success = state;
     }
 
+    /**
+     * The error of this PortResult, if it was not successful.
+     *
+     * @type {Error|undefined}
+     */
     get error() {
         return this.#error;
     }
 
+    /**
+     * @type {array}
+     */
     get warnings() {
         return this.#warnings;
     }
 
+    /**
+     * The resulting value
+     *
+     * @type {*}
+     */
     get value() {
         return this.#value;
     }
@@ -85,11 +138,19 @@ class PortResult {
      * and will be carried forward by pure nodes.
      * When true, the next Node will ignore it's cached output value(s)
      * and re-execute.
+     *
+     * @type {boolean}
      */
     get valueChanged() {
         return this.#valueChanged;
     }
 
+    /**
+     * Add a warning
+     *
+     * @param {*}
+     * @returns {PortResult}
+     */
     addWarning(warning) {
         this.#warnings.push(warning);
         return this;
@@ -98,6 +159,8 @@ class PortResult {
     /**
      * Provide the error which caused this result to fail;
      * Setting an error causes this result to be marked as not successfull.
+     *
+     * @param {Error} error
      */
     setError(error) {
         this.#success = false;

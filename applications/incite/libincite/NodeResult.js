@@ -23,7 +23,7 @@ class NodeResult {
         this.#graphId = graphId;
         this.#nodeId = nodeId;
         this.#success = options.success ?? true;
-        this.#error = options.error ?? null;
+        this.#error = options.error ?? undefined;
         this.#warnings = options.warnings ?? [];
         this.#valueChanged = options.valueChanged ?? false;
         this.#portResults = {};
@@ -96,7 +96,7 @@ class NodeResult {
     /**
      * The error provided by this NodeResult, if there is one. Otherwise, null.
      *
-     * @type {Error}
+     * @type {Error|undefined}
      */
     get error() {
         return this.#error;
