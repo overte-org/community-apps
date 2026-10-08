@@ -6,9 +6,39 @@
 
 const ContextMenu = Script.require("contextMenu");
 
-const HANDLE_MODEL_CENTER_URL = Script.resolvePath("./handle.fst");
-const HANDLE_MODEL_LEFT_URL = Script.resolvePath("./handle_left.fst");
-const HANDLE_MODEL_RIGHT_URL = Script.resolvePath("./handle_right.fst");
+const HANDLE_MODELS = {
+	generic: {
+		url: Script.resolvePath("./handle.fst"),
+		// model dimensions: [0.4, 0.51, 0.51]
+		dimensions: [0.24, 0.306, 0.306],
+	},
+	generic_left: {
+		url: Script.resolvePath("./handle_left.fst"),
+		// model dimensions: [0.4, 0.51, 0.51]
+		dimensions: [0.24, 0.306, 0.306],
+	},
+	generic_right: {
+		url: Script.resolvePath("./handle_right.fst"),
+		// model dimensions: [0.4, 0.51, 0.51]
+		dimensions: [0.24, 0.306, 0.306],
+	},
+	hips: {
+		url: Script.resolvePath("./handle_hips.fst"),
+		// model dimensions: [0.36, 0.075, 0.98]
+		dimensions: [0.288, 0.06, 0.784],
+	},
+	foot_left: {
+		url: Script.resolvePath("./handle_foot_left.fst"),
+		// model dimensions: [0.36, 1.04, 0.48]
+		dimensions: [0.27, 0.78, 0.36],
+	},
+	foot_right: {
+		url: Script.resolvePath("./handle_foot_right.fst"),
+		// model dimensions: [0.36, 1.04, 0.48]
+		dimensions: [0.27, 0.78, 0.36],
+	},
+};
+
 const QUAT_Y_180 = Quat.fromPitchYawRollDegrees(0, 180, 0);
 
 let settings = Settings.getValue("Body Poser", {
@@ -146,16 +176,21 @@ function LP_CreateHandles(jointNames) {
 	for (const joint of jointNames) {
 		const jointIndex = MyAvatar.getJointIndex(joint);
 
-		let modelURL = HANDLE_MODEL_CENTER_URL;
+		let model = HANDLE_MODELS.generic;
 
-		if (joint.includes("Left")) {
-			modelURL = HANDLE_MODEL_LEFT_URL;
+		if (joint === "Hips") {
+			model = HANDLE_MODELS.hips;
+		} else if (joint === "LeftFoot") {
+			model = HANDLE_MODELS.foot_left;
+		} else if (joint === "RightFoot") {
+			model = HANDLE_MODELS.foot_right;
+		} else if (joint.includes("Left")) {
+			model = HANDLE_MODELS.generic_left;
 		} else if (joint.includes("Right")) {
-			modelURL = HANDLE_MODEL_RIGHT_URL;
+			model = HANDLE_MODELS.generic_right;
 		}
 
-		// must be kept up to date with handle.glb
-		const handleSize = Vec3.multiply([0.36, 0.075, 0.98], avatarScale);
+		const handleSize = Vec3.multiply(model.dimensions, avatarScale);
 
 		let localPosition = MyAvatar.getAbsoluteDefaultJointTranslationInObjectFrame(jointIndex);
 
@@ -181,7 +216,7 @@ function LP_CreateHandles(jointNames) {
 			localPosition,
 			localRotation,
 			localDimensions: handleSize,
-			modelURL,
+			modelURL: model.url,
 			useOriginalPivot: true,
 			collisionless: true,
 			visible: handlesVisible,
