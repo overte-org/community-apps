@@ -34,7 +34,6 @@ let frozenAnimation = false;
 
 let animHandler;
 const jointHandleEntities = {};
-const jointHandleVisuals = {};
 
 function LP_AnimHandlerFunc(_dummy) {
 	const data = {};
@@ -186,6 +185,7 @@ function LP_CreateHandles(jointNames) {
 			useOriginalPivot: true,
 			collisionless: true,
 			visible: handlesVisible,
+			ignorePickIntersection: !handlesVisible,
 			grab: {grabbable: handlesVisible},
 			renderLayer: "front",
 		}, settings.public ? "avatar" : "local");
@@ -220,11 +220,6 @@ function LP_DeleteHandles() {
 		delete jointHandleEntities[joint];
 	}
 
-	for (const joint in jointHandleVisuals) {
-		Entities.deleteEntity(jointHandleVisuals[joint]);
-		delete jointHandleVisuals[joint];
-	}
-
 	MyAvatar.rotationThreshold = oldRecenterState.rotationThreshold;
 	MyAvatar.enableStepResetRotation = oldRecenterState.enableStepResetRotation;
 	MyAvatar.hmdLeanRecenterEnabled = oldRecenterState.hmdLeanRecenterEnabled;
@@ -234,11 +229,11 @@ function LP_HideHandles() {
 	if (!hasHandles) { return; }
 
 	for (const handle of Object.values(jointHandleEntities)) {
-		Entities.editEntity(handle, {visible: false, grab: {grabbable:false}});
-	}
-
-	for (const handle of Object.values(jointHandleVisuals)) {
-		Entities.editEntity(handle, {visible: false});
+		Entities.editEntity(handle, {
+			visible: false,
+			grab: { grabbable: false },
+			ignorePickIntersection: true,
+		});
 	}
 }
 
@@ -246,11 +241,11 @@ function LP_ShowHandles() {
 	if (!hasHandles) { return; }
 
 	for (const handle of Object.values(jointHandleEntities)) {
-		Entities.editEntity(handle, {visible: true, grab: {grabbable:true}});
-	}
-
-	for (const handle of Object.values(jointHandleVisuals)) {
-		Entities.editEntity(handle, {visible: true});
+		Entities.editEntity(handle, {
+			visible: true,
+			grab: { grabbable: true },
+			ignorePickIntersection: false,
+		});
 	}
 }
 
