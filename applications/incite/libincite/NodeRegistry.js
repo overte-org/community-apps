@@ -8,23 +8,22 @@ const Nodes = require('./Nodes/index.js');
 const NodePort = require('./NodePort.js');
 
 /**
- * This is a javascript library and is not included by default. To use the method(s) below, you must first include the library.
- *
- * @example <caption>Include this library in your script.</caption>
- * Script.include("/~/system/libraries/incite.js");
- * @namespace VisualScripting
+ * Holds all of the registered nodes. Nodes must be registered here before they can be used in a graph.
  */
 class NodeRegistry {
     #nodes
 
     /**
-     * @Property {boolean} loadDefaultNodes - Should the default nodes be loaded (Default: true)
+     * @param {boolean} loadDefaultNodes - Should the default nodes be loaded (Default: true)
      */
     constructor(loadDefaultNodes = true) {
         this.#nodes = new Map();
         this.loadDefaultNodes();
     }
 
+    /**
+     * Register the default nodes provided in Nodes/
+     */
     loadDefaultNodes() {
 
         console.log("Registering nodes...")
@@ -55,8 +54,8 @@ class NodeRegistry {
     /**
      * Register a new node type
      *
-     * @param {string} type
-     * @param {Object} node - Instance of a node
+     * @param {object} node - Node class to register
+     * @returns {boolean} - If the node has been registed successfully
      */
     register(node) {
         console.log("...node", node.type);
@@ -74,6 +73,13 @@ class NodeRegistry {
         return true;
     }
 
+    /**
+     * Validates the node conforms to the expected structure of a node, and is otherwise valid.
+     *
+     * @param {Node}
+     * @returns {boolean}
+     * @throws {Error} - Node has a problem which makes it invalid
+     */
     validate(node) {
 
         // Collect all port IDs, both input and output, to ensure uniqueness.
@@ -155,7 +161,8 @@ class NodeRegistry {
     /**
      * Get the specified node type from the registry
      *
-     * @return {object}
+     * @param {string} type - The unique type of the node to get.
+     * @returns {Node}
      */
     get(type) {
         return this.#nodes.get(type);
@@ -163,7 +170,9 @@ class NodeRegistry {
 
     /**
      * Check if a node of the specified type exist in the registry
-     * @return {boolean} - true if the node exists
+     *
+     * @param {string} type - The unqiue type of the node to get.
+     * @returns {boolean} - true if the node has been registered
      */
     has(type) {
         return this.#nodes.has(type);
