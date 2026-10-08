@@ -190,10 +190,10 @@ class Node {
         // TODO check if there is a NodeResult set
         // TODO Validate value; type, range, etc.
         console.log("setPortResult", this.graphId, this.id, portId, value);
-        const result = PortResult.success(this.graphId,
-                                          this.id,
-                                          portId,
-                                          value); // TODO mark valueChanged
+        const result = PortResult.createSuccess(this.graphId,
+                                                this.id,
+                                                portId,
+                                                value); // TODO mark valueChanged
         this.nodeResult.setPortResult(result);
         return result;
     }
