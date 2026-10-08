@@ -4,8 +4,6 @@
 //
 "use strict"
 
-const InciteResult = require("./InciteResult.js");
-
 /**
  * A wrapper for the output value of a node after execution.
  */
@@ -36,7 +34,7 @@ class NodeResult {
      * @param {number} nodeId
      * @param {object} options
      */
-    static success(graphId, nodeId, options = {}) {
+    static createSuccess(graphId, nodeId, options = {}) {
         return new NodeResult(graphId, nodeId, value, { ...options, success: true});
     }
 
@@ -47,7 +45,7 @@ class NodeResult {
      * @param {number} nodeId
      * @param {object} options
      */
-    static failure(graphId, nodeId, error, options = {}) {
+    static createFailure(graphId, nodeId, error, options = {}) {
         return new NodeResult(graphId, nodeId, null, {...options, success: false, error});
     }
 

@@ -53,9 +53,9 @@ class ExecutionReel {
      * when the reel has reached capacity.
      */
     add(frame) {
-        frames.push(frame);
+        this.#frames.push(frame);
         if (frame.length > this.maxSize) {
-            frames.shift();
+            this.#frames.shift();
         }
     }
 }

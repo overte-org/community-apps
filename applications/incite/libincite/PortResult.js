@@ -4,8 +4,6 @@
 //
 "use strict"
 
-const InciteResult = require("./InciteResult.js");
-
 /**
  * A wrapper for the output value of a port after execution.
  */
@@ -41,7 +39,7 @@ class PortResult {
      * @param {object} options
      * @returns {PortResult}
      */
-    static success(graphId, nodeId, portId, value, options = {}) {
+    static createSuccess(graphId, nodeId, portId, value, options = {}) {
         return new PortResult(graphId, nodeId, portId, value, { ...options, success: true});
     }
 
@@ -55,7 +53,7 @@ class PortResult {
      * @param {object} options
      * @returns {PortResult}
      */
-    static failure(graphId, nodeId, portId, error, options = {}) {
+    static createFailure(graphId, nodeId, portId, error, options = {}) {
         return new PortResult(graphId, nodeId, portId, null, {...options, success: false, error});
     }
 
