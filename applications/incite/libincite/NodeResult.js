@@ -29,26 +29,52 @@ class NodeResult {
         this.#portResults = {};
     }
 
+    /**
+     * Create a NodeResult which is successful
+     *
+     * @param {number} graphId
+     * @param {number} nodeId
+     * @param {object} options
+     */
     static success(graphId, nodeId, options = {}) {
-        return new InciteResult(graphId, nodeId, value, { ...options, success: true});
+        return new NodeResult(graphId, nodeId, value, { ...options, success: true});
     }
 
+    /**
+     * Create a NodeResult with an error
+     *
+     * @param {number} graphId
+     * @param {number} nodeId
+     * @param {object} options
+     */
     static failure(graphId, nodeId, error, options = {}) {
-        return new InciteResult(graphId, nodeId, null, {...options, success: false, error});
+        return new NodeResult(graphId, nodeId, null, {...options, success: false, error});
     }
 
     /**
      * The id of this NodeResult;
      * matches the id of the Node within the executed graph.
+     *
+     * @type {number}
      */
     get id() {
         return this.nodeId;
     }
 
+    /**
+     * The id of the graph this NodeResult is associated with
+     *
+     * @type {number}
+     */
     get graphId() {
         return this.#graphId;
     }
 
+    /**
+     * The id of the node this NodeResult is associated with
+     *
+     * @type {number}
+     */
     get nodeId() {
         return this.#nodeId;
     }
@@ -56,6 +82,8 @@ class NodeResult {
     /**
     * The success state of this result
     * Will be true if the node executed successfully
+    *
+    * @type {boolean}
     */
     get success() {
         return this.#success;
@@ -65,10 +93,18 @@ class NodeResult {
         this.#success = state;
     }
 
+    /**
+     * The error provided by this NodeResult, if there is one. Otherwise, null.
+     *
+     * @type {Error}
+     */
     get error() {
         return this.#error;
     }
 
+    /**
+     * @type {array}
+     */
     get warnings() {
         return this.#warnings;
     }
@@ -79,15 +115,25 @@ class NodeResult {
      * and will be carried forward by pure nodes.
      * When true, the next Node will ignore it's cached output value(s)
      * and re-execute.
+     *
+     * @type {boolean}
      */
     get valueChanged() {
         return this.#valueChanged;
     }
 
+    /**
+     * @type {object<number, PortResult}
+     */
     get portResults() {
         return Object.values(this.#portResults);
     }
 
+    /**
+     * Add a warning to this NodeResult.
+     *
+     * @returns {NodeResult}
+     */
     addWarning(warning) {
         this.#warnings.push(warning);
         return this;
@@ -96,16 +142,29 @@ class NodeResult {
     /**
      * Provide the error which caused this result to fail;
      * Setting an error causes this result to be marked as not successfull.
+     *
+     * @param {Error} error
      */
     setError(error) {
         this.#success = false;
         this.#error = error;
     }
 
+    /**
+     * Gets the PortResult with the given Id.
+     *
+     * @param {number} portResultId
+     * @returns {PortResult}
+     */
     getPortResult(portResultId) {
         return this.#portResults[portResultId];
     }
 
+    /**
+     * Set the PortResult associated with its Id.
+     *
+     * @param {PortResult} portResult
+     */
     setPortResult(portResult) {
         this.#portResults[portResult.id] = portResult; // TODO verify is PortResult
     }
