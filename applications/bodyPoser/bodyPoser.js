@@ -45,7 +45,7 @@ let settings = Settings.getValue("Body Poser", {
 	upperBodyHandles: true,
 	lowerBodyHandles: true,
 	hipsHandle: true,
-	spine2Handle: true,
+	spine2Handle: false,
 	headHandle: true,
 	public: false,
 });
