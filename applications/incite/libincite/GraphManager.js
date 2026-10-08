@@ -36,7 +36,7 @@ class GraphManager {
     /**
      * Add a graph
      *
-     * @param {Object} node - Instance of a Graph
+     * @param {Graph} node - Instance of a Graph
      * @returns {number} new graph id
      */
     addGraph(graph) {
@@ -53,7 +53,7 @@ class GraphManager {
     /**
      * Get the specified graph
      *
-     * @Property {Number} graphId
+     * @param {number} graphId
      * @returns {Graph}
      */
     getGraph(graphId) {
@@ -63,7 +63,7 @@ class GraphManager {
     /**
      * Delete a node from this graph by its id
      *
-     * @Property {number} graphId
+     * @param {number} graphId
      */
     deleteGraph(graphId) {
         console.log("GraphManager 1 Deleted graph");
@@ -82,14 +82,14 @@ class GraphManager {
     /**
      * Emits when a Graph is loaded
      *
-     * @type Signal<(graphId: number) => void>
+     * @type {Signal<(graphId: number) => void>}
      */
     graphAddedEvent = new Signal("GraphAddedEvent");
 
     /**
      * Emits when a Graph is removed
      *
-     * @type Signal<(graphId: number) => void>
+     * @type {Signal<(graphId: number) => void>}
      */
     graphDeletedEvent = new Signal("GraphDeletedEvent");
 }
