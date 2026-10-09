@@ -9,6 +9,53 @@ const InciteStore = require("./InciteStore.js");
 
 /**
  * Builds graphs from a variety of sources and for varying contexts.
+ *
+ * @example
+ * // Create builder instance
+ * const builder = new GraphBuilder()
+ * // Add some nodes
+ * const NumberNode = nodeRegistry.get("number");
+ * const AddNode = nodeRegistry.get("add");
+ * const PrintNode = nodeRegistry.get("print");
+ * builder.addNode(new NumberNode())
+ *        .addNode(new NumberNode());
+ *        .addNode(new AddNode());
+ *        .addNode(new PrintNode());
+ * // Add connections between nodes
+ * builder.addConnections([
+ *     {
+ *         in: {
+ *             node: 0,
+ *             port: 0
+ *         },
+ *         out: {
+ *             node: 2,
+ *             port: 0
+ *         }
+ *     },
+ *     {
+ *         in: {
+ *             node: 1,
+ *             port: 0
+ *         },
+ *         out: {
+ *             node: 2,
+ *             port: 1
+ *         }
+ *     },
+ *     {
+ *         in: {
+ *             node: 2,
+ *             port: 2
+ *         },
+ *         out: {
+ *             node: 3,
+ *             port: 0
+ *         }
+ *     }
+ * ])
+ * // Build the graph!
+ * const graph = builder.build();
  */
 class GraphBuilder {
     constructor(data = {}) {
@@ -31,7 +78,7 @@ class GraphBuilder {
     }
 
     /**
-     * Set the graph's Url
+     * Set the graph's source URL
      *
      * @param {string} url
      * @returns {GraphBuilder}
@@ -45,7 +92,7 @@ class GraphBuilder {
      * Add a node to the graph
      *
      * @param {Node} node
-     * @returns {GRaphBuilder}
+     * @returns {GraphBuilder}
      */
     addNode(node) {
         this._nodes.push(node);
