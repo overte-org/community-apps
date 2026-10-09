@@ -4,31 +4,32 @@
 //
 
 /**
- * @typedef {Object} GraphJson-Node
- * @property {string} type
+ * @typedef {Object} Graph~NodeJson
+ * @property {string} type - The unique type string of the node
  * @property {Object} data
  */
 
 /**
- * @typedef {Object} GraphJson-Connection
- * @property {GraphJson-Connection-Point} in
- * @property {GraphJson-Connection-Point} out
+ * @typedef {Object} Graph~Connection
+ * @property {Graph~ConnectionPoint} in - The tart of the connection; a node's output port
+ * @property {Graph~ConnectionPoint} out - The end of the connection; a node's input port
  */
 
 /**
- * @typedef {Object} GraphJson-Connection-Point
- * @property {number} node
- * @property {number} port
+ * @typedef {Object} Graph~ConnectionPoint
+ * @property {number} node - The node id
+ * @property {number} port - the port id
  */
 
 /**
- * @typedef {json} GraphJson
- * @property {Array<GraphJson-Node>} nodes
- * @property {Array<GraphJson-Connection>} connections
+ * @typedef {Object} GraphJson
+ * @property {Array<Graph~Node>} nodes
+ * @property {(Array<Graph~Connection>|undfined)} connections
+ * @property {(Array<Graph~Assertion>|undefined)} assertion
  */
 
 /**
- * @typedef {Object} GraphJson-Assertion
+ * @typedef {Object} Graph~Assertion
  * @property {number} nodeId - The id of the node this assertion is about
  * @property {number} portId - The id of the output port this assertion is about
  * @property {*} value - The value of the specified node's output port after exection
@@ -64,13 +65,13 @@ class Graph {
 
     /**
      * An array of connections between nodes
-     * @type {Array<GraphJson-Connection>}
+     * @type {Array<Graph~Connection>}
      */
     #connections
 
     /**
      * A map of connection
-     * @type {map<number, GraphJson-Connection>}
+     * @type {map<number, Graph~Connection>}
      */
     #connectionsById
 
@@ -176,7 +177,7 @@ class Graph {
     /**
      * A copy of the connections in this graph
      *
-     * @returns {Array<GraphJson-Connection>}
+     * @returns {Array<Graph~Connection>}
      */
     get connections() {
         return [ ... this.#connections];
@@ -185,7 +186,7 @@ class Graph {
     /**
      * A copy of the assertions for this graph
      *
-     * @returns {Array<GraphJson-Assertion>}
+     * @returns {Array<Graph~Assertion>}
      */
     get assertions() {
         return [ ... this.#assertions];
@@ -265,7 +266,7 @@ class Graph {
     /**
      *
      * @param {number} connectionId
-     * @returns {GraphJson-Connection}
+     * @returns {Graph~Connection}
      */
     getConnection(connectionId) {
         return this.#connectionsById.get(connectionId);
@@ -372,7 +373,7 @@ class Graph {
     /**
      * Validate the given connection
      *
-     * @param {GraphJson-Connection} connection
+     * @param {Graph~Connection} connection
      * @returns {boolean}
      */
     validateConnection(connection){
@@ -585,7 +586,7 @@ class Graph {
      * Returns any connections involving the specified node
      *
      * @param {GraphNode} graphNode
-     * @returns {Array<GraphJson-Connection>} - input and output connections
+     * @returns {Array<Graph~Connection>} - input and output connections
      */
     getConnections(graphNode) {
         //console.log(graphNode);
