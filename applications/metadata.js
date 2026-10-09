@@ -361,7 +361,7 @@ var metadata = { "applications":
             "caption": "POSE"
         },
         {
-            "isActive": true,
+            "isActive": false,
             "directory": "incite",
             "name": "Incite Visual Scripting",
             "description": "Incite your entities to act with visual scripting!",

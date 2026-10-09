@@ -565,7 +565,7 @@
          "appHomeUrl": "https://thingvellir.net"
       }
       {
-         "appActive":true,
+         "appActive":false,
          "appBaseDirectory":"incite",
          "appName":"Incite Visual Scripting",
          "appDescription":"Incite your entities to act with visual scripting!",
