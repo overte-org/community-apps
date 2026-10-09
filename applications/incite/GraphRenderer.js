@@ -126,7 +126,7 @@ class GraphRenderer {
     /**
      * Add a new NodeRenderer for the specified node
      * @param {number} nodeId - The ID of the node
-     * @return {NodeRenderer} - The new NodeRenderer object for the specified node
+     * @returns {NodeRenderer} - The new NodeRenderer object for the specified node
      */
     addNodeRenderer(nodeId) {
         const nodeRenderer = new NodeRenderer(this, nodeId);

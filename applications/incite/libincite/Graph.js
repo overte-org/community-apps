@@ -486,7 +486,7 @@ class Graph {
      * Run through the entire graph in order, executing each node
      *
      * @param {boolean} force - force this graph to execute, even if it fails validation.
-     * @return {ExecutionFrame} - The results of this execution
+     * @returns {ExecutionFrame} - The results of this execution
      */
     execute(force = false) {
         // Calculate the number of dependencies which must be resolved before each node can execute

@@ -179,7 +179,7 @@ class GraphBuilder {
      * Loads Graph data from json. Accepts partial data.
      *
      * @param {(string|object)} jsonData - JSON string or object
-     * @return {GraphBuilder}
+     * @returns {GraphBuilder}
      */
     fromJson(jsonData) {
         const data = typeof jsonData == 'string'
@@ -221,7 +221,7 @@ class GraphBuilder {
     /**
      * Resets all data associated with this GraphBuilder.
      *
-     * @return {GraphBuilder}
+     * @returns {GraphBuilder}
      */
     reset() {
         this._id = null;

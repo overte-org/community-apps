@@ -27,7 +27,7 @@ class GraphManager {
     /**
      * Get a copy of all current graphs
      *
-     * @return {Array}
+     * @returns {Array}
      */
     get graphs() {
         return [ ... this.#graphs ];

@@ -45,7 +45,7 @@ class NodeRegistry {
     /**
      * Get a copy of all available nodes
      *
-     * @return {Map}
+     * @returns {Map}
      */
     get nodes() {
         return new Map(this.#nodes);
