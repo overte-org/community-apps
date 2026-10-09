@@ -101,7 +101,7 @@ class GraphRenderer {
      * Compares fresh graph data with data from the previous frame.
      * Prepares for the next render frame.
      * @param {number} graphId - The id for the graph to render
-     * @param {array<number>} changedNodeIds - An array of nodes which may need to be rerendered
+     * @param {Array<number>} changedNodeIds - An array of nodes which may need to be rerendered
      */
     update(graphId, changedNodeIds) {
         console.log("GraphRenderer update", graphId, changedNodeIds);

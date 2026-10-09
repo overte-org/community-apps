@@ -54,7 +54,7 @@ class NodeRegistry {
     /**
      * Register a new node type
      *
-     * @param {object} node - Node class to register
+     * @param {Object} node - Node class to register
      * @returns {boolean} - If the node has been registed successfully
      */
     register(node) {

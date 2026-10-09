@@ -5,7 +5,7 @@
 //
 
 /**
- * @typedef {object} renderTask
+ * @typedef {Object} renderTask
  * @property {Object} element
  * @property {Object} document
  */
@@ -18,7 +18,7 @@
 class BaseRenderer {
 
     /**
-     * @type {array<renderTask>}
+     * @type {Array<renderTask>}
      */
     #renderTasks
 

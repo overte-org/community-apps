@@ -11,10 +11,10 @@ const PortResult = require("../PortResult.js");
 /**
  * The base executable Node which all other nodes should extend
  *
- * @property {object} data
- * @property {object} graph - the graph this node belongs to
+ * @property {Object} data
+ * @property {Object} graph - the graph this node belongs to
  * @property {number} id - The id of this node instance
- * @property {object} #node
+ * @property {Object} #node
  * @property {string} type - They type of this node
  */
 class Node {
@@ -44,7 +44,7 @@ class Node {
 
     /**
      * @abstract
-     * @returns {array<NodePort>} input ports
+     * @returns {Array<NodePort>} input ports
      */
     static get defaultInputs() {
         throw new Error(`Node type ${this.type} must set its own defaultInputs`);
@@ -52,7 +52,7 @@ class Node {
 
     /**
      * @abstract
-     * @returns {array<NodePort>} output ports
+     * @returns {Array<NodePort>} output ports
      */
     static get defaultOutputs() {
         throw new Error(`Node type ${this.type} must set its own defaultOutputs`);

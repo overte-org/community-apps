@@ -9,7 +9,7 @@ const TactileElement = require("./TactileElement.js");
 /**
  * Base Layout class
  *
- * @param {object} options
+ * @param {Object} options
  *
  * @property {number} spacing - The spacing between child elements in this layout
  *
@@ -44,7 +44,7 @@ class Layout extends TactileElement {
 
     /**
      * Calculate layout
-     * @param {object} options
+     * @param {Object} options
      */
     calculate(options = {}) {
         if (!this.cache) {

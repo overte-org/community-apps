@@ -7,7 +7,7 @@
 const Signal = require("../../libincite/Signal.js");
 
 /**
- * @typedef {object} GeometryCache
+ * @typedef {Object} GeometryCache
  * @property {number} x - x position relative to the parent
  * @property {number} y - y position relative to the parent
  * @property {number} absoluteX - x position within the document
@@ -17,7 +17,7 @@ const Signal = require("../../libincite/Signal.js");
  */
 
 /**
- * @typedef {object} Spacing
+ * @typedef {Object} Spacing
  * @property {number} top
  * @property {number} right
  * @property {number} bottom
@@ -30,7 +30,7 @@ const Signal = require("../../libincite/Signal.js");
  * @property {number} id - The unique id of this element
  * @property {number} depth - the depth of this element with the document tree
  * @property {number} documentId - The ID of the document this element is attached to.
- * @property {array<object>} elements - The list of child elements within this element
+ * @property {Array<TactileElement>} elements - The list of child elements within this element
  * @property {number} mindWidth - the minimum width this element should be
  * @property {number} minHeight - the minimum heigh this element should be
  * @property {number} maxWidth - the maxium width this element can be
@@ -40,15 +40,16 @@ const Signal = require("../../libincite/Signal.js");
  * @property {string} alignment - Unused ; The horizontal alignment of child elements
  * @property {Spacing} margins - The space around the outer edges of elements within this element
  * @property {boolean} visible - Whether the element will be visible when rendered
+ * @property {boolean} render - whether this element and its children will be part of the rendered tree
  * @property {number} offsetZ - How far forward of the parent to render this element
- * @property {object} parent - The TactileElement which this element is a child of
+ * @property {TactileElement} parent - The TactileElement which this element is a child of
  * @property {boolean} isContainer
  * @property {boolean} valid - If this element has had its layout computed; when false it must be updated, once valid it will be rerendered
  * @property {boolean} isPlaced - If this element has been assigned coordinates
  * @property {GeometryCache} cache - Cache of computed geometry for this element
- * @property {array<elements>} visibleElements - The elements which are marked as visible
- * @property {array<elements>} validElements - The elements which are marked as valid
- * @property {array<elements>} placedElements - The elements which have already been assigned coordinates
+ * @property {Array<TactileElement>} visibleElements - The elements which are marked as visible
+ * @property {Array<TactileElement>} validElements - The elements which are marked as valid
+ * @property {Array<TactileElement>} placedElements - The elements which have already been assigned coordinates
  */
 class TactileElement {
 

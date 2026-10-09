@@ -4,33 +4,33 @@
 //
 
 /**
- * @typedef {object} GraphJson-Node
+ * @typedef {Object} GraphJson-Node
  * @property {string} type
- * @property {object} data
+ * @property {Object} data
  */
 
 /**
- * @typedef {object} GraphJson-Connection
+ * @typedef {Object} GraphJson-Connection
  * @property {GraphJson-Connection-Point} in
  * @property {GraphJson-Connection-Point} out
  */
 
 /**
- * @typedef {object} GraphJson-Connection-Point
+ * @typedef {Object} GraphJson-Connection-Point
  * @property {number} node
  * @property {number} port
  */
 
 /**
  * @typedef {json} GraphJson
- * @property {array<GraphJson-Node>} nodes
- * @property {array<GraphJson-Connection>} connections
+ * @property {Array<GraphJson-Node>} nodes
+ * @property {Array<GraphJson-Connection>} connections
  */
 
 /**
- * @typedef {object} GraphJson-Assertion
- * @property {Number} nodeId - The id of the node this assertion is about
- * @property {Number} portId - The id of the output port this assertion is about
+ * @typedef {Object} GraphJson-Assertion
+ * @property {number} nodeId - The id of the node this assertion is about
+ * @property {number} portId - The id of the output port this assertion is about
  * @property {*} value - The value of the specified node's output port after exection
  */
 
@@ -64,7 +64,7 @@ class Graph {
 
     /**
      * An array of connections between nodes
-     * @type {array<GraphJson-Connection>}
+     * @type {Array<GraphJson-Connection>}
      */
     #connections
 
@@ -157,6 +157,8 @@ class Graph {
 
     /**
      * the url where the json definition for this graph can be found
+     *
+     * @returns {string}
      */
     get url() {
         return this.#url;
@@ -164,6 +166,8 @@ class Graph {
 
     /**
      * A copy of the nodes in this graph
+     *
+     * @returns {Array<Node>}
      */
     get nodes() {
         return [ ... this.#nodes];
@@ -171,7 +175,8 @@ class Graph {
 
     /**
      * A copy of the connections in this graph
-     * @returns {array<GraphJson-Connection>}
+     *
+     * @returns {Array<GraphJson-Connection>}
      */
     get connections() {
         return [ ... this.#connections];
@@ -179,7 +184,8 @@ class Graph {
 
     /**
      * A copy of the assertions for this graph
-     * @returns {array<GraphJson-Assertion>}
+     *
+     * @returns {Array<GraphJson-Assertion>}
      */
     get assertions() {
         return [ ... this.#assertions];
@@ -187,7 +193,8 @@ class Graph {
 
     /**
      * The order this graph will execute in
-     * @returns {array<number>} - nodeIds in order of execution
+     *
+     * @returns {Array<number>} - nodeIds in order of execution
      */
     get executionOrder() {
         return [ ... this.#executionOrder ];
@@ -200,7 +207,8 @@ class Graph {
 
     /**
      * Add a node to this graph
-     * @property {Node}
+     *
+     * @param {Node}
      */
     addNode(node) {
         node.id = this.newId;
@@ -215,6 +223,9 @@ class Graph {
 
     /**
      * Get a node by its ID
+     *
+     * @param {number} nodeId
+     * @returns {Node}
      */
     getNode(nodeId) {
         return this.#nodesById.get(nodeId);
@@ -222,7 +233,8 @@ class Graph {
 
     /**
      * Delete a node from this graph by its id
-     * @property {Number}
+     *
+     * @param {number}
      */
     deleteNode(nodeId) {
         const node = this.#nodes.get(nodeId);
@@ -250,10 +262,19 @@ class Graph {
         this.#valid = this.validateGraph();
     }
 
+    /**
+     *
+     * @param {number} connectionId
+     * @returns {GraphJson-Connection}
+     */
     getConnection(connectionId) {
         return this.#connectionsById.get(connectionId);
     }
 
+    /**
+     *
+     * @param {number} connectionId
+     */
     deleteConnection(connectionId) {
         console.log("graph.deleteConnection:", connectionId);
         const connection = this.#connectionsById.get(connectionId);
@@ -271,6 +292,10 @@ class Graph {
      * Get the cached result for the connected output port
      * of the given input port.
      * Will return null if no connected port.
+     *
+     * @param {number} nodeId
+     * @param {number} portId
+     * @returns {(PortResult|null)}
      */
     getConnectedResult(nodeId, portId) {
         for (const connection of this.#connections) {
@@ -294,6 +319,11 @@ class Graph {
         return null;
     }
 
+    /**
+     * @param {number} nodeId
+     * @param {number} portId
+     * @returns {(PortResult|undefined)}
+     */
     getPortResult(nodeId, portId) {
         return this.#resultCache[`${nodeId}:${portId}`];
     }
@@ -305,6 +335,8 @@ class Graph {
     /**
      * Clear results for a node.
      * To be used when the node is removed from the graph.
+     *
+     * @param {number} nodeId
      */
     clearResults(nodeId) {
         // TODO
@@ -339,7 +371,9 @@ class Graph {
 
     /**
      * Validate the given connection
-     * @type {GraphJson-Connection}
+     *
+     * @param {GraphJson-Connection} connection
+     * @returns {boolean}
      */
     validateConnection(connection){
         console.log("graph.validateConnection", JSON.stringify(connection));
@@ -414,6 +448,8 @@ class Graph {
 
     /**
      * Validate all connections in the graph
+     *
+     * @returns {boolean}
      */
     validateConnections() {
         const total = this.connections.length;
@@ -428,7 +464,8 @@ class Graph {
 
     /**
      * Validate everything about this graph; if it fails to validate it will not execute without intervention.
-     * @return {Boolean} - True if this graph is valid
+     *
+     * @returns {boolean} - True if this graph is valid
      */
     validateGraph() {
         let isValid = true;
@@ -448,7 +485,7 @@ class Graph {
      * Run through the entire graph in order, executing each node
      *
      * @param {boolean} force - force this graph to execute, even if it fails validation.
-     * @return {array} - results of execution; will be empty if it did not execute
+     * @return {ExecutionFrame} - The results of this execution
      */
     execute(force = false) {
         // Calculate the number of dependencies which must be resolved before each node can execute
@@ -481,7 +518,7 @@ class Graph {
     /**
      * Find the order in which to execute this graph so all of a node's dependencies are resolved before it would execute.
      *
-     * @return {array<number>} - This Graph's GraphNodes as a list of ids in executable order
+     * @returns {Array<number>} - This Graph's GraphNodes as a list of ids in executable order
      */
     calculateExecutionOrder() {
         // All nodes get a dependency value based on its input connections
@@ -546,8 +583,9 @@ class Graph {
 
     /**
      * Returns any connections involving the specified node
+     *
      * @param {GraphNode} graphNode
-     * @return {array<GraphJson-Connection>} - input and output connections
+     * @returns {Array<GraphJson-Connection>} - input and output connections
      */
     getConnections(graphNode) {
         //console.log(graphNode);
@@ -575,7 +613,7 @@ class Graph {
      * Go through all connected and apply links to nodes
      *
      * @param {boolean} force - force populating connections, even if the graph fails validation.
-     * @return {Boolean} success
+     * @returns {boolean} success
      */
     populateConnections(force = false) { // TODO: What if a connection is removed or no longer points to a node; need to handle clearing old links
         if(!force && !this.#valid) return false;
@@ -598,6 +636,10 @@ class Graph {
         return true;
     }
 
+    /**
+     * @param {ExecutionFrame} executionFrame
+     * @returns {boolean} success
+     */
     verifyAssertions(executionFrame){
         const queue = [ ... this.assertions ];
         let result = true;

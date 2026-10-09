@@ -32,7 +32,7 @@ class NodeResult {
      *
      * @param {number} graphId
      * @param {number} nodeId
-     * @param {object} options
+     * @param {Object} options
      */
     static createSuccess(graphId, nodeId, options = {}) {
         return new NodeResult(graphId, nodeId, value, { ...options, success: true});
@@ -43,7 +43,7 @@ class NodeResult {
      *
      * @param {number} graphId
      * @param {number} nodeId
-     * @param {object} options
+     * @param {Object} options
      */
     static createFailure(graphId, nodeId, error, options = {}) {
         return new NodeResult(graphId, nodeId, null, {...options, success: false, error});
@@ -101,7 +101,7 @@ class NodeResult {
     }
 
     /**
-     * @type {array}
+     * @type {Array}
      */
     get warnings() {
         return this.#warnings;

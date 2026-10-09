@@ -5,10 +5,10 @@
 //
 
 /**
- * @typedef {object} RenderData
- * @Property {array<object>] graphs
- * @Property {array<object>} nodes
- * @Property {array<object>} connections
+ * @typedef {Object} RenderData
+ * @Property {Array<Object>] graphs
+ * @Property {Array<Object>} nodes
+ * @Property {Array<Object>} connections
  */
 
 const incite = require("./libincite/incite.js");

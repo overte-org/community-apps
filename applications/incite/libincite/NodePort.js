@@ -33,14 +33,14 @@ class NodePort {
     /**
      * All possible PortType values
      *
-     * @type {array<PortType>}
+     * @type {Array<PortType>}
      */
     static PortTypes = new Set(Object.values(NodePort.PortType));
 
     /**
      * Create a port for a node.
      *
-     * @param {object} data
+     * @param {Object} data
      */
     constructor(data = {}) {
         this.#id = data.id;
@@ -86,7 +86,7 @@ class NodePort {
     /**
      * Valid data types which this port is compatible with.
      *
-     * @type {array}
+     * @type {Array}
      */
     get types() {
         return this.#types;

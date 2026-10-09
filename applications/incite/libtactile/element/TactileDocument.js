@@ -12,9 +12,9 @@ const Signal = require("../../libincite/Signal.js");
  * Contains the elements
  *
  * @property {number} _nextID - The next id which can be assigned
- * @property {array<number>} _availableIds - ids which were in use but have since become available
+ * @property {Array<number>} _availableIds - ids which were in use but have since become available
  * @property {Map} _elementMap - elements indexed by their Id
- * @property {array<BaseRenderer>} renderers - renderers attached to this document
+ * @property {Array<BaseRenderer>} renderers - renderers attached to this document
  * @property {TactileElement} root - The top level TactileElement container, all other elements are children in the tree below this element
  */
 class TactileDocument extends TactileElement {

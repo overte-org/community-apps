@@ -4,11 +4,6 @@
 //  Copyright 2026 Overte e.V.
 //
 
-// export Node from './Node'
-// export Add from './Add'
-// export Number from './Number'
-// export Print from './Print'
-
 const Node = require('./Node.js');
 const Add = require('./Add.js');
 const Divide = require('./Divide.js');

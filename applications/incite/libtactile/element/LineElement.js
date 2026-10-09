@@ -9,10 +9,10 @@ const TactileElement = require("./TactileElement.js");
 /**
  * A TextElement for displaying text
  *
- * @property {array<Vec3>} linePoints - The sequence of points to draw lines between. The coords are in 2D coordinates relative to its parent. A maximum of 70 points can be specified. Note: The Z coordinate will be relative to this element's offset position.
- * @property {array<Vec3>} normals - The normal vectors for the line's surface at the linePoints. The values are relative to the entity's orientation.
+ * @property {Array<Vec3>} linePoints - The sequence of points to draw lines between. The coords are in 2D coordinates relative to its parent. A maximum of 70 points can be specified. Note: The Z coordinate will be relative to this element's offset position.
+ * @property {Array<Vec3>} normals - The normal vectors for the line's surface at the linePoints. The values are relative to the entity's orientation.
  * @property {arrray<number>} strokeWidths - The widths, in m, of the line at the linePoints.
- * @property {array<Vec3} strokeColors - The base colors of each point, with values in the range 0.0,0.0,0.0 – 1.0,1.0,1.0. If there are more line points than stroke colors, the color property value is used for the remaining points.
+ * @property {Array<Vec3} strokeColors - The base colors of each point, with values in the range 0.0,0.0,0.0 – 1.0,1.0,1.0. If there are more line points than stroke colors, the color property value is used for the remaining points.
  * @property {string} textures - The URL of a JPG or PNG texture to use for the lines.
  * @property {boolean} isUVModeStretch - true if the texture is stretched to fill the whole line, false if the texture repeats along the line.
  * @property {boolean} glow - true if the opacity of the strokes drops off away from the line center, false if it doesn't.

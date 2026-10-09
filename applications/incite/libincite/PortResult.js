@@ -36,7 +36,7 @@ class PortResult {
      * @param {number} nodeId
      * @param {number} portId
      * @param {*} value
-     * @param {object} options
+     * @param {Object} options
      * @returns {PortResult}
      */
     static createSuccess(graphId, nodeId, portId, value, options = {}) {
@@ -50,7 +50,7 @@ class PortResult {
      * @param {number} nodeId
      * @param {number} portId
      * @param {Error} error
-     * @param {object} options
+     * @param {Object} options
      * @returns {PortResult}
      */
     static createFailure(graphId, nodeId, portId, error, options = {}) {
@@ -115,7 +115,7 @@ class PortResult {
     }
 
     /**
-     * @type {array}
+     * @type {Array}
      */
     get warnings() {
         return this.#warnings;

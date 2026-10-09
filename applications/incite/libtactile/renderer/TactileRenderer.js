@@ -9,7 +9,7 @@ const BaseRenderer = require("./BaseRenderer.js");
 const documentManager = require("../TactileStore.js").documentManager;
 
 /**
- * @typedef {object} DocumentElementIds
+ * @typedef {Object} DocumentElementIds
  * @property {number} documentId
  * @property {number} elementId
  */
@@ -18,7 +18,7 @@ const documentManager = require("../TactileStore.js").documentManager;
  * Render TactileElements to an Overte world
  * @property {string} renderContext
  * @property {string} rootEntityId
- * @property {array<string>} entities
+ * @property {Array<string>} entities
  * @property {number} scale - The scale at which to render elements
  * @property {Vec3} originOffset
  * @property {Map} entityMap - entityId, elementId
