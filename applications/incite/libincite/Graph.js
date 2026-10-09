@@ -279,7 +279,23 @@ class Graph {
         this.#unpureNodesOrdering.splice(orderPosition, 0, nodeId);
     }
 
+    /**
+     * connects two node ports with each other.
+     *
+     * If the target (out) port is already connected, then that connection is deleted.
+     *
+     * @param {GraphJson-Connection} connection
+     */
     addConnection(connection) {
+        {
+            const previousConnection = this.#connections.find(
+              (conn) => conn.out.node === connection.out.node && conn.out.port === connection.out.port
+            );
+            if (previousConnection !== undefined) {
+                console.log("graph.addConnection: previous Connection found -> delete: ", JSON.stringify(previousConnection));
+                this.deleteConnection(previousConnection.id);
+            }
+        }
         console.log("graph.addConnection:", JSON.stringify(connection));
         //const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
         connection.id = this.newId;
