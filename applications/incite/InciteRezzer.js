@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("./Logger.js");
 const incite = require("./libincite/incite.js");
 const GraphRez = require("./GraphRez.js");
 
@@ -50,7 +51,7 @@ class InciteRezzer {
      */
     addGraphRez(graphRez) {
         const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
-        console.log("addGraphRez", id);
+        Logger.log("addGraphRez", id);
         graphRez.id = id;
         this.#graphRez.add(graphRez);
         this.#graphRezMap.set(graphRez.id, graphRez);
@@ -66,7 +67,7 @@ class InciteRezzer {
      * Remove a graph to end its rez.
      */
     removeGraphRez(graphRezId) {
-        console.log("removeGraphRez", graphRezId);
+        Logger.log("removeGraphRez", graphRezId);
         const graphRez = this.#graphRezMap.get(graphRezId);
         this.#graphRez.delete(graphRez);
         this.#graphRezMap.delete(graphRezId);

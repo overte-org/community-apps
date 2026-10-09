@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("../Logger.js");
 const Layout = require("./Layout.js");
 
 /**
@@ -24,7 +25,7 @@ class GridLayout extends Layout{
         this.rows = options.rows ?? Infinity; // max rows when flowDirection is 'column'
         this.rowHeight = options.rowHeight ?? 1;
         this.flowDirection = options.flowDirection ?? 'row'; // 'row' or 'column'
-        console.log(`flowDirection: this=${this.flowDirection}, options=${options.flowDirection}`);
+        Logger.log(`flowDirection: this=${this.flowDirection}, options=${options.flowDirection}`);
     }
 
     get type() {
@@ -64,32 +65,32 @@ class GridLayout extends Layout{
                             ? num > this.rows ? this.rows : this.currentRow(num)+1
                             : this.secondaryDimension;
 
-        console.log("Meausuring...");
+        Logger.log("Meausuring...");
         this.cache.maxColumnWidths = new Array(columns).fill(0); //TODO JSDoc
         this.cache.maxRowHeights = new Array(rows).fill(0); // TODO JSDoc
-        console.log(" maxColumnWidths", this.cache.maxColumnWidths);
-        //console.table(this.cache.maxColumnWidths);
-        console.log(" maxRowHeights", this.cache.maxRowHeights);
-        //console.table(this.cache.maxRowHeights);
+        Logger.log(" maxColumnWidths", this.cache.maxColumnWidths);
+        //Logger.table(this.cache.maxColumnWidths);
+        Logger.log(" maxRowHeights", this.cache.maxRowHeights);
+        //Logger.table(this.cache.maxRowHeights);
 
         this.visibleElements.forEach((element, index) => {
-            console.log(`... ${index}: ${element}`);
+            Logger.log(`... ${index}: ${element}`);
             const col = this.currentColumn(index);
             const row = this.currentRow(index);
-            console.log(`   ... column: ${col}, row: ${row}`);
+            Logger.log(`   ... column: ${col}, row: ${row}`);
 
             const dimensions = element.measure();
             const width = dimensions.width;
             const height = dimensions.height;
 
-            console.log(`   ... width: ${width}, height: ${height}`);
+            Logger.log(`   ... width: ${width}, height: ${height}`);
 
             // Is this the biggest element in this column/row? If so, update the width
             this.cache.maxColumnWidths[col] = Math.max(this.cache.maxColumnWidths[col], width);
             this.cache.maxRowHeights[row] = Math.max(this.cache.maxRowHeights[row], height);
 
-            console.log("   ... maxColumnWidths", this.cache.maxColumnWidths);
-            console.log("   ... maxRowHeights", this.cache.maxRowHeights);
+            Logger.log("   ... maxColumnWidths", this.cache.maxColumnWidths);
+            Logger.log("   ... maxRowHeights", this.cache.maxRowHeights);
 
         });
 
@@ -97,22 +98,22 @@ class GridLayout extends Layout{
 
         const idealHeight = this.cache.maxRowHeights.reduce((total, height) => total + height, 0) + (this.spacing * (rows - 1) + this.margins.top + this.margins.bottom);
 
-        console.log("... Measured!");
+        Logger.log("... Measured!");
 
-        console.log(`width: ${idealWidth}, height: ${idealHeight}`);
+        Logger.log(`width: ${idealWidth}, height: ${idealHeight}`);
 
         const totalWidth = Math.max(this.minWidth, Math.min(Math.max(idealWidth, Number.isFinite(this.preferredWidth) ? this.preferredWidth : 0), this.maxWidth));
 
         const totalHeight = Math.max(this.minWidth, Math.min(Math.max(idealHeight, Number.isFinite(this.preferredHeight) ? this.preferredHeight : 0), this.maxHeight));
 
-        console.log(`width: ${totalWidth}, height: ${totalHeight}`);
+        Logger.log(`width: ${totalWidth}, height: ${totalHeight}`);
 
-        console.log(" maxColumnWidths", this.cache.maxColumnWidths);
-        //console.table(this.cache.maxColumnWidths);
+        Logger.log(" maxColumnWidths", this.cache.maxColumnWidths);
+        //Logger.table(this.cache.maxColumnWidths);
 
 
-        console.log(" maxRowHeights", this.cache.maxRowHeights);
-        //console.table(this.cache.maxRowHeights);
+        Logger.log(" maxRowHeights", this.cache.maxRowHeights);
+        //Logger.table(this.cache.maxRowHeights);
 
         const measuredWidth = totalWidth !== Infinity ? totalWidth : Number.MAX_SAFE_INTEGER;
         const measuredHeight = totalHeight !== Infinity ? totalHeight : Number.MAX_SAFE_INTEGER;
@@ -127,7 +128,7 @@ class GridLayout extends Layout{
     }
 
     layout(availableWidth, availableHeight, x, y) {
-        console.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
+        Logger.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const finalWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const finalHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
@@ -151,26 +152,26 @@ class GridLayout extends Layout{
         this.cache.width = finalWidth;
         this.cache.height = finalHeight;
 
-        console.log(`look ${this.cache.x} - ${this.parent.cache.absoluteX}`);
+        Logger.log(`look ${this.cache.x} - ${this.parent.cache.absoluteX}`);
 
-        console.log("margins:", this.margins, "spacing", this.spacing);
+        Logger.log("margins:", this.margins, "spacing", this.spacing);
 
 
         let currentX = this.margins.left;
         let currentY = this.margins.top;
 
-        console.log("Calculating positions...");
+        Logger.log("Calculating positions...");
         this.visibleElements.forEach((element, index) => {
-            console.log(`... ${index}: element ${element}`);
+            Logger.log(`... ${index}: element ${element}`);
             const column = this.currentColumn(index);
             const row = this.currentRow(index);
 
-            console.log(`... ${index}: Column ${column}, Row ${row}`);
+            Logger.log(`... ${index}: Column ${column}, Row ${row}`);
 
             const cellWidth = this.cache.maxColumnWidths[column];
             const cellHeight = this.cache.maxRowHeights[row];
 
-            console.log("margins.left:", this.margins.left, "column:", column, "cellWidth:", cellWidth, "spacing:", this.spacing, "(cellWidth + this.spacing)", (cellWidth + this.spacing));
+            Logger.log("margins.left:", this.margins.left, "column:", column, "cellWidth:", cellWidth, "spacing:", this.spacing, "(cellWidth + this.spacing)", (cellWidth + this.spacing));
 
             element.layout(cellWidth, cellHeight, currentX, currentY);
 
@@ -191,8 +192,8 @@ class GridLayout extends Layout{
             }
         });
 
-        console.log("totalWidth:", this.cache.width, "totalHeight:", this.cache.height);
-        console.log("maxColumnWidths:", this.cache.maxColumnWidths, "maxRowHeights:", this.cache.maxRowHeights);
+        Logger.log("totalWidth:", this.cache.width, "totalHeight:", this.cache.height);
+        Logger.log("maxColumnWidths:", this.cache.maxColumnWidths, "maxRowHeights:", this.cache.maxRowHeights);
 
         this.valid = true;
 

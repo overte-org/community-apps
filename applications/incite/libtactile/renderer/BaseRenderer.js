@@ -4,6 +4,8 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("../Logger.js");
+
 /**
  * @typedef {Object} renderTask
  * @property {Object} element
@@ -42,7 +44,7 @@ class BaseRenderer {
         }
 
         this.#renderTasks.push(renderTask);
-        console.log("Added renderTask for element", renderTask.element.id);
+        Logger.log("Added renderTask for element", renderTask.element.id);
 
         // Schedule a draw, if not already scheduled
         if (!this.renderScheduled) {
@@ -56,7 +58,7 @@ class BaseRenderer {
      * it will render the change on its next pass
      */
     onElementRemoved(document, element) {
-        console.log("onElementRemoved", document.id, element.id)
+        Logger.log("onElementRemoved", document.id, element.id)
         // TODO: Confirm it is an element
 
         // Store the element and document tree in renderTask
@@ -68,7 +70,7 @@ class BaseRenderer {
         }
 
         this.#renderTasks.push(renderTask);
-        console.log("Added renderTask for element", renderTask.element.id);
+        Logger.log("Added renderTask for element", renderTask.element.id);
 
         // Schedule a draw, if not already scheduled
         if (!this.renderScheduled) {
@@ -102,12 +104,12 @@ class BaseRenderer {
      * Render all renderTasks
      */
     renderSchedule() {
-        console.log(`renderSchedule: ${this.#renderTasks.length} tasks`)
+        Logger.log(`renderSchedule: ${this.#renderTasks.length} tasks`)
         for (const renderTask of this.#renderTasks) {
-            console.log("Executing render task for element ", renderTask.element.id, ",", renderTask.document.id);
+            Logger.log("Executing render task for element ", renderTask.element.id, ",", renderTask.document.id);
             const element = renderTask.element;
             if (renderTask.action == "DELETE") {
-                console.log("renderSchedule action to DELETE", element.id)
+                Logger.log("renderSchedule action to DELETE", element.id)
                 this.destroyElement(element);
             } else {
                 this.renderElement(element);

@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("./Logger.js");
 const TactileDocument = require("./element/TactileDocument.js");
 
 class TactileDocumentManager {
@@ -28,7 +29,7 @@ class TactileDocumentManager {
 
     addDocument(document) {
         if (!(document instanceof TactileDocument)) {
-            console.error("Cannot add document; it is not a document.");
+            Logger.error("Cannot add document; it is not a document.");
             return;
         };
         const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;

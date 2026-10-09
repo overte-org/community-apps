@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("../Logger.js");
 const TactileElements = require("../element/index.js");
 const BaseRenderer = require("./BaseRenderer.js");
 const documentManager = require("../TactileStore.js").documentManager;
@@ -63,7 +64,7 @@ class TactileRenderer extends BaseRenderer {
 
         Script.scriptEnding.connect(() => {
             this.cleanup();
-            console.log("TactileRenderer ended.");
+            Logger.log("TactileRenderer ended.");
         });
 
         this.rendererCount = 0;
@@ -83,7 +84,7 @@ class TactileRenderer extends BaseRenderer {
         const documentId = documentElementIds.documentId;
         const elementId = documentElementIds.elementId;
         if (typeof documentId == 'undefined' || typeof elementId == 'undefined') {
-            console.warn("Received a DocumentElementId from TactileRenderer, but the data was incomplete.", documentId, elementId);
+            Logger.warn("Received a DocumentElementId from TactileRenderer, but the data was incomplete.", documentId, elementId);
             return;
         }
         const document = documentManager.getDocument(documentId);
@@ -176,20 +177,20 @@ class TactileRenderer extends BaseRenderer {
      * @param {boolean} isRoot - Is this entity the root entity all other entities will be parented to?
      */
     createEntity(element, isRoot, renderType = "local") {
-        console.log(`createEntity ... offsetZ=${element.offsetZ}, depth=${element.depth}`);
+        Logger.log(`createEntity ... offsetZ=${element.offsetZ}, depth=${element.depth}`);
 
-        console.log(`render element ${this.rendererCount} has a depth of ${element.depth} with offset of ${element.offsetZ} and parent depth of ${element.parent?.depth}`);
+        Logger.log(`render element ${this.rendererCount} has a depth of ${element.depth} with offset of ${element.offsetZ} and parent depth of ${element.parent?.depth}`);
         if (isRoot) {
             // this is the root element, save its entityId seperately.
-            console.log("Before I create root entity; saving some details...");
+            Logger.log("Before I create root entity; saving some details...");
             this.dimensions = {x: element.cache.width, y: element.cache.height, z: 0.2};
-            console.log(` ... dimensions: ${JSON.stringify(this.dimensions)}`);
+            Logger.log(` ... dimensions: ${JSON.stringify(this.dimensions)}`);
             //this.entityOrigin = {x: entityProperties.position.x - (element.cache.width/2), y: entityProperties.position.y - (element.cache.height/2), z: entityProperties.position.z - 0.1}
-            console.log(` ... entityOrigin: ${JSON.stringify(this.entityOrigin)}`);
-            console.log("...done!");
+            Logger.log(` ... entityOrigin: ${JSON.stringify(this.entityOrigin)}`);
+            Logger.log("...done!");
         }
         const entityProperties = this.entityProperties(element);
-        console.log(`Placing entity ${element.id} (${this.rendererCount}) @ ${JSON.stringify(entityProperties.position)}`);
+        Logger.log(`Placing entity ${element.id} (${this.rendererCount}) @ ${JSON.stringify(entityProperties.position)}`);
         const entityId = Entities.addEntity(entityProperties, renderType);
 
         // Store entities for later
@@ -203,10 +204,10 @@ class TactileRenderer extends BaseRenderer {
 
         if (isRoot) {
             // this is the root element, save its entityId seperately.
-            console.log("Created root entity; saving some details...");
+            Logger.log("Created root entity; saving some details...");
             this.rootEntityId = entityId;
-            console.log(` ... rootEntityId: ${this.rootEntityId}`);
-            console.log("...done!");
+            Logger.log(` ... rootEntityId: ${this.rootEntityId}`);
+            Logger.log("...done!");
         }
         this.rendererCount += 1;
         return entityId;
@@ -217,7 +218,7 @@ class TactileRenderer extends BaseRenderer {
      * @param {Object} element
      */
     entityProperties(element) {
-        console.log(element.id, "entityProperties - start");
+        Logger.log(element.id, "entityProperties - start");
         const DEFAULT_ENTITY_PROPERTIES = {
             All: {
                 description: "",
@@ -275,7 +276,7 @@ class TactileRenderer extends BaseRenderer {
                                           element.absoluteZ,
                                           element.id == 0);
 
-        console.log(`zDepth debug - zdepth: ${element.zDepth}, offsetZ: ${element.offsetZ}, absoluteZ: ${element.absoluteZ}`);
+        Logger.log(`zDepth debug - zdepth: ${element.zDepth}, offsetZ: ${element.offsetZ}, absoluteZ: ${element.absoluteZ}`);
 
         // set default properties
         let properties = { ... DEFAULT_ENTITY_PROPERTIES.All,
@@ -287,14 +288,14 @@ class TactileRenderer extends BaseRenderer {
                             unlit: element.unlit,
         }
 
-        console.log(element.id, "entityProperties - switch time!");
+        Logger.log(element.id, "entityProperties - switch time!");
 
-        console.log(element.id, "element.type is", element.type);
+        Logger.log(element.id, "element.type is", element.type);
 
         // Add variant-specific properties
         switch(element.type) {
             case 'TextElement':
-                console.log(element.id, "entityProperties - TextElement!");
+                Logger.log(element.id, "entityProperties - TextElement!");
                 properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.TextElement }
                 properties.text = element.text;
                 properties.backgroundColor = element.color;
@@ -304,12 +305,12 @@ class TactileRenderer extends BaseRenderer {
                 properties.lineHeight = element.lineHeight;
                 break;
             case 'GridElement':
-                console.log(element.id, "entityProperties - GridElement!");
+                Logger.log(element.id, "entityProperties - GridElement!");
                 properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.GridElement }
 
                 break;
             case 'LineElement':
-                console.log(element.id, "entityProperties - LineElement!");
+                Logger.log(element.id, "entityProperties - LineElement!");
                 properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.LineElement };
                 properties.linePoints = element.linePoints.map(point => {
                     return {
@@ -326,14 +327,14 @@ class TactileRenderer extends BaseRenderer {
                 properties.faceCamera = element.faceCamera;
                 break;
             default:
-                console.log(element.id, "entityProperties - default!")
+                Logger.log(element.id, "entityProperties - default!")
                 properties.type = "Box";
                 properties.color = element.color;
                 properties.alpha = element.alpha;
                 break;
         }
 
-        console.log("entityProperties - I switched.");
+        Logger.log("entityProperties - I switched.");
 
         return properties;
     }
@@ -364,27 +365,27 @@ class TactileRenderer extends BaseRenderer {
             // TODO: Disconnect when element is no longer being rendered
             if (element instanceof TactileElements.ButtonElement) {
                 element.elementPressed.connect((documentId, elementId) => {
-                    console.log("renderElement button elementPressed");
+                    Logger.log("renderElement button elementPressed");
                     const document = documentManager.getDocument(documentId);
                     const buttonElement = document.getElement(elementId);
                     buttonElement.color = buttonElement.buttonColorPressed;
                     buttonElement.zDepth = buttonElement.buttonPressDepth;
                 });
                 element.elementReleased.connect((documentId, elementId) => {
-                    console.log("renderElement button elementReleased");
+                    Logger.log("renderElement button elementReleased");
                     const document = documentManager.getDocument(documentId);
                     const buttonElement = document.getElement(elementId);
                     buttonElement.color = buttonElement.buttonColorHover;
                     buttonElement.zDepth = 0.02; // TODO: This should not be hardcoded
                 });
                 element.elementHoverStarted.connect((documentId, elementId) => {
-                    console.log("renderElement button elementHoverStarted");
+                    Logger.log("renderElement button elementHoverStarted");
                     const document = documentManager.getDocument(documentId);
                     const buttonElement = document.getElement(elementId);
                     buttonElement.color = buttonElement.buttonColorHover;
                 });
                 element.elementHoverStopped.connect((documentId, elementId) => {
-                    console.log("renderElement button elementHoverStopped");
+                    Logger.log("renderElement button elementHoverStopped");
                     const document = documentManager.getDocument(documentId);
                     const buttonElement = document.getElement(elementId);
                     buttonElement.color = buttonElement.buttonColorReleased;
@@ -397,7 +398,7 @@ class TactileRenderer extends BaseRenderer {
      * Renders the absence of the given element into the world
      */
     destroyElement(element) {
-        console.log("Destroying element", element.id);
+        Logger.log("Destroying element", element.id);
         const entityId = this.entityMap.get(element.id);
         if (entityId) {
             Entities.deleteEntity(entityId);
@@ -408,7 +409,7 @@ class TactileRenderer extends BaseRenderer {
             this.elementMap.delete(entityId);
             this.entityToDocumentAndElementIds.delete(entityId);
         } else {
-            console.log("Asked to destroy element entity, but element has not been rendered; no such entity known to exist.", element.id);
+            Logger.log("Asked to destroy element entity, but element has not been rendered; no such entity known to exist.", element.id);
         }
     }
 
@@ -436,7 +437,7 @@ class TactileRenderer extends BaseRenderer {
             z: offsetZ,
         });
 
-        print(`TwoToThreeD .. x=${x}, y=${y}, offsetZ=${offsetZ}, width=${width}, height=${height}, isRoot=${isRoot}, origin={x:${origin.x},y:${origin.y},z:${origin.z}}, offsetFromOrigin={x:${offsetFromOrigin.x},y:${offsetFromOrigin.y},z:${offsetFromOrigin.z}}`);
+        Logger.log(`TwoToThreeD .. x=${x}, y=${y}, offsetZ=${offsetZ}, width=${width}, height=${height}, isRoot=${isRoot}, origin={x:${origin.x},y:${origin.y},z:${origin.z}}, offsetFromOrigin={x:${offsetFromOrigin.x},y:${offsetFromOrigin.y},z:${offsetFromOrigin.z}}`);
 
         return Vec3.sum(origin, offsetFromOrigin);
     }

@@ -35,6 +35,7 @@
  * @property {*} value - The value of the specified node's output port after exection
  */
 
+const Logger = require("./Logger.js");
 const Signal = require("./Signal.js");
 const ExecutionFrame = require("./ExecutionFrame.js");
 const ExecutionReel = require("./ExecutionReel.js");
@@ -146,7 +147,7 @@ class Graph {
         this.#assertions = data.assertions ?? [];
 
         this.#valid = this.validateGraph(); // We validate, but we do not judge
-        console.log("Graph is valid?", this.#valid);
+        Logger.log("Graph is valid?", this.#valid);
 
 
         this.populateConnections();
@@ -202,7 +203,7 @@ class Graph {
     }
 
     get newId() {
-        console.log("nextId:", this.#nextId, "availableIds:", this.#availableIds);
+        Logger.log("nextId:", this.#nextId, "availableIds:", this.#availableIds);
         return this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
     }
 
@@ -248,10 +249,10 @@ class Graph {
     }
 
     addConnection(connection) {
-        console.log("graph.addConnection:", JSON.stringify(connection));
+        Logger.log("graph.addConnection:", JSON.stringify(connection));
         //const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
         connection.id = this.newId;
-        console.log("graph.addConnection with id", connection.id);
+        Logger.log("graph.addConnection with id", connection.id);
         this.#connections.push(connection);
         this.#connectionsById.set(connection.id, connection);
 
@@ -277,7 +278,7 @@ class Graph {
      * @param {number} connectionId
      */
     deleteConnection(connectionId) {
-        console.log("graph.deleteConnection:", connectionId);
+        Logger.log("graph.deleteConnection:", connectionId);
         const connection = this.#connectionsById.get(connectionId);
         const index = this.#connections.findIndex((connection) => connection.id == connectionId);
         this.#connections.splice(index, 1);
@@ -376,8 +377,8 @@ class Graph {
      * @param {Graph~Connection} connection
      * @returns {boolean}
      */
-    validateConnection(connection){
-        console.log("graph.validateConnection", JSON.stringify(connection));
+    validateConnection(connection) {
+        Logger.log("graph.validateConnection", JSON.stringify(connection));
         let inPort;
         let outPort;
         let bothPortsDefined = false;
@@ -430,7 +431,7 @@ class Graph {
                                                 (Graph.TYPE_COMPATIBLES[outType] ?? new Set()).has(inType)))) { // TODO: improve validation by matching against specific type currently being output
                         return true;
                     } else {
-                        console.log("Cannot validate", inPort.types, "Connecting to", outPort.types);
+                        Logger.log("Cannot validate", inPort.types, "Connecting to", outPort.types);
                     }
                 };
             }
@@ -443,7 +444,7 @@ class Graph {
         if (bothPortsDefined) message.push("inPort", inPort, "outPort:", outPort);
         if (!bothPortTypesCorrect) message.push("One or more port type is incorrect; inPort:", inPort.type, "outPort:", outPort.type);
         message.push(JSON.stringify(connection));
-        console.warn(... message);
+        Logger.warn(... message);
         return false;
     }
 
@@ -476,7 +477,7 @@ class Graph {
                 .filter(([key, value]) => !value)
                 .map(([key]) => key);
         if (invalidTypes.length != 0) {
-            console.log(`Graph ${this.id} failed the vibe check. The following have issues: ${invalidTypes}`);
+            Logger.log(`Graph ${this.id} failed the vibe check. The following have issues: ${invalidTypes}`);
             return false;
         }
         return true;
@@ -494,7 +495,7 @@ class Graph {
         const queue = this.executionOrder;
         const executionFrame = new ExecutionFrame(this.id);
 
-        console.log("Execution order:", queue);
+        Logger.log("Execution order:", queue);
 
         // Run through execution order
         while (queue.length > 0) {
@@ -504,7 +505,7 @@ class Graph {
             // Iterate all port results of this nodeResult
             const nodeResult = executionFrame.getNodeResult(currentNode.id)
             for (const portResult of nodeResult.portResults) {
-                console.log(`${portResult.nodeId}:${portResult.portId} = ${portResult.value ?? "No Value"}`);
+                Logger.log(`${portResult.nodeId}:${portResult.portId} = ${portResult.value ?? "No Value"}`);
             }
         }
 
@@ -576,7 +577,7 @@ class Graph {
         }
 
         if (result.length !== this.#nodes.size) {
-            console.warn(`Not all nodes were processed! ${result.length}/${this.#nodes.size}`)
+            Logger.warn(`Not all nodes were processed! ${result.length}/${this.#nodes.size}`)
         }
 
         return result;
@@ -589,12 +590,12 @@ class Graph {
      * @returns {Array<Graph~Connection>} - input and output connections
      */
     getConnections(graphNode) {
-        //console.log(graphNode);
+        //Logger.log(graphNode);
         const inputs = [];
         const output = [];
         this.connections.forEach(item => {
-            //console.log(item);
-            //console.log("in:", item.in, ", out:", item.out);
+            //Logger.log(item);
+            //Logger.log("in:", item.in, ", out:", item.out);
             if (item.out.node === graphNode.id) {
                 inputs.push(item);
             } else if (item.in.node === graphNode.id) {
@@ -619,11 +620,11 @@ class Graph {
     populateConnections(force = false) { // TODO: What if a connection is removed or no longer points to a node; need to handle clearing old links
         if(!force && !this.#valid) return false;
         for (const connection of this.connections) {
-            console.log("Connection:", connection);
+            Logger.log("Connection:", connection);
             const inNode = this.getNode(connection.in.node);
             const outNode = this.getNode(connection.out.node);
 
-            //console.log("inNode:", inNode, "outNode:", outNode);
+            //Logger.log("inNode:", inNode, "outNode:", outNode);
 
             const outputPort = inNode.getPort(connection.in.port);
             const inputPort = outNode.getPort(connection.out.port);
@@ -645,7 +646,7 @@ class Graph {
         const queue = [ ... this.assertions ];
         let result = true;
 
-        console.log("Verifying assertions...");
+        Logger.log("Verifying assertions...");
 
         while (queue.length > 0) {
             const assertion = queue.shift();
@@ -655,16 +656,16 @@ class Graph {
             const portResult = executionFrame.getPortResult(assertion.portId);
             const value = assertion.value;
 
-            //console.log(`Verifying assertion ${assertion.nodeId}:${assertion.portId} == ${assertion.value}`);
+            //Logger.log(`Verifying assertion ${assertion.nodeId}:${assertion.portId} == ${assertion.value}`);
 
             if (!portResult.success || portResult.value != value) {
-                console.warn(`!! Graph assertion failure !! Node ${assertion.nodeId}, Port ${assertion.portId} should have value ${value} but has ${portResult.value} instead. ${portResult.success ? "success" : "failure"}`);
+                Logger.warn(`!! Graph assertion failure !! Node ${assertion.nodeId}, Port ${assertion.portId} should have value ${value} but has ${portResult.value} instead. ${portResult.success ? "success" : "failure"}`);
                 result = false;
-                console.log(`Node Execution Result: ${JSON.stringify(nodeResult)}`);
+                Logger.log(`Node Execution Result: ${JSON.stringify(nodeResult)}`);
             }
         }
 
-        if (result) console.log("... All good!");
+        if (result) Logger.log("... All good!");
 
         return result;
     }

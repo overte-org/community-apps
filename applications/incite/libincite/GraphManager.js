@@ -3,6 +3,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("./Logger.js");
 const Graph = require('./Graph.js');
 const Signal = require('./Signal.js');
 
@@ -21,7 +22,7 @@ class GraphManager {
         this.#graphsById = new Map();
         this.#nextId = 0;
         this.#availableIds = [];
-        console.log("new GraphManager");
+        Logger.log("new GraphManager");
     }
 
     /**
@@ -44,8 +45,8 @@ class GraphManager {
         graph.id = id; // TODO: Make graph IDs unique
         this.#graphs.add(graph);
         this.#graphsById.set(id, graph);
-        console.log("addGraph", graph.id);
-        console.log("Graph", graph.id, "is", this.#graphsById.get(graph.id).id);
+        Logger.log("addGraph", graph.id);
+        Logger.log("Graph", graph.id, "is", this.#graphsById.get(graph.id).id);
         this.graphAddedEvent.emit(id); // TODO: Only emit if successfully added
         return id;
     }
@@ -66,10 +67,10 @@ class GraphManager {
      * @param {number} graphId
      */
     deleteGraph(graphId) {
-        console.log("GraphManager 1 Deleted graph");
+        Logger.log("GraphManager 1 Deleted graph");
         const graph = this.#graphsById.get(graphId);
 
-        console.log("GraphManager 2 Deleted graph");
+        Logger.log("GraphManager 2 Deleted graph");
         for (const node of graph.nodes) {
             graph.nodeRemovedEvent.emit(node.id);
         }

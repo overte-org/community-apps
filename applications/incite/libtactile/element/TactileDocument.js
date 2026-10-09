@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("../Logger.js");
 const TactileElement = require("./TactileElement.js");
 const BaseRenderer = require("../renderer/BaseRenderer.js");
 const Signal = require("../../libincite/Signal.js");
@@ -26,7 +27,7 @@ class TactileDocument extends TactileElement {
         super(options);
         this.alpha = options.alpha ?? 0;
         this.zDepth = options.zDepth ?? 0;
-        console.log("TactileDocument constructor, after super");
+        Logger.log("TactileDocument constructor, after super");
 
         this.expandToFit = options.expandToFit ?? false; // When true will expand the container document size to fit the contents. When false will constrain the contents to fit the container document size.
 
@@ -37,13 +38,13 @@ class TactileDocument extends TactileElement {
             this._elementMap = new Map();
         }
 
-        console.log("TactileDocument constructor preparing renderers");
+        Logger.log("TactileDocument constructor preparing renderers");
         this.renderers = [];
         if (options.renderer instanceof BaseRenderer) {
-            console.log("BaseRenderer being pushed during construction");
+            Logger.log("BaseRenderer being pushed during construction");
             this.renderers.push(options.renderer)
         } else if (Array.isArray(options.renderer)) { // TODO: Is it an array of BaseRenderers?
-            console.log("Replacing renderers during construction");
+            Logger.log("Replacing renderers during construction");
             this.renderers = options.renderer;
         }
 
@@ -61,7 +62,7 @@ class TactileDocument extends TactileElement {
 
     set documentId(newId) {
         if (this.#documentId) {
-            console.warn("TactileDocument documentId cannot be changed.");
+            Logger.warn("TactileDocument documentId cannot be changed.");
         } else {
             this.#documentId = newId;
         }
@@ -106,17 +107,17 @@ class TactileDocument extends TactileElement {
      * Called when an element is removed as a child of this tree
      */
     _onElementRemovedFromTree(element) {
-        console.log("_onElementRemovedFromTree", element.id)
+        Logger.log("_onElementRemovedFromTree", element.id)
         this._elementMap.delete(element.id);
         this._availableIds.push(element.id);
         for (const renderer of this.renderers) {
-            console.log("Informing rendered of validation.");
+            Logger.log("Informing rendered of validation.");
             renderer.onElementRemoved(this, element);
         }
     }
 
     _onElementInvalidated(element) {
-        console.info(`Element ${element.id} invalidated! What now?`);
+        Logger.info(`Element ${element.id} invalidated! What now?`);
 
         // mark this document invalid
         if (this.valid) this.valid = false;
@@ -151,10 +152,10 @@ class TactileDocument extends TactileElement {
         // so they might choose to render it again at some
         // point in the future.
 
-        console.info(`Element ${element.id} validated! What now?`);
+        Logger.info(`Element ${element.id} validated! What now?`);
 
         for (const renderer of this.renderers) {
-            console.log("Informing rendered of validation.");
+            Logger.log("Informing rendered of validation.");
             renderer.onElementValidated(this, element);
         }
     }
@@ -175,8 +176,8 @@ class TactileDocument extends TactileElement {
     }
 
     update() {
-        console.log("Document update");
-        console.log("Number of elements:", this.elements.length);
+        Logger.log("Document update");
+        Logger.log("Number of elements:", this.elements.length);
 
         // iterate through tree
         // when element is not valid; do geometry calc
@@ -184,9 +185,9 @@ class TactileDocument extends TactileElement {
         this.cache.largestWidth = 0;
         this.cache.largestHeight = 0;
         for (const element of this.elements) {
-            console.log("We got elements!");
+            Logger.log("We got elements!");
             if (!this.expandToFit && element.valid) continue; // Skip if nothing to do.
-            console.log("We invalid!");
+            Logger.log("We invalid!");
             const size = element.measure();
             const width = size.width;
             const height = size.height;
@@ -194,14 +195,14 @@ class TactileDocument extends TactileElement {
             if (   ((width < Number.MAX_SAFE_INTEGER) && width > this.cache.largestWidth)
                 || (this.cache.largestWidthElement == element.id && width < this.cache.largestWidth)
             ) {
-                console.log(`New largest width from element ${element.id}: ${width}, (was ${this.cache.largestWidth})`);
+                Logger.log(`New largest width from element ${element.id}: ${width}, (was ${this.cache.largestWidth})`);
                 this.cache.largestWidth = width;
                 this.cache.largestElement = element.id;
             }
             if (    ((height < Number.MAX_SAFE_INTEGER) && height > this.cache.largestHeight)
                 || (this.cache.largestHeightElement == element.id && height < this.cache.largestHeight)
             ) {
-                console.log(`New largest height from element ${element.id}: ${height}, (was ${this.cache.largestHeight})`);
+                Logger.log(`New largest height from element ${element.id}: ${height}, (was ${this.cache.largestHeight})`);
                 this.cache.largestHeight = height;
                 this.cache.largestElement = element.id;
             }

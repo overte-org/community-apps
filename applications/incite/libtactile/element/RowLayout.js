@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("../Logger.js");
 const Layout = require("./Layout.js");
 
 /**
@@ -24,7 +25,7 @@ class RowLayout extends Layout {
         // Let's measure the width and height of each row, to accomodate the desired element sizes
 
 
-        console.log("Meausuring...");
+        Logger.log("Meausuring...");
 
         let totalWidth = this.margins.left;
         let totalChildWidth = 0;
@@ -55,9 +56,9 @@ class RowLayout extends Layout {
 
         if (!Number.isFinite(measuredWidth)) Number.MAX_SAFE_INTEGER
 
-        console.log("... Measured!");
+        Logger.log("... Measured!");
 
-        console.log(`width: ${measuredWidth}, height: ${measuredHeight}`);
+        Logger.log(`width: ${measuredWidth}, height: ${measuredHeight}`);
 
         this.cache.measuredWidth = measuredWidth;
         this.cache.measuredHeight = measuredHeight;
@@ -71,7 +72,7 @@ class RowLayout extends Layout {
     }
 
     layout(availableWidth, availableHeight, x, y) {
-        console.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
+        Logger.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const maxWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const maxHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
@@ -121,7 +122,7 @@ class RowLayout extends Layout {
         let currentX = this.margins.left;
         const currentY = this.margins.top;
 
-        console.log("Calculating positions...");
+        Logger.log("Calculating positions...");
         visibleElements.forEach((element, index) => {
             const elementExpansionWidth = (element.cache.preferredExpansionWidth / totalExpansionWidth) * remainingWidth;
             const cellWidth = element.minWidth + elementExpansionWidth;
@@ -135,7 +136,7 @@ class RowLayout extends Layout {
 
         });
 
-        console.log("totalWidth:", finalWidth, "totalHeight:", finalHeight);
+        Logger.log("totalWidth:", finalWidth, "totalHeight:", finalHeight);
 
         this.valid = true;
 
