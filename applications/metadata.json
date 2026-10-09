@@ -564,5 +564,19 @@
          "appCategory": "UTILITY",
          "appHomeUrl": "https://thingvellir.net"
       }
+      {
+         "appActive":false,
+         "appBaseDirectory":"incite",
+         "appName":"Incite Visual Scripting",
+         "appDescription":"Incite your entities to act with visual scripting!",
+         "appScriptVersions":{
+            "Stable":"incite_app.js"
+         },
+         "appIcon":"icon-white.svg",
+         "appAuthor":"Zedwick",
+         "appAgeMaturity":"EVERYONE",
+         "appCategory":"UTILITY",
+         "appHomeUrl":"https://more.overte.org"
+      },
    ]
 }

@@ -1,0 +1,65 @@
+{
+    "nodes": [
+        {
+            "id": 0,
+            "type": "number",
+            "data": {
+                "value": 1
+            }
+        },
+        {
+            "id": 1,
+            "type": "add"
+        },
+        {
+            "id": 2,
+            "type": "number",
+            "data": {
+                "value": 2
+            }
+        },
+        {
+            "id": 3,
+            "type": "print"
+        }
+    ],
+    "connections": [
+        {
+            "in": {
+                "node": 0,
+                "port": 0
+            },
+            "out": {
+                "node": 1,
+                "port": 0
+            }
+        },
+        {
+            "in": {
+                "node": 2,
+                "port": 0
+            },
+            "out": {
+                "node": 1,
+                "port": 1
+            }
+        },
+        {
+            "in": {
+                "node": 1,
+                "port": 0
+            },
+            "out": {
+                "node": 3,
+                "port": 0
+            }
+        }
+    ],
+    "assertions": [
+        {
+            "nodeId": 1,
+            "portId": 0,
+            "value": 3
+        }
+    ]
+}

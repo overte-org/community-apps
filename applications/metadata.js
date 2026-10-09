@@ -359,6 +359,16 @@ var metadata = { "applications":
             "jsfile": "bodyPoser/bodyPoser.js",
             "icon": "bodyPoser/icon-white.svg",
             "caption": "POSE"
+        },
+        {
+            "isActive": false,
+            "directory": "incite",
+            "name": "Incite Visual Scripting",
+            "description": "Incite your entities to act with visual scripting!",
+            "jsfile": "incite/incite_app.js",
+            "icon": "incite/icon-white.svg",
+            "caption": "INCITE"
         }
+
     ]
 };
