@@ -19,41 +19,89 @@ class GraphBuilder {
         this._assertions = [];
     }
 
+    /**
+     * Set the Graph's Id
+     *
+     * @param {number} id
+     * @returns {GraphBuilder}
+     */
     setId(id) {
         this._id = id;
         return this;
     }
 
+    /**
+     * Set the graph's Url
+     *
+     * @param {string} url
+     * @returns {GraphBuilder}
+     */
     setUrl(url) {
         this._url = url;
         return this;
     }
 
+    /**
+     * Add a node to the graph
+     *
+     * @param {Node} node
+     * @returns {GRaphBuilder}
+     */
     addNode(node) {
         this._nodes.push(node);
         return this;
     }
 
+    /**
+     * Add a collection of nodes to the graph
+     *
+     * @param {Array<Node>} nodes
+     * @returns {GraphBuilder}
+     */
     addNodes(nodes) {
         this._nodes.push(...nodes);
         return this;
     }
 
+    /**
+     * Add a connection between nodes in the graph
+     *
+     * @param {Object} connection
+     * @returns {GraphBuilder}
+     */
     addConnection(connection) {
         this._connections.push(connection);
         return this;
     }
 
+    /**
+     * Add a collection of connections between nodes in the graph
+     *
+     * @param {Array<Object>} connections
+     * @returns {GraphBuilder}
+     */
     addConnections(connections) {
         this._connections.push(...connections);
         return this;
     }
 
+    /**
+     * Add an assertion
+     *
+     * @param {Object} assertion
+     * @returns {GraphBuilders}
+     */
     addAssertion(assertion) {
         this._assertions.push(assertion);
         return this;
     }
 
+    /**
+     * Add a collection of assertions
+     *
+     * @param {Array<Object>} assertions
+     * @returns {GraphBuilders}
+     */
     addAssertions(assertions) {
         this._assertions.push(...assertions);
         return this;
@@ -61,7 +109,8 @@ class GraphBuilder {
 
     /**
      * Build a new Graph object with the data provided.
-     * return {Graph}
+     *
+     * @returns {Graph}
      */
     build() {
         const graph = new Graph({
@@ -81,6 +130,7 @@ class GraphBuilder {
 
     /**
      * Loads Graph data from json. Accepts partial data.
+     *
      * @param {(string|object)} jsonData - JSON string or object
      * @return {GraphBuilder}
      */
@@ -123,6 +173,7 @@ class GraphBuilder {
 
     /**
      * Resets all data associated with this GraphBuilder.
+     *
      * @return {GraphBuilder}
      */
     reset() {
