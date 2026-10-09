@@ -54,7 +54,7 @@ class NodeRenderer {
             dimensions: [0.5, 0.5, 0.2],
             dynamic: true,
             collisionless: false,
-            userData: "{ \"grabbableKey\": { \"grabbable\": true, \"kinematic\": false } }",
+            grab: { grabbable: true, kinematic: false },
 
         });
 
