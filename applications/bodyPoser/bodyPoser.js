@@ -25,17 +25,15 @@ const HANDLE_MODELS = {
 	hips: {
 		url: Script.resolvePath("./handle_hips.fst"),
 		// model dimensions: [0.36, 0.075, 0.98]
-		dimensions: [0.288, 0.06, 0.784],
+		dimensions: [0.06, 0.03, 0.53],
 	},
 	foot_left: {
 		url: Script.resolvePath("./handle_foot_left.fst"),
-		// model dimensions: [0.36, 1.04, 0.48]
-		dimensions: [0.27, 0.78, 0.36],
+		dimensions: [0.05, 0.7, 0.05],
 	},
 	foot_right: {
 		url: Script.resolvePath("./handle_foot_right.fst"),
-		// model dimensions: [0.36, 1.04, 0.48]
-		dimensions: [0.27, 0.78, 0.36],
+		dimensions: [0.05, 0.7, 0.05],
 	},
 };
 
@@ -176,13 +174,17 @@ function LP_CreateHandles(jointNames) {
 	for (const joint of jointNames) {
 		const jointIndex = MyAvatar.getJointIndex(joint);
 
+		const useVRHandles = HMD.active;
+
 		let model = HANDLE_MODELS.generic;
 
-		if (joint === "Hips") {
+		// only use the handles with poles in VR,
+		// the generic balls are good enough for desktop
+		if (useVRHandles && joint === "Hips") {
 			model = HANDLE_MODELS.hips;
-		} else if (joint === "LeftFoot") {
+		} else if (useVRHandles && joint === "LeftFoot") {
 			model = HANDLE_MODELS.foot_left;
-		} else if (joint === "RightFoot") {
+		} else if (useVRHandles && joint === "RightFoot") {
 			model = HANDLE_MODELS.foot_right;
 		} else if (joint.includes("Left")) {
 			model = HANDLE_MODELS.generic_left;
