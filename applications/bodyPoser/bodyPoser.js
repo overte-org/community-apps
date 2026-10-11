@@ -66,7 +66,10 @@ const jointHandleEntities = {};
 function LP_AnimHandlerFunc(_dummy) {
 	const data = {};
 	for (const [name, handle] of Object.entries(jointHandleEntities)) {
-		let { localPosition, localRotation } = Entities.getEntityProperties(handle, ["localPosition", "localRotation"]);
+		let { position, rotation } = Entities.getEntityProperties(handle, ["position", "rotation"]);
+
+		let localPosition = Entities.worldToLocalPosition(position, MyAvatar.SELF_ID, -1, true);
+		let localRotation = Entities.worldToLocalRotation(rotation, MyAvatar.SELF_ID, -1, true);
 
 		// HACK: Avatar entities inherit MyAvatar.scale, but the IK targets don't,
 		// so scale up the handle position to match the avatar
@@ -202,6 +205,9 @@ function LP_CreateHandles(jointNames) {
 		if (settings.public) {
 			localPosition = Vec3.multiply(localPosition, 1.0 / MyAvatar.scale);
 		}
+
+		// TODO: Public handles desync their localDimensions when grabbed,
+		// reset them when we get the hifi grab message
 
 		let localRotation = Quat.IDENTITY;
 
