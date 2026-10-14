@@ -36,6 +36,7 @@ const Signal = require("../../libincite/Signal.js");
  * @property {number} minHeight - the minimum heigh this element should be
  * @property {number} maxWidth - the maxium width this element can be
  * @property {number} maxHeight - The maximum heigh this element can be
+ * @property {Model} model - The model to load for this element, where supported by the renderer
  * @property {number} preferredWidth - The preferred width of this element if given infinite space
  * @property {number} preferredHeight - the preferred height of this element if given infinite space
  * @property {string} alignment - Unused ; The horizontal alignment of child elements
@@ -59,6 +60,7 @@ class TactileElement {
     #elements
     #minWidth
     #minHeight
+    #model
     #preferredWidth
     #preferredHeight
     #valid
@@ -93,6 +95,7 @@ class TactileElement {
         this.zDepth = options.zDepth ?? 0.1;
         this.offsetZ = options.offsetZ ?? 0;
 
+        this.#model = options.model;
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
@@ -159,6 +162,14 @@ class TactileElement {
 
     get minHeight() {
         return this.#cache?.minHeight ?? this.#minHeight;
+    }
+
+    get model() {
+        return this.#model;
+    }
+
+    set model(url) {
+        this.#model = url;
     }
 
     get color() {

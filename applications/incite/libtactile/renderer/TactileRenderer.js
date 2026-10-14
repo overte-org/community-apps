@@ -252,16 +252,32 @@ class TactileRenderer extends BaseRenderer {
                     equipable: false,
                 }
             },
-            GridElement: {
+            Grid: {
                 type: "Grid",
                 followCamera: false,
                 majorGridEvery: 1,
                 minorGridEvery: 0.2,
             },
-            LineElement: {
+            Model: {
+                type: "Model",
+                collisionShape: "none",
+                compoundShapeURL: "",
+                animation: {
+                    url: "",
+                    running: false,
+                    allowTranslation: false,
+                    loop: true,
+                    hold: false,
+                    currentFrame: 0,
+                    firstFrame: 0,
+                    lastFrame: 100000,
+                    fps: 30.0,
+                }
+            },
+            PolyLine: {
                 type: "PolyLine",
             },
-            TextElement: {
+            Text: {
                 type: "Text",
                 text: "Text",
                 textColor: { red: 255, green: 255, blue: 255 },
@@ -294,11 +310,16 @@ class TactileRenderer extends BaseRenderer {
 
         Logger.debug(element.id, "element.type is", element.type);
 
+        function giveFeedbackModelNotSupported() {
+            console.warn(`Model data provided but is not supported when rendering ${element.type}.`)
+        }
+
         // Add variant-specific properties
         switch(element.type) {
             case 'TextElement':
                 Logger.debug(element.id, "entityProperties - TextElement!");
-                properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.TextElement }
+                if (element.model) giveFeedbackModelNotSupported();
+                properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.Text }
                 properties.text = element.text;
                 properties.backgroundColor = element.color;
                 properties.backgroundAlpha = element.alpha;
@@ -308,12 +329,14 @@ class TactileRenderer extends BaseRenderer {
                 break;
             case 'GridElement':
                 Logger.debug(element.id, "entityProperties - GridElement!");
-                properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.GridElement }
+                if (element.model) giveFeedbackModelNotSupported();
+                properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.Grid }
 
                 break;
             case 'LineElement':
                 Logger.debug(element.id, "entityProperties - LineElement!");
-                properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.LineElement };
+                if (element.model) giveFeedbackModelNotSupported();
+                properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.PolyLine };
                 properties.linePoints = element.linePoints.map(point => {
                     return {
                         x: point.x - element.parent.cache.width/2,
@@ -330,7 +353,20 @@ class TactileRenderer extends BaseRenderer {
                 break;
             default:
                 Logger.debug(element.id, "entityProperties - default!")
-                properties.type = "Box";
+                if (element.model && element.model.modelUrl != "") {
+                    properties = { ... properties, ... DEFAULT_ENTITY_PROPERTIES.Model };
+                    const model = element.model;
+                    properties.modelURL = model.modelUrl;
+                    properties.modelScale = model.modelScale;
+                    properties.useOriginalPivot = model.useOriginalPivot;
+                    properties.textures = model.textures;
+                    properties.shapeType = model.shapeType;
+                    properties.compoundShapeURL = model.compoundShapeUrl;
+                    properties.animation = model.animation;
+                    properties.groupCulled = model.groupCulled;
+                } else {
+                    properties.type = "Box";
+                }
                 properties.color = element.color;
                 properties.alpha = element.alpha;
                 break;
