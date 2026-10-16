@@ -117,7 +117,7 @@ class TactileDocument extends TactileElement {
     }
 
     _onElementInvalidated(element) {
-        Logger.info(`Element ${element.id} invalidated! What now?`);
+        Logger.debug(`Element ${element.id} invalidated! What now?`);
 
         // mark this document invalid
         if (this.valid) this.valid = false;
@@ -152,7 +152,7 @@ class TactileDocument extends TactileElement {
         // so they might choose to render it again at some
         // point in the future.
 
-        Logger.info(`Element ${element.id} validated! What now?`);
+        Logger.debug(`Element ${element.id} validated! What now?`);
 
         for (const renderer of this.renderers) {
             Logger.debug("Informing renderer of validation.");

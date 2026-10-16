@@ -14,42 +14,51 @@ class Logger {
     #enableWarn
     #enableError
 
+    static loggerName = "tactile";
+
     constructor() {
         this.#enableLog = true;
-        this.#enableDebug = false
-        this.#enableInfo = false;
-        this.#enableWarn = false;
-        this.#enableError = false;
+        this.#enableDebug = false;
+        this.#enableInfo = true;
+        this.#enableWarn = true;
+        this.#enableError = true;
     }
 
     log(...args) {
         if (this.#enableLog) {
-            console.log(...args);
+            console.log(`${Logger.loggerName}:`, ...args);
         }
     }
 
     debug(...args) {
         if (this.#enableDebug) {
-            console.log(...args);
+            console.log(`${Logger.loggerName}:`, ...args);
         }
     }
 
     info(...args) {
         if (this.#enableInfo) {
-            console.info(...args);
+            console.info(`${Logger.loggerName}:`, ...args);
         }
     }
 
     warn(...args) {
         if (this.#enableWarn) {
-            console.warn(...args);
+            console.warn(`${Logger.loggerName}:`, ...args);
         }
     }
 
     error(...args) {
         if (this.#enableError) {
-            console.error(...args);
+            console.error(`${Logger.loggerName}:`, ...args);
         }
+    }
+
+    /**
+     * Enable or disable logging debug messages
+     */
+    showDebug(bool) {
+        this.#enableDebug = bool;
     }
 }
 

@@ -15,7 +15,7 @@ const Logger = isOverte ? require("./Logger.js") : Logger;
 
 switch (platform) {
     case 'overte':
-        print("Setting up for Overte");
+        Logger.log("Setting up for Overte");
         Script.clearCache(); // TODO: Don't clear cache in production'
         break;
     case 'node':
@@ -209,9 +209,60 @@ function deleteNode(graphId) {
 }
 
 if (isOverte) {
+    // Settings
+    const debug = Settings.getValue("incite/logDebugMessages", false); // const to make all debug checks free
+    {
+        Logger.showDebug(debug);
+        const InciteLogger = require("./libincite/Logger.js");
+        const TactileLogger = require("./libtactile/Logger.js");
+        InciteLogger.showDebug(debug);
+        TactileLogger.showDebug(debug);
+    }
+
+    const DEVELOPER_SUBMENU = "Developer > Apps"
+    const MENU_DEBUG_NAME = "Incite: Show Debug Messages";
+
+    // Developer menu
+    //
+
+    Menu.addMenu(DEVELOPER_SUBMENU);
+
+    Menu.addMenuItem({
+        menuName: DEVELOPER_SUBMENU,
+        menuItemName: MENU_DEBUG_NAME,
+        isCheckable: true,
+        isChecked: debug,
+    });
+
+    function handleMenuClick(menuItem) {
+        switch(menuItem) {
+            case MENU_DEBUG_NAME:
+                toggleDebug();
+                break;
+        }
+    }
+    Menu.menuItemEvent.connect(handleMenuClick);
+
+    // Enable or disable debug
+    function toggleDebug() {
+        Settings.setValue("incite/logDebugMessages", !debug);
+        // debug is stored as a const and only loaded from settings on script start,
+        // so to toggle it we need to restart the whole script
+        const runningScripts = ScriptDiscoveryService.getRunning();
+        for (const script of runningScripts) {
+            if (script.name === "incite_app.js") {
+                print ("Disabling", script.name);
+                ScriptDiscoveryService.stopScript(script.url, true); // restart
+            }
+        }
+
+    }
+
     updateContextMenu();
 
     Script.scriptEnding.connect(() => {
+        Menu.removeMenuItem(DEVELOPER_SUBMENU, MENU_DEBUG_NAME);
+
         ContextMenu.unregisterActionSet("incite.menu_nodes");
         ContextMenu.unregisterActionSet("incite.menu");
         ContextMenu.unregisterActionSet("incite");
