@@ -25,9 +25,6 @@ class Signal {
      * @param {function} callback
      */
     connect(callback) {
-        // console.log("Signal", this.#name, "connect",
-        //             callback,
-        //             JSON.stringify(callback));
         this.#callbacks.add(callback);
     }
 
@@ -36,9 +33,6 @@ class Signal {
      * @param {function} callback
      */
     disconnect(callback) {
-        // console.log("Signal", this.#name, "disconnect",
-        //             callback,
-        //             JSON.stringify(callback));
         this.#callbacks.delete(callback);
     }
 

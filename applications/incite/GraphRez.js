@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const Logger = require("./Logger.js");
 const incite = require("./libincite/incite.js");
 const tactile = require("./libtactile/tactile.js");
 
@@ -53,7 +54,7 @@ class GraphRez {
     }
 
     setNodeInputportElementToMap(nodeId, portId, elementId) {
-        console.log("setNodeInputportElementToMap", nodeId, portId, elementId);
+        Logger.debug("setNodeInputportElementToMap", nodeId, portId, elementId);
         let portMap = this.#inputportElementMap.get(nodeId);
         if (!portMap) {
             this.#inputportElementMap.set(nodeId, new Map());
@@ -63,17 +64,17 @@ class GraphRez {
     }
 
     getNodeInputportElementToMap(nodeId, portId) {
-        console.log("getNodeInputportElementToMap", nodeId, portId);
+        Logger.debug("getNodeInputportElementToMap", nodeId, portId);
         const portMap = this.#inputportElementMap.get(nodeId);
         if (!portMap) {
-            console.warn("getNodeInputportElementToMap", nodeId, portId, "portMap is nundefined");
+            Logger.warn("getNodeInputportElementToMap", nodeId, portId, "portMap is nundefined");
             return;
         }
         return portMap.get(portId);
     }
 
     setNodeOutputportElementToMap(nodeId, portId, elementId) {
-        console.log("setNodeOutputportElementToMap", nodeId, portId, elementId);
+        Logger.debug("setNodeOutputportElementToMap", nodeId, portId, elementId);
         let portMap = this.#outputportElementMap.get(nodeId);
         if (!portMap) {
             this.#outputportElementMap.set(nodeId, new Map());
@@ -84,10 +85,10 @@ class GraphRez {
 
 
     getNodeOutputportElementToMap(nodeId, portId) {
-        console.log("getNodeOutputportElementToMap", nodeId, portId);
+        Logger.debug("getNodeOutputportElementToMap", nodeId, portId);
         const portMap = this.#outputportElementMap.get(nodeId);
         if (!portMap) {
-            console.warn("getNodeOutputportElementToMap", nodeId, portId, "portMap is nundefined");
+            Logger.warn("getNodeOutputportElementToMap", nodeId, portId, "portMap is nundefined");
             return;
         }
         return portMap.get(portId);
@@ -146,7 +147,7 @@ class GraphRez {
             });
             inputPorts.addElement(inputElement);
             inputElement.elementPressed.connect((documentId, elementId) => {
-                console.log(`Element ${elementId} has been clicked! Input.`);
+                Logger.debug(`Element ${elementId} has been clicked! Input.`);
                 // check if we are in connection mode, so we can finalise the connection here.
                 if (this.interactionMode == 'ConnectingPorts') {
                     const newConnection = {
@@ -159,33 +160,33 @@ class GraphRez {
                             port: port.id,
                         }
                     };
-                    console.log("newConnection:", JSON.stringify(newConnection));
+                    Logger.debug("newConnection:", JSON.stringify(newConnection));
                     if (!this.#graph.validateConnection(newConnection)) {
-                        console.warn("Connection is not valid; Ports are not compatable ");
+                        Logger.warn("Connection is not valid; Ports are not compatable ");
                         return;
                     }
-                    console.log("newConnection 1");
+                    Logger.debug("newConnection 1");
 
                     // End ConnectingPorts interaction mode and clean up connecting line
                     this.startInteractionMode('None');
 
-                    console.log("newConnection 2");
+                    Logger.debug("newConnection 2");
 
                     // Connect nodes in the graph
                     this.#graph.addConnection(newConnection);
                     // Connection is drawn in response to new connection signal from Graph
-                    console.log("newConnection complete");
+                    Logger.debug("newConnection complete");
                 // Do we have an existing connection? We shall disconnect it.
                 } else {
-                    console.log("We are not currently connecting ports.");
+                    Logger.debug("We are not currently connecting ports.");
                     const connections = this.#graph.getConnections(node);
                     connections?.inputs.forEach((connection, connectionIndex) => {
-                        console.log("Could we delete this connection?", connection.id, JSON.stringify(connection))
+                        Logger.debug("Could we delete this connection?", connection.id, JSON.stringify(connection))
                         if (connection.out.port === port.id) {
-                            console.log("Connection matches port", port.id);
+                            Logger.debug("Connection matches port", port.id);
                             // This connection terminates at this node.
                             this.#graph.deleteConnection(connection.id);
-                            console.log("Removed connection:", JSON.stringify(connection));
+                            Logger.debug("Removed connection:", JSON.stringify(connection));
                         }
                     })
                 }
@@ -218,7 +219,7 @@ class GraphRez {
             });
             outputPorts.addElement(outputElement);
             outputElement.elementPressed.connect((documentId, elementId) => {
-                console.log(`Element ${elementId} has been clicked! Output.`);
+                Logger.debug(`Element ${elementId} has been clicked! Output.`);
                 // check we are not already in connection mode (if this is the same output we were already trying to connect just cancel connection mode)
                 if (this.interactionMode == 'ConnectingPorts') return;
 
@@ -280,7 +281,7 @@ class GraphRez {
     }
 
     onConnectionRemoved(graphId, connectionId) {
-        console.log("onConnectionRemoved", graphId, connectionId);
+        Logger.debug("onConnectionRemoved", graphId, connectionId);
         const connectionElementId = this.#connectionElementMap.get(connectionId);
         this.#elementConnectionMap.delete(connectionElementId);
         this.#connectionElementMap.delete(connectionId);
@@ -288,20 +289,20 @@ class GraphRez {
     }
 
     startInteractionMode(newMode, newModeData = {}) {
-        console.log("startInteractionMode", newMode, JSON.stringify(newModeData));
-        console.log("startInteractionMode; current interactionMode:", this.interactionMode);
+        Logger.debug("startInteractionMode", newMode, JSON.stringify(newModeData));
+        Logger.debug("startInteractionMode; current interactionMode:", this.interactionMode);
         // cleanup existing mode
         switch(this.interactionMode) {
             case "ConnectingPorts":
-                console.log("startInteractionMode ConnectingPorts");
+                Logger.debug("startInteractionMode ConnectingPorts");
                 // Cleanup polyline
                 if (this.modeData.elementId) {
                     const document = tactile.tactileStore.documentManager.getDocument(this.modeData.outputPort.documentId)
-                    console.log("startInteractionMode doc1");
+                    Logger.debug("startInteractionMode doc1");
                     //const line = document.getElement(this.modeData.elementId);
-                    console.log("startInteractionMode doc2");
+                    Logger.debug("startInteractionMode doc2");
                     document.removeElement(this.modeData.elementId);
-                    console.log("startInteractionMode doc3");
+                    Logger.debug("startInteractionMode doc3");
                 }
 
                 // Return port visuals to normal
@@ -349,7 +350,7 @@ class GraphRez {
     }
 
     onNodeRemoved(graphId, nodeId) {
-        console.log("onNodeRemoved", graphId, nodeId);
+        Logger.debug("onNodeRemoved", graphId, nodeId);
         const elementId = this.#nodeElementMap.get(nodeId);
         this.document.root.removeElement(elementId);
         this.#nodeElementMap.delete(nodeId);
