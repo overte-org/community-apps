@@ -14,8 +14,6 @@ class Logger {
     #enableWarn
     #enableError
 
-    static loggerName = "ia";
-
     constructor() {
         this.#enableLog = true;
         this.#enableDebug = false;
@@ -26,31 +24,31 @@ class Logger {
 
     log(...args) {
         if (this.#enableLog) {
-            console.log(`${Logger.loggerName}:`, ...args);
+            console.log(...args);
         }
     }
 
     debug(...args) {
         if (this.#enableDebug) {
-            console.log(`${Logger.loggerName}:`, ...args);
+            console.log(...args);
         }
     }
 
     info(...args) {
         if (this.#enableInfo) {
-            console.info(`${Logger.loggerName}:`, ...args);
+            console.info(...args);
         }
     }
 
     warn(...args) {
         if (this.#enableWarn) {
-            console.warn(`${Logger.loggerName}:`, ...args);
+            console.warn(...args);
         }
     }
 
     error(...args) {
         if (this.#enableError) {
-            console.error(`${Logger.loggerName}:`, ...args);
+            console.error(...args);
         }
     }
 
