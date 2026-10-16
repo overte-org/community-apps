@@ -113,6 +113,11 @@ class Graph {
     #exectutionReel
 
     /**
+     * The dependency cycles existing in the current graph state
+     */
+    #dependencyCycles
+
+    /**
      * The execution order of unpure nodes
      *
      * TODO: this is a temporary helper to make execution of unpure nodes work
@@ -213,6 +218,15 @@ class Graph {
     get newId() {
         Logger.debug("nextId:", this.#nextId, "availableIds:", this.#availableIds);
         return this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
+    }
+
+    /**
+     * The cycles in the graph, which should be a directed-acyclic graph
+     *
+     * @returns {Array<Array<number>>} - array of cycles of nodeIds
+     */
+    get dependencyCycles() {
+        return [ ...this.#dependencyCycles.map(e => [...e]) ];
     }
 
     /**
@@ -513,6 +527,113 @@ class Graph {
     }
 
     /**
+     * calculates cycles in the graph
+     *
+     * @returns {Array<Array<number>>} - array of cycles of nodes
+     */
+    calculateCycles() {
+        const inConnectionsMap = new Map();
+        const outConnectionsMap = new Map();
+
+        for (const node of this.#nodes) {
+            const id = node.id;
+            if (!inConnectionsMap.has(id)) inConnectionsMap.set(id, new Set());
+            if (!outConnectionsMap.has(id)) outConnectionsMap.set(id, new Set());
+        }
+
+        {
+            const ns = this.#unpureNodesOrdering.slice(1);
+            for (const [inNode, outNode] of (function*(...iterators) { for (let it of iterators) yield* it; })(
+              this.#connections.map(conn => [conn.in.node, conn.out.node]),
+              // Two consecutive elements in the array form a connection.
+              this.#unpureNodesOrdering.slice(0, -1).map((p,i) => [p,ns[i]])
+            )) {
+                inConnectionsMap.get(inNode).add(outNode);
+                outConnectionsMap.get(outNode).add(inNode);
+            }
+        }
+
+        let prevNodes = [];
+        let next = [ ...[...this.#nodes].map(n => n.id) ];
+
+        // Using Kahn's algorithm to eliminate every node not in a cycle
+        while (next.length > 0 && prevNodes.length !== next.length) {
+            prevNodes = next;
+            next = [];
+            for (const node of prevNodes) {
+                if (outConnectionsMap.get(node).size === 0 || inConnectionsMap.get(node).size === 0) {
+                    inConnectionsMap.forEach(set => { set.delete(node); });
+                    outConnectionsMap.forEach(set => { set.delete(node); });
+                } else {
+                    next.push(node);
+                }
+            }
+        }
+
+        if (next.length > 0) {
+            // there are still nodes left
+            // -> there are no more nodes with degree 0
+            // -> there are only cycles left
+            //
+            // WARNING: this algorithm doesn't find 'duplicate' cycles,
+            //          i.e. [0 -> 1 -> 2, 0 -> 2] will only give out [0 -> 1 -> 2],
+            //          which is enough for our purposes
+
+            const traversePaths = new Map(inConnectionsMap.entries().map(([k,v]) => [k,[...v]]));
+
+            const cycles = [];
+            const visited = new Set();
+
+            for (const startNode of next) {
+                if (visited.has(startNode)) continue;
+
+                const stack = [[startNode, -1]];
+                const path = [];
+
+                while (stack.length > 0) {
+                    const [node, neighborIndex] = stack.at(-1);
+
+                    if (path.indexOf(node) === -1) {
+                        if (visited.has(node)) {
+                            stack.pop();
+                            continue;
+                        }
+                        path.push(node);
+                    }
+
+                    const neighbors = traversePaths.get(node) ?? [];
+
+                    let advanced = false;
+                    for (let i = neighborIndex + 1; i < neighbors.length; i++) {
+                        stack[stack.length - 1][1] = i;
+
+                        const pathIndex = path.indexOf(neighbors[i]);
+                        if (pathIndex !== -1) {
+                            cycles.push(path.slice(pathIndex));
+                            continue;
+                        }
+
+                        if (!visited.has(neighbors[i])) {
+                            stack.push([neighbors[i], -1]);
+                            advanced = true;
+                            break;
+                        }
+                    }
+
+                    if (!advanced) {
+                        stack.pop();
+                        path.pop();
+                        visited.add(node);
+                    }
+                }
+            }
+
+            return cycles;
+        }
+        return [];
+    }
+
+    /**
      * Validate everything about this graph; if it fails to validate it will not execute without intervention.
      *
      * @returns {boolean} - True if this graph is valid
@@ -525,10 +646,18 @@ class Graph {
                 .filter(([key, value]) => !value)
                 .map(([key]) => key);
         if (invalidTypes.length != 0) {
-            Logger.log(`Graph ${this.id} failed the vibe check. The following have issues: ${invalidTypes}`);
+            Logger.warn(`Graph ${this.id} failed the vibe check. The following have issues: ${invalidTypes}`);
             return false;
         }
-        return true;
+
+        // verify DAG-ness
+        this.#dependencyCycles = this.calculateCycles();
+        if (this.#dependencyCycles.length > 0) {
+            Logger.warn("cycles were found in the graph:", this.#dependencyCycles);
+        } else {
+            Logger.debug("no cycles found");
+        }
+        return this.#dependencyCycles.length === 0;
     }
 
     /**
