@@ -51,7 +51,7 @@ class InciteRezzer {
      */
     addGraphRez(graphRez) {
         const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
-        Logger.log("addGraphRez", id);
+        Logger.debug("addGraphRez", id);
         graphRez.id = id;
         this.#graphRez.add(graphRez);
         this.#graphRezMap.set(graphRez.id, graphRez);
@@ -67,7 +67,7 @@ class InciteRezzer {
      * Remove a graph to end its rez.
      */
     removeGraphRez(graphRezId) {
-        Logger.log("removeGraphRez", graphRezId);
+        Logger.debug("removeGraphRez", graphRezId);
         const graphRez = this.#graphRezMap.get(graphRezId);
         this.#graphRez.delete(graphRez);
         this.#graphRezMap.delete(graphRezId);

@@ -27,7 +27,7 @@ class TactileDocument extends TactileElement {
         super(options);
         this.alpha = options.alpha ?? 0;
         this.zDepth = options.zDepth ?? 0;
-        Logger.log("TactileDocument constructor, after super");
+        Logger.debug("TactileDocument constructor, after super");
 
         this.expandToFit = options.expandToFit ?? false; // When true will expand the container document size to fit the contents. When false will constrain the contents to fit the container document size.
 
@@ -38,13 +38,13 @@ class TactileDocument extends TactileElement {
             this._elementMap = new Map();
         }
 
-        Logger.log("TactileDocument constructor preparing renderers");
+        Logger.debug("TactileDocument constructor preparing renderers");
         this.renderers = [];
         if (options.renderer instanceof BaseRenderer) {
-            Logger.log("BaseRenderer being pushed during construction");
+            Logger.debug("BaseRenderer being pushed during construction");
             this.renderers.push(options.renderer)
         } else if (Array.isArray(options.renderer)) { // TODO: Is it an array of BaseRenderers?
-            Logger.log("Replacing renderers during construction");
+            Logger.debug("Replacing renderers during construction");
             this.renderers = options.renderer;
         }
 
@@ -107,11 +107,11 @@ class TactileDocument extends TactileElement {
      * Called when an element is removed as a child of this tree
      */
     _onElementRemovedFromTree(element) {
-        Logger.log("_onElementRemovedFromTree", element.id)
+        Logger.debug("_onElementRemovedFromTree", element.id)
         this._elementMap.delete(element.id);
         this._availableIds.push(element.id);
         for (const renderer of this.renderers) {
-            Logger.log("Informing rendered of validation.");
+            Logger.debug("Informing rendered of validation.");
             renderer.onElementRemoved(this, element);
         }
     }
@@ -155,7 +155,7 @@ class TactileDocument extends TactileElement {
         Logger.info(`Element ${element.id} validated! What now?`);
 
         for (const renderer of this.renderers) {
-            Logger.log("Informing rendered of validation.");
+            Logger.debug("Informing renderer of validation.");
             renderer.onElementValidated(this, element);
         }
     }
@@ -176,8 +176,8 @@ class TactileDocument extends TactileElement {
     }
 
     update() {
-        Logger.log("Document update");
-        Logger.log("Number of elements:", this.elements.length);
+        Logger.debug("Document update");
+        Logger.debug("Number of elements:", this.elements.length);
 
         // iterate through tree
         // when element is not valid; do geometry calc
@@ -185,9 +185,9 @@ class TactileDocument extends TactileElement {
         this.cache.largestWidth = 0;
         this.cache.largestHeight = 0;
         for (const element of this.elements) {
-            Logger.log("We got elements!");
+            Logger.debug("We got elements!");
             if (!this.expandToFit && element.valid) continue; // Skip if nothing to do.
-            Logger.log("We invalid!");
+            Logger.debug("We invalid!");
             const size = element.measure();
             const width = size.width;
             const height = size.height;
@@ -195,14 +195,14 @@ class TactileDocument extends TactileElement {
             if (   ((width < Number.MAX_SAFE_INTEGER) && width > this.cache.largestWidth)
                 || (this.cache.largestWidthElement == element.id && width < this.cache.largestWidth)
             ) {
-                Logger.log(`New largest width from element ${element.id}: ${width}, (was ${this.cache.largestWidth})`);
+                Logger.debug(`New largest width from element ${element.id}: ${width}, (was ${this.cache.largestWidth})`);
                 this.cache.largestWidth = width;
                 this.cache.largestElement = element.id;
             }
             if (    ((height < Number.MAX_SAFE_INTEGER) && height > this.cache.largestHeight)
                 || (this.cache.largestHeightElement == element.id && height < this.cache.largestHeight)
             ) {
-                Logger.log(`New largest height from element ${element.id}: ${height}, (was ${this.cache.largestHeight})`);
+                Logger.debug(`New largest height from element ${element.id}: ${height}, (was ${this.cache.largestHeight})`);
                 this.cache.largestHeight = height;
                 this.cache.largestElement = element.id;
             }

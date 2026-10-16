@@ -23,7 +23,7 @@ class ColumnLayout extends Layout {
 
     measure() {
         // Let's measure the width and height of each row, to accomodate the desired element sizes
-        Logger.log("Meausuring...");
+        Logger.debug("Meausuring...");
 
         let totalWidth = this.preferredWidth;
         let totalChildWidth = 0;
@@ -51,9 +51,9 @@ class ColumnLayout extends Layout {
         measuredWidth = measuredWidth !== Infinity ? measuredWidth : Number.MAX_SAFE_INTEGER;
         measuredHeight = measuredHeight !== Infinity ? measuredHeight : Number.MAX_SAFE_INTEGER;
 
-        Logger.log("... Measured!");
+        Logger.debug("... Measured!");
 
-        Logger.log(`width: ${measuredWidth}, height: ${measuredHeight}`);
+        Logger.debug(`width: ${measuredWidth}, height: ${measuredHeight}`);
 
         this.cache.measuredWidth = measuredWidth;
         this.cache.measuredHeight = measuredHeight;
@@ -67,7 +67,7 @@ class ColumnLayout extends Layout {
     }
 
     layout(availableWidth, availableHeight, x, y) {
-        Logger.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
+        Logger.debug(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const maxWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const maxHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
@@ -117,14 +117,14 @@ class ColumnLayout extends Layout {
         const currentX = this.margins.left;
         let currentY = this.margins.top;
 
-        Logger.log("Calculating positions...");
+        Logger.debug("Calculating positions...");
         this.visibleElements.forEach((element, index) => {
             const elementExpansionHeight = (element.cache.preferredExpansionHeight / totalExpansionHeight) * remainingHeight;
-            Logger.log("prefExpansionHeight:", element.cache.preferredExpansionHeight, "totalExpansionHeight:", totalExpansionHeight, "remainingHeight:", remainingHeight);
+            Logger.debug("prefExpansionHeight:", element.cache.preferredExpansionHeight, "totalExpansionHeight:", totalExpansionHeight, "remainingHeight:", remainingHeight);
             const cellWidth = contentWidth; // Always the same width given as the restriction.
             const cellHeight = element.minHeight + elementExpansionHeight;
-            Logger.log("..CellWidth:", cellWidth);
-            Logger.log("..CellHeight:", cellHeight, "minHeight:", element.minHeight, "expansionHeight:", elementExpansionHeight);
+            Logger.debug("..CellWidth:", cellWidth);
+            Logger.debug("..CellHeight:", cellHeight, "minHeight:", element.minHeight, "expansionHeight:", elementExpansionHeight);
 
             if (index != 0) currentY += this.spacing;
 
@@ -134,7 +134,7 @@ class ColumnLayout extends Layout {
 
         });
 
-        Logger.log("totalWidth:", finalWidth, "totalHeight:", finalHeight);
+        Logger.debug("totalWidth:", finalWidth, "totalHeight:", finalHeight);
 
         this.valid = true;
 

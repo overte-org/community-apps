@@ -39,9 +39,9 @@ function loadGraph(graphURL) {
     req.onreadystatechange = function () {
         if (req.readyState === req.DONE) {
             if (req.status === 200) {
-                //Logger.log("Success");
-                //Logger.log("Content type:", req.getResponseHeader("content-type"));
-                //Logger.log("Content:", req.responseText.slice(0, 100), "...");
+                //Logger.debug("Success");
+                //Logger.debug("Content type:", req.getResponseHeader("content-type"));
+                //Logger.debug("Content:", req.responseText.slice(0, 100), "...");
 
                 graph = new incite.GraphBuilder().fromJson(req.responseText).build();
 
@@ -50,7 +50,7 @@ function loadGraph(graphURL) {
                 graph.execute();
 
             } else {
-                Logger.log("Error", req.status, req.statusText);
+                Logger.warn("Error", req.status, req.statusText);
             }
 
             req = null;
@@ -225,7 +225,7 @@ if (isOverte) {
 
     const handleMessage = function(channel, message, sender) {
         if (channel === ContextMenu.CLICK_FUNC_CHANNEL && sender === MyAvatar.sessionUUID) {
-            Logger.log("Received ContextMenu FUNC");
+            Logger.debug("Received ContextMenu FUNC");
             let data;
             try {
                 data = JSON.parse(message)
@@ -235,11 +235,11 @@ if (isOverte) {
             }
 
             if (data && typeof data === 'object') {
-                Logger.log("Received ContextMenu object");
+                Logger.debug("Received ContextMenu object");
                 const func = data.func;
 
                 if (typeof func === 'string') {
-                    Logger.log("Received ContextMenu func string");
+                    Logger.debug("Received ContextMenu func string");
                     if (func.indexOf('incite.add_node.') === 0) {
                         Logger.log("Adding node...");
                         const nodeType = func.substring(16);

@@ -25,7 +25,7 @@ class RowLayout extends Layout {
         // Let's measure the width and height of each row, to accomodate the desired element sizes
 
 
-        Logger.log("Meausuring...");
+        Logger.debug("Meausuring...");
 
         let totalWidth = this.margins.left;
         let totalChildWidth = 0;
@@ -56,9 +56,9 @@ class RowLayout extends Layout {
 
         if (!Number.isFinite(measuredWidth)) Number.MAX_SAFE_INTEGER
 
-        Logger.log("... Measured!");
+        Logger.debug("... Measured!");
 
-        Logger.log(`width: ${measuredWidth}, height: ${measuredHeight}`);
+        Logger.debug(`width: ${measuredWidth}, height: ${measuredHeight}`);
 
         this.cache.measuredWidth = measuredWidth;
         this.cache.measuredHeight = measuredHeight;
@@ -72,7 +72,7 @@ class RowLayout extends Layout {
     }
 
     layout(availableWidth, availableHeight, x, y) {
-        Logger.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
+        Logger.debug(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const maxWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const maxHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
@@ -122,7 +122,7 @@ class RowLayout extends Layout {
         let currentX = this.margins.left;
         const currentY = this.margins.top;
 
-        Logger.log("Calculating positions...");
+        Logger.debug("Calculating positions...");
         visibleElements.forEach((element, index) => {
             const elementExpansionWidth = (element.cache.preferredExpansionWidth / totalExpansionWidth) * remainingWidth;
             const cellWidth = element.minWidth + elementExpansionWidth;
@@ -136,7 +136,7 @@ class RowLayout extends Layout {
 
         });
 
-        Logger.log("totalWidth:", finalWidth, "totalHeight:", finalHeight);
+        Logger.debug("totalWidth:", finalWidth, "totalHeight:", finalHeight);
 
         this.valid = true;
 

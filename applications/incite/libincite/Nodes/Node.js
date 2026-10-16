@@ -156,7 +156,7 @@ class Node {
         if (port.type !== Node.NodePort.PortType.INPUT) {
             throw new Error(`Port ${portId} is not a valid input port`);
         }
-        Logger.log("getInputResult", portId);
+        Logger.debug("getInputResult", portId);
 
         // Return port result
         return this.graph.getConnectedResult(this.id, portId);
@@ -190,7 +190,7 @@ class Node {
     setPortResult(portId, value) {
         // TODO check if there is a NodeResult set
         // TODO Validate value; type, range, etc.
-        Logger.log("setPortResult", this.graphId, this.id, portId, value);
+        Logger.debug("setPortResult", this.graphId, this.id, portId, value);
         const result = PortResult.createSuccess(this.graphId,
                                                 this.id,
                                                 portId,
@@ -254,9 +254,9 @@ class Node {
         this.nodeResult = new NodeResult(this.graphId, this.id);
 
         try {
-            Logger.log("Execute", this.type);
+            Logger.debug("Execute", this.type);
             for(const port of this.inputs) {
-                Logger.log("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port"); // TODO: N value = no port; Should make more useful error messages.
+                Logger.debug("Port", port.name, "connected to", port.connectedPort?.value ?? "No Port"); // TODO: N value = no port; Should make more useful error messages.
             }
 
             // Execute
@@ -265,7 +265,7 @@ class Node {
             executionFrame.storeNodeResult(this.nodeResult);
             // Cache results
             for (const portResult of this.nodeResult.portResults) {
-                Logger.log("Node.run portResult", JSON.stringify(portResult));
+                Logger.debug("Node.run portResult", JSON.stringify(portResult));
                 this.graph.setPortResult(this.id, portResult.id, portResult);
             }
 

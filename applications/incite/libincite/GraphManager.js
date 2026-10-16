@@ -22,7 +22,7 @@ class GraphManager {
         this.#graphsById = new Map();
         this.#nextId = 0;
         this.#availableIds = [];
-        Logger.log("new GraphManager");
+        Logger.debug("new GraphManager");
     }
 
     /**
@@ -45,8 +45,8 @@ class GraphManager {
         graph.id = id; // TODO: Make graph IDs unique
         this.#graphs.add(graph);
         this.#graphsById.set(id, graph);
-        Logger.log("addGraph", graph.id);
-        Logger.log("Graph", graph.id, "is", this.#graphsById.get(graph.id).id);
+        Logger.debug("addGraph", graph.id);
+        Logger.debug("Graph", graph.id, "is", this.#graphsById.get(graph.id).id);
         this.graphAddedEvent.emit(id); // TODO: Only emit if successfully added
         return id;
     }
@@ -67,10 +67,10 @@ class GraphManager {
      * @param {number} graphId
      */
     deleteGraph(graphId) {
-        Logger.log("GraphManager 1 Deleted graph");
+        Logger.debug("GraphManager 1 Deleted graph");
         const graph = this.#graphsById.get(graphId);
 
-        Logger.log("GraphManager 2 Deleted graph");
+        Logger.debug("GraphManager 2 Deleted graph");
         for (const node of graph.nodes) {
             graph.nodeRemovedEvent.emit(node.id);
         }

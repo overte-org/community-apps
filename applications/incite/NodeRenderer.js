@@ -28,7 +28,7 @@ class NodeRenderer {
      * @param {number} nodeId
      */
     constructor(graphRenderer, nodeId) {
-        Logger.log("NodeRender");
+        Logger.debug("NodeRender");
         this.#graphRenderer = graphRenderer;
         this.#nodeId = nodeId;
         this.#entities = new Set();
@@ -37,7 +37,7 @@ class NodeRenderer {
     }
 
     setup() {
-    Logger.log("Node Render setup");
+        Logger.debug("Node Render setup");
         // get node
         const node = this.#node;
 
@@ -45,7 +45,7 @@ class NodeRenderer {
 
         const properties = Entities.getEntityProperties(graphEntityId, "position");
 
-        Logger.log("Graph entity", graphEntityId, "position", properties.position);
+        Logger.debug("Graph entity", graphEntityId, "position", properties.position);
 
         const nodeEntityId = Entities.addEntity({
             type: "Box",
@@ -59,7 +59,7 @@ class NodeRenderer {
 
         });
 
-        Logger.log("New node entity", nodeEntityId);
+        Logger.debug("New node entity", nodeEntityId);
 
         this.#entities.add(nodeEntityId);
     }

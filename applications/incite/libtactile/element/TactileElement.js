@@ -63,18 +63,18 @@ class TactileElement {
     #valid
 
     constructor(options = {}) {
-        Logger.log("TactileElement constructor");
+        Logger.debug("TactileElement constructor");
         this.id = options.id ?? null;
         this.depth = 0;
 
-        Logger.log("TactileElement constructor preparing elements");
+        Logger.debug("TactileElement constructor preparing elements");
         this.elements = [];
         if (options.elements instanceof TactileElement) {
-            Logger.log("TactileElement pushed during contruction", options.elements);
+            Logger.debug("TactileElement pushed during contruction", options.elements);
             this.addElement(options.elements)
         } else if (Array.isArray(options.elements)) { // TODO: Is it an array of TactileElements?
-            Logger.log(`Array populating elements during construction, length: ${options.elements.length}`);
-            // Logger.log(options.elements); // NOTE: This line locks up Interface, consuming all available RAM
+            Logger.debug(`Array populating elements during construction, length: ${options.elements.length}`);
+            // Logger.debug(options.elements); // NOTE: This line locks up Interface, consuming all available RAM
             for (const element of options.elements) {
                 this.addElement(element);
             }
@@ -167,7 +167,7 @@ class TactileElement {
     }
 
     set cache(cache) {
-        Logger.log("Setting cache");
+        Logger.debug("Setting cache");
         this.#cache = cache;
     }
 
@@ -234,10 +234,10 @@ class TactileElement {
 
         if (this.parent) {
             // Propogate up the tree
-            Logger.log(`Propogate up the tree; ${this.id} -> ${this.parent.id}`)
+            Logger.debug(`Propogate up the tree; ${this.id} -> ${this.parent.id}`)
             this.parent._propogateAttachment(element);
         } else {
-            Logger.log(`${this.id}: parent is ${this.parent?.id}`);
+            Logger.debug(`${this.id}: parent is ${this.parent?.id}`);
         }
 
     }
@@ -246,22 +246,22 @@ class TactileElement {
      * Propogate removal notification up through the tree
      */
     _propogateRemoval(element) {
-        Logger.log("_propogateRemoval");
+        Logger.debug("_propogateRemoval");
         // An element has been removed below/within this element,
         // so this element's geometry is no longer valid
         this.valid = false;
 
         // Notify this element
         this._onElementRemovedFromTree(element);
-        Logger.log("_propogateRemoval post-_onElementRemovedFromTree");
+        Logger.debug("_propogateRemoval post-_onElementRemovedFromTree");
 
 
         if (this.parent) {
             // Propogate up the tree
-            Logger.log(`Propogate up the tree; ${this.id} -> ${this.parent.id}`)
+            Logger.debug(`Propogate up the tree; ${this.id} -> ${this.parent.id}`)
             this.parent._propogateRemoval(element);
         } else {
-            Logger.log(`${this.id}: parent is ${this.parent?.id}`);
+            Logger.debug(`${this.id}: parent is ${this.parent?.id}`);
         }
 
     }
@@ -294,7 +294,7 @@ class TactileElement {
         this.parent = parent;
         this.depth = this.parent ? this.parent.depth + 1 : 0;
 
-        Logger.log(`_onParentChanged: element ${this.id} parent: ${this.parent.id}, depth${this.depth}`);
+        Logger.debug(`_onParentChanged: element ${this.id} parent: ${this.parent.id}, depth${this.depth}`);
 
         // TODO: notify renderer
     }
@@ -303,14 +303,14 @@ class TactileElement {
      * Iterates down through the tree, updating child elements
      */
     _updateChildren() {
-        Logger.log(`   . Updating my (${this.id}) children...`);
+        Logger.debug(`   . Updating my (${this.id}) children...`);
         for (const element of this.elements) {
             element._onParentChanged(this);
             element._propogateAttachment(element)
-            Logger.log(`   . ... element ${element.id} parent: ${element.parent.id}`);
+            Logger.debug(`   . ... element ${element.id} parent: ${element.parent.id}`);
             element._updateChildren();
         }
-        Logger.log(`   . ...done!`);
+        Logger.debug(`   . ...done!`);
     }
 
     /**
@@ -321,18 +321,18 @@ class TactileElement {
             throw new Error('Only TactileElements can be added as a child of a TactileElement');
         }
 
-        Logger.log("addElement...");
-        // Logger.log(" ... adding element to elements");
+        Logger.debug("addElement...");
+        // Logger.debug(" ... adding element to elements");
         this.elements.push(element);
-        Logger.log(" ... calling element._onParentChanged");
+        Logger.debug(" ... calling element._onParentChanged");
         element._onParentChanged(this);
-        Logger.log(`  .. parent is ${element.parent?.id}`);
-        // Logger.log(" ... calling element._propogateAttachment");
+        Logger.debug(`  .. parent is ${element.parent?.id}`);
+        // Logger.debug(" ... calling element._propogateAttachment");
         this._propogateAttachment(element);
-        // Logger.log(" ... calling element._updateChildren");
+        // Logger.debug(" ... calling element._updateChildren");
         // notify children of change in tree
         element._updateChildren();
-        Logger.log("...done!");
+        Logger.debug("...done!");
         return this;
     }
 
@@ -340,7 +340,7 @@ class TactileElement {
      * Remove a child element of this element
      */
     removeElement(elementId) {
-        Logger.log("removeElement", elementId);
+        Logger.debug("removeElement", elementId);
         const element = this.document.getElement(elementId);
         if (!element) {
             Logger.warn(`Cannot remove element from tree #${this.document.id}, element#${elementId} does not exist.`);
@@ -356,7 +356,7 @@ class TactileElement {
      * Clear computed values
      */
     resetCache() {
-        Logger.log("resetting Cache");
+        Logger.debug("resetting Cache");
         this.cache = this.cache ?? {};
         this.cache.elements = new Map();
     }

@@ -24,7 +24,7 @@ class FloatingLayout extends Layout {
     findAvailablePosition(width, height) {
         const visibleElements = this.visibleElements;
         const placedElements = this.placedElements;
-        Logger.log(`findAvailablePosition - placedElements: ${placedElements.length}`);
+        Logger.debug(`findAvailablePosition - placedElements: ${placedElements.length}`);
         const cache = this.cache;
         const spacing = this.spacing;
         const margins = this.margins;
@@ -36,7 +36,7 @@ class FloatingLayout extends Layout {
         for (const candidate of candidates) {
             const rating = rateMyCandidate(candidate); // 0.0 - 1.0; 1.0 is ideal
 
-            Logger.log(`Candidate ${candidate.x},${candidate.y} rating is ${rating} (Best: ${bestRating})`);
+            Logger.debug(`Candidate ${candidate.x},${candidate.y} rating is ${rating} (Best: ${bestRating})`);
 
             if (rating > bestRating) {
                 bestRating = rating;
@@ -50,7 +50,7 @@ class FloatingLayout extends Layout {
         if (!bestCandidate) {
             const offset = placedElements.length*0.1;
             bestCandidate = { x: this.margins.left+offset, y: this.margins.top+offset};
-            Logger.log("Could not find a good place to position the element.");
+            Logger.warn("Could not find a good place to position the element.");
         }
 
         return bestCandidate;
@@ -61,14 +61,14 @@ class FloatingLayout extends Layout {
          * @returns {number} - total overlapping area
          */
         function getOverlap(candidatePosition, element) {
-            Logger.log(`getOverlap candidatePosition: ${candidatePosition.x},${candidatePosition.y}, cache: ${cache.width},${cache.height}, element.cache: ${element.cache.x},${element.cache.y} ${element.cache.measuredWidth},${element.cache.measuredHeight}`)
+            Logger.debug(`getOverlap candidatePosition: ${candidatePosition.x},${candidatePosition.y}, cache: ${cache.width},${cache.height}, element.cache: ${element.cache.x},${element.cache.y} ${element.cache.measuredWidth},${element.cache.measuredHeight}`)
 
             const overlapX = Math.min(candidatePosition.x + cache.width,
                                       element.cache.x + element.cache.measuredWidth) - Math.max(candidatePosition.x, element.cache.x);
             const overlapY = Math.min(candidatePosition.y + cache.height,
                                       element.cache.y + element.cache.measuredHeight) - Math.max(candidatePosition.y, element.cache.y);
 
-            Logger.log(`getOverlap overlap: ${overlapX},${overlapY}`);
+            Logger.debug(`getOverlap overlap: ${overlapX},${overlapY}`);
             return overlapX * overlapY;
         }
 
@@ -81,17 +81,17 @@ class FloatingLayout extends Layout {
             let totalOverlap = 0;
             let greatestOverlap = 0;
 
-            Logger.log("Checking overlaps...");
+            Logger.debug("Checking overlaps...");
             for (const element of placedElements) { // Elements which already have a place in the layout
                 const overlap = getOverlap(candidatePosition, element);
 
-                Logger.log(" ... Overlap is", overlap, "for element", element.id);
+                Logger.debug(" ... Overlap is", overlap, "for element", element.id);
 
                 totalOverlap += overlap;
                 if (overlap > greatestOverlap) greatestOverlap = overlap;
             }
 
-            Logger.log("... totalOverlap:", totalOverlap, "greatestOverlap: ", greatestOverlap);
+            Logger.debug("... totalOverlap:", totalOverlap, "greatestOverlap: ", greatestOverlap);
 
             const totalArea = width * height;
             const areaRemaining = totalArea - greatestOverlap;
@@ -150,7 +150,7 @@ class FloatingLayout extends Layout {
         // Let's measure the width and height of each row, to accomodate the desired element sizes
 
 
-        Logger.log("Meausuring...");
+        Logger.debug("Meausuring...");
 
         let totalArea = 0;
         this.visibleElements.forEach((element, index) => {
@@ -173,9 +173,9 @@ class FloatingLayout extends Layout {
         measuredWidth = measuredWidth !== Infinity ? measuredWidth : Number.MAX_SAFE_INTEGER;
         measuredHeight = measuredHeight !== Infinity ? measuredHeight : Number.MAX_SAFE_INTEGER;
 
-        Logger.log("... Measured!");
+        Logger.debug("... Measured!");
 
-        Logger.log(`width: ${measuredWidth}, height: ${measuredHeight}`);
+        Logger.debug(`width: ${measuredWidth}, height: ${measuredHeight}`);
 
         this.cache.measuredWidth = measuredWidth;
         this.cache.measuredHeight = measuredHeight;
@@ -187,7 +187,7 @@ class FloatingLayout extends Layout {
     }
 
     layout(availableWidth, availableHeight, x, y) {
-        Logger.log(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
+        Logger.debug(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const finalWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const finalHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
@@ -205,14 +205,14 @@ class FloatingLayout extends Layout {
         this.cache.width = finalWidth;
         this.cache.height = finalHeight;
 
-        Logger.log("Calculating positions...");
+        Logger.debug("Calculating positions...");
         this.visibleElements.forEach((element, index) => {
 
             // If element is already position, we don't need to generate a new
             // position for it.
             // We may need to update its position if the this has resized. TODO
             if (element.isPlaced) {
-                Logger.log("Element is already positioned; let's leave it where it is. Element:", element.id)
+                Logger.debug("Element is already positioned; let's leave it where it is. Element:", element.id)
                 element.layout(element.cache.measuredWidth, element.cache.measuredHeight, element.cache.x, element.cache.y);
             } else {
                 const position = this.findAvailablePosition(element.cache.measuredWidth, element.cache.measuredHeight);
@@ -222,7 +222,7 @@ class FloatingLayout extends Layout {
 
         });
 
-        Logger.log("totalWidth:", this.cache.measuredWidth, "totalHeight:", this.cache.measuredHeight);
+        Logger.debug("totalWidth:", this.cache.measuredWidth, "totalHeight:", this.cache.measuredHeight);
 
         this.valid = true;
 

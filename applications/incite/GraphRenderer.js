@@ -61,7 +61,7 @@ class GraphRenderer {
 
 
     constructor(graphId, data = {}) {
-        Logger.log("GraphRenderer", graphId, data);
+        Logger.debug("GraphRenderer", graphId, data);
         this.#graphId = graphId;
         this.#nodeRenderers = data.nodeRenderers ?? new Map();
         this.#renderedConnections = data.renderedConnections ?? new Map();
@@ -69,17 +69,17 @@ class GraphRenderer {
         this.renderGraph();
 
         for (const node of this.graph.nodes) {
-            Logger.log("GraphRenderer constructing nodeRenderer for ", node);
+            Logger.debug("GraphRenderer constructing nodeRenderer for ", node);
             this.addNodeRenderer(node.id);
         }
 
         this.#subscribe();
 
-        Logger.log("GraphRenderer Started");
+        Logger.debug("GraphRenderer Started");
     }
 
     #subscribe() {
-        Logger.log("GraphRenderer graphId:",this.#graphId);
+        Logger.debug("GraphRenderer graphId:",this.#graphId);
         const graph = this.graph;
 
         graph.GraphUpdatedEvent.connect(this.update.bind(this));
@@ -105,7 +105,7 @@ class GraphRenderer {
      * @param {Array<number>} changedNodeIds - An array of nodes which may need to be rerendered
      */
     update(graphId, changedNodeIds) {
-        Logger.log("GraphRenderer update", graphId, changedNodeIds);
+        Logger.debug("GraphRenderer update", graphId, changedNodeIds);
         // Check nodes to see which are marked as updated
         for (const nodeId of changedNodeIds) {
             const node = this.graph.getNode(nodeId);
@@ -140,13 +140,13 @@ class GraphRenderer {
      * @param {number} nodeId
      */
     renderNode(nodeId) {
-        Logger.log("GraphRenderer renderNode", nodeId);
+        Logger.debug("GraphRenderer renderNode", nodeId);
         let nodeRenderer = this.#nodeRenderers.get(nodeId);
         if (!nodeRenderer) {
-            Logger.log("GraphRenderer renderNode", nodeId, "!nodeRenderer");
+            Logger.debug("GraphRenderer renderNode", nodeId, "!nodeRenderer");
             nodeRenderer = this.addNodeRenderer(nodeId);
         } else {
-            Logger.log("Cannot create new NodeRenderer for", nodeId, "nodeRenderer already exists for this node.");
+            Logger.warn("Cannot create new NodeRenderer for", nodeId, "nodeRenderer already exists for this node.");
         }
 
         nodeRenderer.render();
@@ -187,7 +187,7 @@ class GraphRenderer {
      * This is distinct from deletion // TODO: Make this distinct from deletion
      */
     removeNode(nodeId) {
-        Logger.log("removeNode: Graph", this.#graphId, "node", nodeId)
+        Logger.debug("removeNode: Graph", this.#graphId, "node", nodeId)
         this.getNodeRenderer(nodeId).deleteEntities();
         this.#nodeRenderers.delete(nodeId);
     }
@@ -196,7 +196,7 @@ class GraphRenderer {
      * Delete the in-domain representation of the Graph
      */
     deleteGraphEntity() {
-        Logger.log("Deleting Graph entity", this.#graphEntityId);
+        Logger.debug("Deleting Graph entity", this.#graphEntityId);
         Entities.deleteEntity(this.#graphEntityId);
     }
 
@@ -206,7 +206,7 @@ class GraphRenderer {
     end(graphId) {
         if(graphId != this.graphId) return;
 
-        Logger.log("GraphRenderer end graph");
+        Logger.debug("GraphRenderer end graph");
         const graph = this.graph;
 
         //graph.GraphUpdatedEvent.disconnect(this.update.bind(this));

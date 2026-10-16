@@ -147,7 +147,7 @@ class Graph {
         this.#assertions = data.assertions ?? [];
 
         this.#valid = this.validateGraph(); // We validate, but we do not judge
-        Logger.log("Graph is valid?", this.#valid);
+        Logger.debug("Graph is valid?", this.#valid);
 
 
         this.populateConnections();
@@ -203,7 +203,7 @@ class Graph {
     }
 
     get newId() {
-        Logger.log("nextId:", this.#nextId, "availableIds:", this.#availableIds);
+        Logger.debug("nextId:", this.#nextId, "availableIds:", this.#availableIds);
         return this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
     }
 
@@ -249,10 +249,10 @@ class Graph {
     }
 
     addConnection(connection) {
-        Logger.log("graph.addConnection:", JSON.stringify(connection));
+        Logger.debug("graph.addConnection:", JSON.stringify(connection));
         //const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
         connection.id = this.newId;
-        Logger.log("graph.addConnection with id", connection.id);
+        Logger.debug("graph.addConnection with id", connection.id);
         this.#connections.push(connection);
         this.#connectionsById.set(connection.id, connection);
 
@@ -278,7 +278,7 @@ class Graph {
      * @param {number} connectionId
      */
     deleteConnection(connectionId) {
-        Logger.log("graph.deleteConnection:", connectionId);
+        Logger.debug("graph.deleteConnection:", connectionId);
         const connection = this.#connectionsById.get(connectionId);
         const index = this.#connections.findIndex((connection) => connection.id == connectionId);
         this.#connections.splice(index, 1);
@@ -378,7 +378,7 @@ class Graph {
      * @returns {boolean}
      */
     validateConnection(connection) {
-        Logger.log("graph.validateConnection", JSON.stringify(connection));
+        Logger.debug("graph.validateConnection", JSON.stringify(connection));
         let inPort;
         let outPort;
         let bothPortsDefined = false;
@@ -431,7 +431,7 @@ class Graph {
                                                 (Graph.TYPE_COMPATIBLES[outType] ?? new Set()).has(inType)))) { // TODO: improve validation by matching against specific type currently being output
                         return true;
                     } else {
-                        Logger.log("Cannot validate", inPort.types, "Connecting to", outPort.types);
+                        Logger.debug("Cannot validate", inPort.types, "Connecting to", outPort.types);
                     }
                 };
             }
@@ -495,7 +495,7 @@ class Graph {
         const queue = this.executionOrder;
         const executionFrame = new ExecutionFrame(this.id);
 
-        Logger.log("Execution order:", queue);
+        Logger.debug("Execution order:", queue);
 
         // Run through execution order
         while (queue.length > 0) {
@@ -505,7 +505,7 @@ class Graph {
             // Iterate all port results of this nodeResult
             const nodeResult = executionFrame.getNodeResult(currentNode.id)
             for (const portResult of nodeResult.portResults) {
-                Logger.log(`${portResult.nodeId}:${portResult.portId} = ${portResult.value ?? "No Value"}`);
+                Logger.debug(`${portResult.nodeId}:${portResult.portId} = ${portResult.value ?? "No Value"}`);
             }
         }
 
@@ -590,12 +590,12 @@ class Graph {
      * @returns {Array<Graph~Connection>} - input and output connections
      */
     getConnections(graphNode) {
-        //Logger.log(graphNode);
+        //Logger.debug(graphNode);
         const inputs = [];
         const output = [];
         this.connections.forEach(item => {
-            //Logger.log(item);
-            //Logger.log("in:", item.in, ", out:", item.out);
+            //Logger.debug(item);
+            //Logger.debug("in:", item.in, ", out:", item.out);
             if (item.out.node === graphNode.id) {
                 inputs.push(item);
             } else if (item.in.node === graphNode.id) {
@@ -620,11 +620,11 @@ class Graph {
     populateConnections(force = false) { // TODO: What if a connection is removed or no longer points to a node; need to handle clearing old links
         if(!force && !this.#valid) return false;
         for (const connection of this.connections) {
-            Logger.log("Connection:", connection);
+            Logger.debug("Connection:", connection);
             const inNode = this.getNode(connection.in.node);
             const outNode = this.getNode(connection.out.node);
 
-            //Logger.log("inNode:", inNode, "outNode:", outNode);
+            //Logger.debug("inNode:", inNode, "outNode:", outNode);
 
             const outputPort = inNode.getPort(connection.in.port);
             const inputPort = outNode.getPort(connection.out.port);
@@ -646,7 +646,7 @@ class Graph {
         const queue = [ ... this.assertions ];
         let result = true;
 
-        Logger.log("Verifying assertions...");
+        Logger.debug("Verifying assertions...");
 
         while (queue.length > 0) {
             const assertion = queue.shift();
@@ -656,16 +656,16 @@ class Graph {
             const portResult = executionFrame.getPortResult(assertion.portId);
             const value = assertion.value;
 
-            //Logger.log(`Verifying assertion ${assertion.nodeId}:${assertion.portId} == ${assertion.value}`);
+            //Logger.debug(`Verifying assertion ${assertion.nodeId}:${assertion.portId} == ${assertion.value}`);
 
             if (!portResult.success || portResult.value != value) {
                 Logger.warn(`!! Graph assertion failure !! Node ${assertion.nodeId}, Port ${assertion.portId} should have value ${value} but has ${portResult.value} instead. ${portResult.success ? "success" : "failure"}`);
                 result = false;
-                Logger.log(`Node Execution Result: ${JSON.stringify(nodeResult)}`);
+                Logger.debug(`Node Execution Result: ${JSON.stringify(nodeResult)}`);
             }
         }
 
-        if (result) Logger.log("... All good!");
+        if (result) Logger.debug("... All good!");
 
         return result;
     }
