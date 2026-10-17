@@ -6,10 +6,12 @@
 
 const renderer = require("./renderer/index.js");
 const element = require("./element/index.js");
+const data = require("./element/data/index.js");
 const tactileStore = require("./TactileStore.js");
 
 module.exports = {
     renderer,
     element,
+    data,
     tactileStore,
 };
