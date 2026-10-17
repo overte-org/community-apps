@@ -114,6 +114,8 @@ class Graph {
 
     /**
      * The dependency cycles existing in the current graph state
+     *
+     * @type {Array<Array<number>>}
      */
     #dependencyCycles
 
@@ -121,6 +123,8 @@ class Graph {
      * The execution order of non-pure nodes
      *
      * TODO: this is a temporary helper to make execution of non-pure nodes work
+     *
+     * @type {Array<number>}
      */
      #nonPureNodesOrdering
 
@@ -288,7 +292,7 @@ class Graph {
             throw new Error(`${nodeId} does not exist`);
         }
         if (node.pure) {
-            throw new Error(`${nodeId}(${node.type}) was passed, but it's not nonPure`);
+            throw new Error(`${nodeId}(${node.type}) was passed, expected non-pure but got pure`);
         }
         this.#nonPureNodesOrdering = this.#nonPureNodesOrdering.filter(e => e !== nodeId);
         this.#nonPureNodesOrdering.splice(orderPosition, 0, nodeId);
@@ -543,7 +547,8 @@ class Graph {
 
         {
             const ns = this.#nonPureNodesOrdering.slice(1);
-            for (const [inNode, outNode] of (function*(...iterators) { for (let it of iterators) yield* it; })(
+            const zipIterators = function*(...iterators) { for (let it of iterators) yield* it; };
+            for (const [inNode, outNode] of zipIterators(
               this.#connections.map(conn => [conn.in.node, conn.out.node]),
               // Two consecutive elements in this array form a connection.
               this.#nonPureNodesOrdering.slice(0, -1).map((p,i) => [p,ns[i]])
