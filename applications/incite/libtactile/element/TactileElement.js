@@ -309,15 +309,29 @@ class TactileElement {
     }
 
     /**
-     * Iterates down through the tree, updating child elements
+     * Iterates down through the tree, attatching child elements to the tree
      */
-    _updateChildren() {
-        Logger.debug(`   . Updating my (${this.id}) children...`);
+    _attachChildren() {
+        Logger.debug(`   . Attaching my (${this.id}) children...`);
         for (const element of this.elements) {
             element._onParentChanged(this);
             element._propogateAttachment(element)
             Logger.debug(`   . ... element ${element.id} parent: ${element.parent.id}`);
-            element._updateChildren();
+            element._attachChildren();
+        }
+        Logger.debug(`   . ...done!`);
+    }
+
+    /**
+     * Iterates down through the tree, detatching child elements from the tree
+     */
+    _detachChildren() {
+        Logger.debug(`   . Detaching my (${this.id}) children...`);
+        for (const element of this.elements) {
+            element._onParentChanged(this);
+            //element._propogateDetatchment(element)
+            Logger.debug(`   . ... element ${element.id} parent: ${element.parent.id}`);
+            element._detachChildren();
         }
         Logger.debug(`   . ...done!`);
     }
@@ -340,9 +354,9 @@ class TactileElement {
         Logger.debug(`  .. parent is ${element.parent?.id}`);
         // Logger.debug(" ... calling element._propogateAttachment");
         this._propogateAttachment(element);
-        // Logger.debug(" ... calling element._updateChildren");
+        // Logger.debug(" ... calling element._attachChildren");
         // notify children of change in tree
-        element._updateChildren();
+        element._attachChildren();
         Logger.debug("...done!");
         return this;
     }
@@ -405,7 +419,7 @@ class TactileElement {
         // update the tree
         element._onParentChanged(this);
         this._propogateAttachment(element);
-        element._updateChildren();
+        element._attachChildren();
 
         return this;
     }
@@ -424,7 +438,7 @@ class TactileElement {
         }
         this.#elements = this.elements.filter(element => element.id != elementId);
         this._propogateRemoval(element);
-        element._updateChildren();
+        element._detachChildren();
         return this;
     }
 
@@ -436,7 +450,7 @@ class TactileElement {
         this.#elements = [];
         for (const element of clearedElements) {
             this._propogateRemoval(element);
-            element._updateChildren();
+            element._detachChildren();
         }
         return this;
     }
