@@ -329,7 +329,6 @@ class TactileElement {
         Logger.debug(`   . Detaching my (${this.id}) children...`);
         for (const element of this.elements) {
             element._onParentChanged(this);
-            //element._propogateDetatchment(element)
             Logger.debug(`   . ... element ${element.id} parent: ${element.parent.id}`);
             element._detachChildren();
         }
