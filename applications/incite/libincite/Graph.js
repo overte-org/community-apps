@@ -118,11 +118,11 @@ class Graph {
     #dependencyCycles
 
     /**
-     * The execution order of unpure nodes
+     * The execution order of non-pure nodes
      *
-     * TODO: this is a temporary helper to make execution of unpure nodes work
+     * TODO: this is a temporary helper to make execution of non-pure nodes work
      */
-     #unpureNodesOrdering
+     #nonPureNodesOrdering
 
     /**
      * Which output types can be connected to which input types
@@ -144,7 +144,7 @@ class Graph {
         this.#nodesById = new Map();
         this.#nextId = 0;
         this.#availableIds = [];
-        this.#unpureNodesOrdering = [];
+        this.#nonPureNodesOrdering = [];
         for (const node of this.#nodes) {
             if (node.id === undefined) node.id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
             if (node.id <= this.#nextId) this.#nextId = node.id+1;
@@ -239,7 +239,7 @@ class Graph {
         this.#nodes.add(node);
         this.#nodesById.set(node.id, node);
         if (!node.pure) {
-            this.#unpureNodesOrdering.push(node.id);
+            this.#nonPureNodesOrdering.push(node.id);
         }
         node.setParentGraph(this);
         this.nodeAddedEvent.emit(this.id, node.id); // TODO: Only emit if successfully added
@@ -267,7 +267,7 @@ class Graph {
         const node = this.#nodes.get(nodeId);
         this.#nodes.delete(node);
         this.#nodesById.delete(nodeId);
-        this.#unpureNodesOrdering = this.#unpureNodesOrdering.filter(e => e !== nodeId);
+        this.#nonPureNodesOrdering = this.#nonPureNodesOrdering.filter(e => e !== nodeId);
         this.#availableIds.push(nodeId);
         this.nodeRemovedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
         this.updateData();
@@ -275,23 +275,23 @@ class Graph {
     }
 
     /**
-     * changes the position of a node in the unpure node ordering.
+     * changes the position of a node in the non-pure node ordering.
      *
      * The new index is the one after the nodeId was removed
      *
      * @param {Number} orderPosition - the wanted position
      * @param {Number} nodeId - the id of the node to be changed
      */
-    setUnpureNodeOrder(orderPosition, nodeId) {
+    setNonPureNodeOrder(orderPosition, nodeId) {
         const node = this.#nodesById.get(nodeId);
         if (node === undefined) {
             throw new Error(`${nodeId} does not exist`);
         }
         if (node.pure) {
-            throw new Error(`${nodeId}(${node.type}) was passed, but it's not unpure`);
+            throw new Error(`${nodeId}(${node.type}) was passed, but it's not nonPure`);
         }
-        this.#unpureNodesOrdering = this.#unpureNodesOrdering.filter(e => e !== nodeId);
-        this.#unpureNodesOrdering.splice(orderPosition, 0, nodeId);
+        this.#nonPureNodesOrdering = this.#nonPureNodesOrdering.filter(e => e !== nodeId);
+        this.#nonPureNodesOrdering.splice(orderPosition, 0, nodeId);
     }
 
     /**
@@ -542,11 +542,11 @@ class Graph {
         }
 
         {
-            const ns = this.#unpureNodesOrdering.slice(1);
+            const ns = this.#nonPureNodesOrdering.slice(1);
             for (const [inNode, outNode] of (function*(...iterators) { for (let it of iterators) yield* it; })(
               this.#connections.map(conn => [conn.in.node, conn.out.node]),
-              // Two consecutive elements in the array form a connection.
-              this.#unpureNodesOrdering.slice(0, -1).map((p,i) => [p,ns[i]])
+              // Two consecutive elements in this array form a connection.
+              this.#nonPureNodesOrdering.slice(0, -1).map((p,i) => [p,ns[i]])
             )) {
                 inConnectionsMap.get(inNode).add(outNode);
                 outConnectionsMap.get(outNode).add(inNode);
@@ -700,7 +700,8 @@ class Graph {
      * @returns {Array<number>} - This Graph's GraphNodes as a list of ids in executable order
      */
     calculateExecutionOrder() {
-        // We calculate the execution order by taking the list of unpure nodes in their order of execution and insert the dependencies of those
+        // We calculate the execution order by taking the list of non-pure nodes in their order of execution
+        // and insert the dependencies of those.
         //
         // We expect a directed acyclic graph (DAG), so we just depth-first search (DFS) to get the ordering
 
@@ -713,8 +714,8 @@ class Graph {
             connectionDependenciesMap.get(connection.out.node).push(connection.in.node);
         }
 
-        // initialize with unpure nodes order, because of no connectionection in code
-        const stack = [ ...this.#unpureNodesOrdering ].reverse().map(el => [el, 0]);
+        // initialize with non-pure nodes order, because of no connectionection in code
+        const stack = [ ...this.#nonPureNodesOrdering ].reverse().map(el => [el, 0]);
         const result = [];
         while (stack.length > 0) {
             const [currentNodeIndex, workIndex] = stack.pop();
