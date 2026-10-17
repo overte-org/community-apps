@@ -13,7 +13,7 @@ class Model {
     // #blendshapeCoefficients
     #useOriginalPivot
     // #loadPriority
-    #textures
+    // #textures
     // #originalTextures
     #shapeType
     #compoundShapeUrl
@@ -71,20 +71,6 @@ class Model {
 
     set useOriginalPivot(useOriginalPivot) {
         this.#useOriginalPivot = useOriginalPivot;
-    }
-
-    /**
-     * A JSON string of texture name, URL pairs used when rendering the model in place of the model's original textures.
-     *
-     * @type {string}
-     * @default ""
-     */
-    get textures() {
-        return this.#textures ?? "";
-    }
-
-    set textures(textures) {
-        this.#textures = textures;
     }
 
     /**

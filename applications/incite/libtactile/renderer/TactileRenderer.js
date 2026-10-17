@@ -359,16 +359,15 @@ class TactileRenderer extends BaseRenderer {
                     properties.modelURL = model.modelUrl;
                     properties.modelScale = model.modelScale;
                     properties.useOriginalPivot = model.useOriginalPivot;
-                    properties.textures = model.textures;
                     properties.shapeType = model.shapeType;
                     properties.compoundShapeURL = model.compoundShapeUrl;
                     properties.animation = model.animation;
                     properties.groupCulled = model.groupCulled;
                 } else {
                     properties.type = "Box";
+                    properties.color = element.color;
+                    properties.alpha = element.alpha;
                 }
-                properties.color = element.color;
-                properties.alpha = element.alpha;
                 break;
         }
 
