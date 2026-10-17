@@ -113,6 +113,22 @@ class Graph {
     #exectutionReel
 
     /**
+     * The dependency cycles existing in the current graph state
+     *
+     * @type {Array<Array<number>>}
+     */
+    #dependencyCycles
+
+    /**
+     * The execution order of non-pure nodes
+     *
+     * TODO: this is a temporary helper to make execution of non-pure nodes work
+     *
+     * @type {Array<number>}
+     */
+     #nonPureNodesOrdering
+
+    /**
      * Which output types can be connected to which input types
      */
     static get TYPE_COMPATIBLES() {
@@ -132,6 +148,7 @@ class Graph {
         this.#nodesById = new Map();
         this.#nextId = 0;
         this.#availableIds = [];
+        this.#nonPureNodesOrdering = [];
         for (const node of this.#nodes) {
             if (node.id === undefined) node.id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
             if (node.id <= this.#nextId) this.#nextId = node.id+1;
@@ -208,6 +225,15 @@ class Graph {
     }
 
     /**
+     * The cycles in the graph, which should be a directed-acyclic graph
+     *
+     * @returns {Array<Array<number>>} - array of cycles of nodeIds
+     */
+    get dependencyCycles() {
+        return [ ...this.#dependencyCycles.map(e => [...e]) ];
+    }
+
+    /**
      * Add a node to this graph
      *
      * @param {Node}
@@ -216,6 +242,9 @@ class Graph {
         node.id = this.newId;
         this.#nodes.add(node);
         this.#nodesById.set(node.id, node);
+        if (!node.pure) {
+            this.#nonPureNodesOrdering.push(node.id);
+        }
         node.setParentGraph(this);
         this.nodeAddedEvent.emit(this.id, node.id); // TODO: Only emit if successfully added
         this.updateData();
@@ -242,13 +271,50 @@ class Graph {
         const node = this.#nodes.get(nodeId);
         this.#nodes.delete(node);
         this.#nodesById.delete(nodeId);
+        this.#nonPureNodesOrdering = this.#nonPureNodesOrdering.filter(e => e !== nodeId);
         this.#availableIds.push(nodeId);
         this.nodeRemovedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
         this.updateData();
         this.graphUpdatedEvent.emit(this.id, new Set([nodeId]));
     }
 
+    /**
+     * changes the position of a node in the non-pure node ordering.
+     *
+     * The new index is the one after the nodeId was removed
+     *
+     * @param {Number} orderPosition - the wanted position
+     * @param {Number} nodeId - the id of the node to be changed
+     */
+    setNonPureNodeOrder(orderPosition, nodeId) {
+        const node = this.#nodesById.get(nodeId);
+        if (node === undefined) {
+            throw new Error(`${nodeId} does not exist`);
+        }
+        if (node.pure) {
+            throw new Error(`${nodeId}(${node.type}) was passed, expected non-pure but got pure`);
+        }
+        this.#nonPureNodesOrdering = this.#nonPureNodesOrdering.filter(e => e !== nodeId);
+        this.#nonPureNodesOrdering.splice(orderPosition, 0, nodeId);
+    }
+
+    /**
+     * Connects two node ports with each other.
+     *
+     * If the target (out) port is already connected, then that connection is deleted.
+     *
+     * @param {GraphJson-Connection} connection
+     */
     addConnection(connection) {
+        {
+            const previousConnection = this.#connections.find(
+              (conn) => conn.out.node === connection.out.node && conn.out.port === connection.out.port
+            );
+            if (previousConnection !== undefined) {
+                Logger.debug("graph.addConnection: previous Connection found -> delete: ", JSON.stringify(previousConnection));
+                this.deleteConnection(previousConnection.id);
+            }
+        }
         Logger.debug("graph.addConnection:", JSON.stringify(connection));
         //const id = this.#availableIds.length > 0 ? this.#availableIds.pop() : this.#nextId++;
         connection.id = this.newId;
@@ -465,6 +531,114 @@ class Graph {
     }
 
     /**
+     * calculates cycles in the graph
+     *
+     * @returns {Array<Array<number>>} - array of cycles of nodes
+     */
+    calculateCycles() {
+        const inConnectionsMap = new Map();
+        const outConnectionsMap = new Map();
+
+        for (const node of this.#nodes) {
+            const id = node.id;
+            if (!inConnectionsMap.has(id)) inConnectionsMap.set(id, new Set());
+            if (!outConnectionsMap.has(id)) outConnectionsMap.set(id, new Set());
+        }
+
+        {
+            const ns = this.#nonPureNodesOrdering.slice(1);
+            const zipIterators = function*(...iterators) { for (let it of iterators) yield* it; };
+            for (const [inNode, outNode] of zipIterators(
+              this.#connections.map(conn => [conn.in.node, conn.out.node]),
+              // Two consecutive elements in this array form a connection.
+              this.#nonPureNodesOrdering.slice(0, -1).map((p,i) => [p,ns[i]])
+            )) {
+                inConnectionsMap.get(inNode).add(outNode);
+                outConnectionsMap.get(outNode).add(inNode);
+            }
+        }
+
+        let prevNodes = [];
+        let next = [ ...[...this.#nodes].map(n => n.id) ];
+
+        // Using Kahn's algorithm to eliminate every node not in a cycle
+        while (next.length > 0 && prevNodes.length !== next.length) {
+            prevNodes = next;
+            next = [];
+            for (const node of prevNodes) {
+                if (outConnectionsMap.get(node).size === 0 || inConnectionsMap.get(node).size === 0) {
+                    inConnectionsMap.forEach(set => { set.delete(node); });
+                    outConnectionsMap.forEach(set => { set.delete(node); });
+                } else {
+                    next.push(node);
+                }
+            }
+        }
+
+        if (next.length > 0) {
+            // there are still nodes left
+            // -> there are no more nodes with degree 0
+            // -> there are only cycles left
+            //
+            // WARNING: this algorithm doesn't find 'duplicate' cycles,
+            //          i.e. [0 -> 1 -> 2, 0 -> 2] will only give out [0 -> 1 -> 2],
+            //          which is enough for our purposes
+
+            const traversePaths = new Map(inConnectionsMap.entries().map(([k,v]) => [k,[...v]]));
+
+            const cycles = [];
+            const visited = new Set();
+
+            for (const startNode of next) {
+                if (visited.has(startNode)) continue;
+
+                const stack = [[startNode, -1]];
+                const path = [];
+
+                while (stack.length > 0) {
+                    const [node, neighborIndex] = stack.at(-1);
+
+                    if (path.indexOf(node) === -1) {
+                        if (visited.has(node)) {
+                            stack.pop();
+                            continue;
+                        }
+                        path.push(node);
+                    }
+
+                    const neighbors = traversePaths.get(node) ?? [];
+
+                    let advanced = false;
+                    for (let i = neighborIndex + 1; i < neighbors.length; i++) {
+                        stack[stack.length - 1][1] = i;
+
+                        const pathIndex = path.indexOf(neighbors[i]);
+                        if (pathIndex !== -1) {
+                            cycles.push(path.slice(pathIndex));
+                            continue;
+                        }
+
+                        if (!visited.has(neighbors[i])) {
+                            stack.push([neighbors[i], -1]);
+                            advanced = true;
+                            break;
+                        }
+                    }
+
+                    if (!advanced) {
+                        stack.pop();
+                        path.pop();
+                        visited.add(node);
+                    }
+                }
+            }
+
+            return cycles;
+        }
+        return [];
+    }
+
+    /**
      * Validate everything about this graph; if it fails to validate it will not execute without intervention.
      *
      * @returns {boolean} - True if this graph is valid
@@ -477,10 +651,18 @@ class Graph {
                 .filter(([key, value]) => !value)
                 .map(([key]) => key);
         if (invalidTypes.length != 0) {
-            Logger.log(`Graph ${this.id} failed the vibe check. The following have issues: ${invalidTypes}`);
+            Logger.warn(`Graph ${this.id} failed the vibe check. The following have issues: ${invalidTypes}`);
             return false;
         }
-        return true;
+
+        // verify DAG-ness
+        this.#dependencyCycles = this.calculateCycles();
+        if (this.#dependencyCycles.length > 0) {
+            Logger.warn("cycles were found in the graph:", this.#dependencyCycles);
+        } else {
+            Logger.debug("no cycles found");
+        }
+        return this.#dependencyCycles.length === 0;
     }
 
     /**
@@ -523,57 +705,36 @@ class Graph {
      * @returns {Array<number>} - This Graph's GraphNodes as a list of ids in executable order
      */
     calculateExecutionOrder() {
-        // All nodes get a dependency value based on its input connections
-        //  ; nodes with no inputs have 0
-        //  ; nodes which have been processed present as a 0 on the input of the next node
-        //  ; nodes with all inputs processed have 0
-        // We process all nodes with 0 dependencies, and once those are complete
-        // we should have new nodes with 0 dependencies. Keep processing until all nodes
-        // are complete.
+        // We calculate the execution order by taking the list of non-pure nodes in their order of execution
+        // and insert the dependencies of those.
+        //
+        // We expect a directed acyclic graph (DAG), so we just depth-first search (DFS) to get the ordering
 
-        const inputDependencies = new Map();
-        for (const node of this.#nodes) {
-            inputDependencies.set(node.id, this.connections.filter(item => item.out.node === node.id).length); // Number of inputs connected on each node
+        const connectionDependenciesMap = new Map();
+
+        for (const connection of this.#connections) {
+            if (!connectionDependenciesMap.has(connection.out.node)) {
+                connectionDependenciesMap.set(connection.out.node, []);
+            }
+            connectionDependenciesMap.get(connection.out.node).push(connection.in.node);
         }
 
-        const queue = [];
-        const result = []; // nodeIDs in execution order
-        const processedIds = new Set(); // TODO: Ensure we don't loop back in on ourselves.
-
-        // Nodes with 0 inputDependencies are ready to execute
-        for (const [id, count] of inputDependencies.entries()) {
-            if (count === 0) {
-                queue.push(id);
-            }
-        }
-
-        while (queue.length > 0) {
-            const currentId = queue.shift();
-            const currentNode = this.#nodesById.get(currentId);
-
-            result.push(currentId);
-            processedIds.add(currentId);
-
-            // Find downstream connected nodes
-            const connectedNodes = [];
-            for( const connection of this.#connections) {
-                if (connection.in.node === currentId) {
-                    connectedNodes.push(connection.out.node);
+        // initialize with non-pure nodes order, because of no connectionection in code
+        const stack = [ ...this.#nonPureNodesOrdering ].reverse().map(el => [el, 0]);
+        const result = [];
+        while (stack.length > 0) {
+            const [currentNodeIndex, workIndex] = stack.pop();
+            const currentNodeDependencies = connectionDependenciesMap.get(currentNodeIndex);
+            if (currentNodeDependencies !== undefined) {
+                const nextDependencyId = currentNodeDependencies.findIndex((dependencies, index) => index >= workIndex && result.indexOf(dependencies) === -1);
+                const nextNodeIndex = currentNodeDependencies[nextDependencyId];
+                if (nextNodeIndex !== undefined) {
+                    stack.push([currentNodeIndex, nextDependencyId + 1]);
+                    stack.push([nextNodeIndex, 0]);
+                    continue;
                 }
             }
-
-            // Update downstream node dependency value
-            for (const connectedNodeId of connectedNodes) {
-                const connectedNode = this.#nodesById.get(connectedNodeId);
-                const dependencies = inputDependencies.get(connectedNode.id)
-                inputDependencies.set(connectedNode.id, dependencies - 1);
-
-                // If all dependencies are resolved, add to queue.
-                if (inputDependencies.get(connectedNode.id) === 0) {
-                    queue.push(connectedNode.id);
-                }
-            }
-
+            result.push(currentNodeIndex);
         }
 
         if (result.length !== this.#nodes.size) {
