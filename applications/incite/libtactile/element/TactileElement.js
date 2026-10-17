@@ -398,12 +398,11 @@ class TactileElement {
 
             targetElement = e;
 
-        }
-
-        if (target instanceof TactileElement) {
+        } else if (target instanceof TactileElement) {
             // target can be a TactileElement
             targetElement = target;
-
+        } else {
+            throw new Error(`Cannot insert element ${element.id} as a child of parent element ${this.id} before target element; target element must be a TactileElement, but is ${typeof target}`);
         }
 
         // get target position within array
