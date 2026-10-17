@@ -56,6 +56,7 @@ class TactileElement {
 
     #cache
     #color
+    #elements
     #minWidth
     #minHeight
     #preferredWidth
@@ -103,6 +104,14 @@ class TactileElement {
 
         this.#valid = false; // Needs recalculating when false
         // Each renderer maintains it's own list of elements which need to be rerendered after updating
+    }
+
+    get elements() {
+        return this.#elements;
+    }
+
+    set elements(elements) {
+        this.#elements = elements;
     }
 
     get documentId() {
@@ -300,25 +309,40 @@ class TactileElement {
     }
 
     /**
-     * Iterates down through the tree, updating child elements
+     * Iterates down through the tree, attatching child elements to the tree
      */
-    _updateChildren() {
-        Logger.debug(`   . Updating my (${this.id}) children...`);
+    _attachChildren() {
+        Logger.debug(`   . Attaching my (${this.id}) children...`);
         for (const element of this.elements) {
             element._onParentChanged(this);
             element._propogateAttachment(element)
             Logger.debug(`   . ... element ${element.id} parent: ${element.parent.id}`);
-            element._updateChildren();
+            element._attachChildren();
+        }
+        Logger.debug(`   . ...done!`);
+    }
+
+    /**
+     * Iterates down through the tree, detatching child elements from the tree
+     */
+    _detachChildren() {
+        Logger.debug(`   . Detaching my (${this.id}) children...`);
+        for (const element of this.elements) {
+            element._onParentChanged(this);
+            Logger.debug(`   . ... element ${element.id} parent: ${element.parent.id}`);
+            element._detachChildren();
         }
         Logger.debug(`   . ...done!`);
     }
 
     /**
      * Add a new child element to this element
+     *
+     * @param {TactileElement} element
      */
     addElement(element) {
         if (!(element instanceof TactileElement)) {
-            throw new Error('Only TactileElements can be added as a child of a TactileElement');
+            throw new Error(`Only a TactileElement can be added as a child of a TactileElement. Cannot add type ${typeof element}`);
         }
 
         Logger.debug("addElement...");
@@ -329,15 +353,79 @@ class TactileElement {
         Logger.debug(`  .. parent is ${element.parent?.id}`);
         // Logger.debug(" ... calling element._propogateAttachment");
         this._propogateAttachment(element);
-        // Logger.debug(" ... calling element._updateChildren");
+        // Logger.debug(" ... calling element._attachChildren");
         // notify children of change in tree
-        element._updateChildren();
+        element._attachChildren();
         Logger.debug("...done!");
         return this;
     }
 
     /**
+     * Add new child elements to this element
+     *
+     * @param {array<TactileElement>} elements
+     */
+    addElements(elements) {
+        for (const element of elements) {
+            this.addElement(element);
+        }
+    }
+
+    // TODO: insertElementAfter(element, target); see insertElementBefore.
+
+    /**
+     * Insert an element in a particular location within the elements array
+     *
+     * @param {TactileElement} element - The TactileElement to insert
+     * @param {TactileElement|number} target - The TactileElement to insert before
+     */
+    insertElementBefore(element, target) {
+        // Element must be a TactileElement
+        if (!(element instanceof TactileElement)) {
+            throw new Error(`Only a TactileElement can be added as a child of a TactileElement. Cannot add type ${typeof element}`);
+        }
+
+        let targetElement;
+
+        if (typeof target === 'number') {
+            // target can be a number representing the id of a TactileElement
+            const e = this.document?.getElement(target);
+
+            if (!e) {
+                throw new Error(`Element with ID ${target} not found`);
+            }
+
+            targetElement = e;
+
+        } else if (target instanceof TactileElement) {
+            // target can be a TactileElement
+            targetElement = target;
+        } else {
+            throw new Error(`Cannot insert element ${element.id} as a child of parent element ${this.id} before target element; target element must be a TactileElement, but is ${typeof target}`);
+        }
+
+        // get target position within array
+        const targetIndex = this.elements.findIndex((e) => e.id == targetElement.id);
+
+        if (targetIndex == -1) {
+            throw new Error(`Element with ID ${targetElement.id} not found as a child of element with ID ${this.id}. Could not insert element with ID ${element.id}.`);
+        }
+
+        // insert element in the correct position
+        this.#elements.splice(targetIndex, 0, element);
+
+        // update the tree
+        element._onParentChanged(this);
+        this._propogateAttachment(element);
+        element._attachChildren();
+
+        return this;
+    }
+
+    /**
      * Remove a child element of this element
+     *
+     * @param {number} elmentId
      */
     removeElement(elementId) {
         Logger.debug("removeElement", elementId);
@@ -346,9 +434,22 @@ class TactileElement {
             Logger.warn(`Cannot remove element from tree #${this.document.id}, element#${elementId} does not exist.`);
             return;
         }
-        this.elements = this.elements.filter(element => element.id != elementId);
+        this.#elements = this.elements.filter(element => element.id != elementId);
         this._propogateRemoval(element);
-        element._updateChildren();
+        element._detachChildren();
+        return this;
+    }
+
+    /**
+     * Remove every child element from this element
+     */
+    removeAllElements() {
+        const clearedElements = this.#elements;
+        this.#elements = [];
+        for (const element of clearedElements) {
+            this._propogateRemoval(element);
+            element._detachChildren();
+        }
         return this;
     }
 

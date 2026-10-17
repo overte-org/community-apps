@@ -177,7 +177,7 @@ class TactileRenderer extends BaseRenderer {
      * @param {boolean} isRoot - Is this entity the root entity all other entities will be parented to?
      */
     createEntity(element, isRoot, renderType = "local") {
-        Logger.debug(`createEntity ... offsetZ=${element.offsetZ}, depth=${element.depth}`);
+        Logger.debug(`createEntity ... element.id=${element.id}, element.documentId=${element.documentId}, offsetZ=${element.offsetZ}, depth=${element.depth}`);
 
         Logger.debug(`render element ${this.rendererCount} has a depth of ${element.depth} with offset of ${element.offsetZ} and parent depth of ${element.parent?.depth}`);
         if (isRoot) {
@@ -192,6 +192,8 @@ class TactileRenderer extends BaseRenderer {
         const entityProperties = this.entityProperties(element);
         Logger.debug(`Placing entity ${element.id} (${this.rendererCount}) @ ${JSON.stringify(entityProperties.position)}`);
         const entityId = Entities.addEntity(entityProperties, renderType);
+
+        Logger.debug(`Element ${element.id} entity created with id ${entityId}`);
 
         // Store entities for later
         this.entities.push(entityId);
@@ -398,6 +400,10 @@ class TactileRenderer extends BaseRenderer {
      * Renders the absence of the given element into the world
      */
     destroyElement(element) {
+        // First destroy its children
+        for (const childElement of element.elements) {
+            this.destroyElement(childElement);
+        }
         Logger.debug("Destroying element", element.id);
         const entityId = this.entityMap.get(element.id);
         if (entityId) {
@@ -409,7 +415,7 @@ class TactileRenderer extends BaseRenderer {
             this.elementMap.delete(entityId);
             this.entityToDocumentAndElementIds.delete(entityId);
         } else {
-            Logger.warn("Asked to destroy element entity, but element has not been rendered; no such entity known to exist.", element.id);
+            Logger.warn("Asked to destroy element entity, but element has not been rendered; no such entity known to exist.", element.id, this.entityMap.get(element.id));
         }
     }
 
