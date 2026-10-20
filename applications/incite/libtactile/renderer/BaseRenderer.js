@@ -5,12 +5,7 @@
 //
 
 const Logger = require("../Logger.js");
-
-/**
- * @typedef {Object} renderTask
- * @property {Object} element
- * @property {Object} document
- */
+const RenderTask = require("./RenderTask.js");
 
 /**
  * The base class which all Tactile renderers must extend.
@@ -20,7 +15,7 @@ const Logger = require("../Logger.js");
 class BaseRenderer {
 
     /**
-     * @type {Array<renderTask>}
+     * @type {Array<RenderTask>}
      */
     #renderTasks
 
@@ -37,19 +32,8 @@ class BaseRenderer {
         // TODO: Confirm it is an element
 
         // Store the element and document tree in renderTask
-        // TODO: Do we want to store IDs instead of objects here? Documents do not yet have one.
-        const renderTask = {
-            element: element,
-            document: document,
-        }
-
-        this.#renderTasks.push(renderTask);
-        Logger.debug("Added renderTask for element", renderTask.element.id);
-
-        // Schedule a draw, if not already scheduled
-        if (!this.renderScheduled) {
-            this.scheduleRender();
-        }
+        this.addRenderTask(new RenderTask(element,
+                                          document));
     }
 
     /**
@@ -62,20 +46,9 @@ class BaseRenderer {
         // TODO: Confirm it is an element
 
         // Store the element and document tree in renderTask
-        // TODO: Do we want to store IDs instead of objects here? Documents do not yet have one.
-        const renderTask = {
-            element: element,
-            document: document,
-            action: "DELETE"
-        }
-
-        this.#renderTasks.push(renderTask);
-        Logger.debug("Added renderTask for element", renderTask.element.id);
-
-        // Schedule a draw, if not already scheduled
-        if (!this.renderScheduled) {
-            this.scheduleRender();
-        }
+        this.addRenderTask(new RenderTask(element,
+                                          document,
+                                          RenderTask.DELETE));
     }
 
     /**
@@ -98,6 +71,25 @@ class BaseRenderer {
         this.renderScheduled = true;
     }
 
+    /**
+     * Add a new renderTask to be completed on the next pass
+     *
+     * @param {RenderTask} renderTask
+     */
+    addRenderTask(renderTask) {
+        if (!renderTask instanceof RenderTask) {
+            throw new TypeError(`Cannot add render task; expected RenderTask but got ${typeof renderTask}`);
+        }
+
+        this.#renderTasks.push(renderTask);
+        Logger.debug("Added renderTask for element", renderTask.element.id);
+
+        // Schedule a draw, if not already scheduled
+        if (!this.renderScheduled) {
+            this.scheduleRender();
+        }
+    }
+
 
 
     /**
@@ -105,17 +97,32 @@ class BaseRenderer {
      */
     renderSchedule() {
         Logger.debug(`renderSchedule: ${this.#renderTasks.length} tasks`)
-        for (const renderTask of this.#renderTasks) {
+        const queue = [...this.#renderTasks];
+        this.#renderTasks = [];
+
+        for (const renderTask of queue) {
             Logger.debug("Executing render task for element ", renderTask.element.id, ",", renderTask.document.id);
             const element = renderTask.element;
-            if (renderTask.action == "DELETE") {
+            if (renderTask.action == RenderTask.DELETE) {
                 Logger.debug("renderSchedule action to DELETE", element.id)
                 this.destroyElement(element);
-            } else {
+            } else if (renderTask.action == RenderTask.REFINE) {
+                Logger.debug("renderSchedule action to REFINE", element.id)
+                this.refineElement(element);
+            }else {
                 this.renderElement(element);
             }
         }
-        this.#renderTasks = [];
+    }
+
+    /**
+     * Run a second pass to render an element
+     *
+     * @param {TactileElement} element
+     * @abstract
+     */
+    refineElement(element) {
+        throw new Error("refineElement method must be implemented by a sub-class");
     }
 
     /**

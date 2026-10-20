@@ -8,6 +8,7 @@ const Logger = require("../Logger.js");
 const TactileElements = require("../element/index.js");
 const BaseRenderer = require("./BaseRenderer.js");
 const documentManager = require("../TactileStore.js").documentManager;
+const RenderTask = require("./RenderTask.js");
 
 /**
  * @typedef {Object} DocumentElementIds
@@ -381,8 +382,86 @@ class TactileRenderer extends BaseRenderer {
      */
     updateEntity(element, isRoot) {
         const entityProperties = this.entityProperties(element);
+        const entityId = this.entityMap.get(element.id);
 
-        Entities.editEntity(this.entityMap.get(element.id), entityProperties);
+        Entities.editEntity(entityId, entityProperties);
+
+        // Set up second pass refinement render tasks
+        this.refineElement(element);
+    }
+
+    refineModel(element, entityId) {
+        if (!(element.model && element.model.modelUrl && element.model.maintainNaturalProportions)) return true;
+        // Check if model has finished loading, else reschedule refine task.
+        if (!Entities.isLoaded(entityId)) {
+            Logger.debug(`Element ${element.id}'s entity ${entityId} is not yet ready, so cannot read model data. Will try again next render pass.`);
+            return false;
+        }
+
+        Logger.debug("Refining model element...")
+
+        // Get the model's naturalDimensions
+        // NOTE: This currently retrieves all entityProperties,
+        // as naturalDimensions cannot be asked for specifically;
+        // see [Issue #2415](https://github.com/overte-org/overte/issues/2415).
+        const entityProperties = Entities.getEntityProperties(entityId);
+        const naturalDimensions = entityProperties.naturalDimensions;
+
+        const dimensions = entityProperties.dimensions;
+
+        // Resize the entity to match the model's ratios,
+        // restricted to within the element's size.
+        const scaleLimits = {
+            x: dimensions.x / naturalDimensions.x,
+            y: dimensions.y / naturalDimensions.y,
+            z: dimensions.z / naturalDimensions.z
+        }
+
+        const scale = Math.min(scaleLimits.x,
+                               scaleLimits.y,
+                               scaleLimits.z);
+
+        const scaledDimensions = Vec3.multiply(entityProperties.naturalDimensions,
+                                               scale);
+
+        Entities.editEntity(entityId, {
+            dimensions: scaledDimensions,
+        });
+
+        Logger.debug("... done!");
+
+        return true;
+    }
+
+    /**
+     * Run a second-pass to refine the render of an element.
+     *
+     * This is used when an element's render depends on details only known once the entity has finished loading.
+     *
+     * @param {TactileElement}
+     */
+    refineElement(element) {
+        const entityId = this.entityMap.get(element.id);
+        if (!entityId) return;
+        let retry;
+
+        if (!this.refineModel(element, entityId) && !retry) retry = true;
+
+        if (retry) {
+            // queue another refine render task for this element
+            // as one of the refine methods was not ready to complete.
+
+            this.addRenderTask(new RenderTask(element,
+                                                element.document,
+                                                RenderTask.REFINE));
+        }
+
+        // TODO: Refine TextElement
+        // if (element instanceof TextElement) {
+        //     this.addRenderTask(new RenderTask(element,
+        //                                       document,
+        //                                       RenderTask.REFINE));
+        // }
     }
 
     /**
@@ -428,6 +507,10 @@ class TactileRenderer extends BaseRenderer {
                     buttonElement.color = buttonElement.buttonColorReleased;
                 });
             }
+
+
+            // Set up second pass refinement render tasks
+            this.refineElement(element);
         }
     }
 

@@ -25,6 +25,8 @@ class Model {
     // #relayParentJoints
     #groupCulled
 
+    #maintainNaturalProportions;
+
     /**
      * @param {string} modelUrl
      */
@@ -127,6 +129,20 @@ class Model {
 
     set groupCulled(bool) {
         this.#groupCulled = bool;
+    }
+
+    /**
+     * Whether this model should keep its natural ratio between its 3 dimensions,
+     * and instead scaled to be within the element's dimensions.
+     *
+     * @type {boolean}
+     */
+    get maintainNaturalProportions() {
+        return this.#maintainNaturalProportions;
+    }
+
+    set maintainNaturalProportions(bool) {
+        this.#maintainNaturalProportions = bool;
     }
 }
 
