@@ -364,9 +364,11 @@ class TactileRenderer extends BaseRenderer {
                     properties.compoundShapeURL = model.compoundShapeUrl;
                     properties.animation = model.animation;
                     properties.groupCulled = model.groupCulled;
-                    if (element.animation && element.animation.url != "") {
-                        const animation = element.animation;
-                        properties.animation = animation.toAnimationProperties();
+                    if (element.currentAnimation != "") {
+                        const animation = model.animations[element.currentAnimation] ;
+                            if (animation) {
+                                properties.animation = animation.toAnimationProperties();
+                            }
                     }
                 } else {
                     properties.type = "Box";

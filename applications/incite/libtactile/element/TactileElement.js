@@ -28,10 +28,10 @@ const Signal = require("../../libincite/Signal.js");
 /**
  * The basic TactileElement
  *
- * @property {Animation} animation - The animation to apply to this element's model.
  * @property {number} id - The unique id of this element
  * @property {number} depth - the depth of this element with the document tree
  * @property {number} documentId - The ID of the document this element is attached to.
+ * @property {string} currentAnimation - The key of the model animation to apply to this element's model. The default animation will be "idle"; this property can be set to an empty string of `""` to set no animation.
  * @property {Array<TactileElement>} elements - The list of child elements within this element
  * @property {number} mindWidth - the minimum width this element should be
  * @property {number} minHeight - the minimum heigh this element should be
@@ -56,9 +56,9 @@ const Signal = require("../../libincite/Signal.js");
  */
 class TactileElement {
 
-    #animation
     #cache
     #color
+    #currentAnimation
     #elements
     #minWidth
     #minHeight
@@ -98,7 +98,7 @@ class TactileElement {
         this.offsetZ = options.offsetZ ?? 0;
 
         this.#model = options.model;
-        this.#animation = options.animation;
+        this.#currentAnimation = options.currentAnimation;
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
@@ -175,16 +175,19 @@ class TactileElement {
         this.#model = url;
     }
 
-    get animation() {
-        return this.#animation;
+    get currentAnimation() {
+        return this.#currentAnimation == "" || this.#currentAnimation ? this.#currentAnimation : "idle";
     }
 
-    set animation(animation) {
-        if (!typeof animation == `Animation`) {
-            throw TypeError(`Element animation value must be set as an Animation, received a ${typeof animation}`);
+    set currentAnimation(animation) {
+        if (!typeof animation == 'string') {
+            throw TypeError(`Element currentAnimation value must be set as a string, received a ${typeof animation}`);
+        }
+        if (this.model && !this.model.animations[animation]) {
+            Logger.warn(`Element ${element.id} has the currentAnimation value set to ${animation} but no such animation yet exists on the model.`);
         }
 
-        this.#animation = animation;
+        this.#currentAnimation = animation;
     }
 
     get color() {

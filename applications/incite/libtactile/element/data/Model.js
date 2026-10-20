@@ -17,7 +17,7 @@ class Model {
     // #originalTextures
     #shapeType
     #compoundShapeUrl
-    #animation
+    #animations
     // #joinRotations
     // #joinRotationsSet
     // #joinTranslations
@@ -32,6 +32,7 @@ class Model {
      */
     constructor(modelUrl) {
         this.#modelUrl = modelUrl;
+        this.#animations = {};
     }
 
     /**
@@ -105,17 +106,12 @@ class Model {
     }
 
     /**
-     * An animation to play on this model.
+     * The list of available animations for this model.
      *
-     * @type {object}
-     * @see {@link https://apidocs.overte.org/Entities.html#.AnimationProperties|Entities.AnimationProperties}
+     * @type {Object<string, Animation>}
      */
-    get animation() {
-        return this.#animation;
-    }
-
-    set animation(animation) {
-        this.#animation = animation;
+    get animations() {
+        return this.#animations;
     }
 
     /**
