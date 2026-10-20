@@ -28,6 +28,7 @@ const Signal = require("../../libincite/Signal.js");
 /**
  * The basic TactileElement
  *
+ * @property {Animation} animation - The animation to apply to this element's model.
  * @property {number} id - The unique id of this element
  * @property {number} depth - the depth of this element with the document tree
  * @property {number} documentId - The ID of the document this element is attached to.
@@ -55,6 +56,7 @@ const Signal = require("../../libincite/Signal.js");
  */
 class TactileElement {
 
+    #animation
     #cache
     #color
     #elements
@@ -96,6 +98,7 @@ class TactileElement {
         this.offsetZ = options.offsetZ ?? 0;
 
         this.#model = options.model;
+        this.#animation = options.animation;
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
@@ -170,6 +173,18 @@ class TactileElement {
 
     set model(url) {
         this.#model = url;
+    }
+
+    get animation() {
+        return this.#animation;
+    }
+
+    set animation(animation) {
+        if (!typeof animation == `Animation`) {
+            throw TypeError(`Element animation value must be set as an Animation, received a ${typeof animation}`);
+        }
+
+        this.#animation = animation;
     }
 
     get color() {
