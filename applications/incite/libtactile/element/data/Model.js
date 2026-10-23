@@ -17,7 +17,7 @@ class Model {
     // #originalTextures
     #shapeType
     #compoundShapeUrl
-    #animation
+    #animations
     // #joinRotations
     // #joinRotationsSet
     // #joinTranslations
@@ -25,11 +25,14 @@ class Model {
     // #relayParentJoints
     #groupCulled
 
+    #maintainNaturalProportions;
+
     /**
      * @param {string} modelUrl
      */
     constructor(modelUrl) {
         this.#modelUrl = modelUrl;
+        this.#animations = {};
     }
 
     /**
@@ -103,17 +106,12 @@ class Model {
     }
 
     /**
-     * An animation to play on this model.
+     * The list of available animations for this model.
      *
-     * @type {object}
-     * @see {@link https://apidocs.overte.org/Entities.html#.AnimationProperties|Entities.AnimationProperties}
+     * @type {Object<string, Animation>}
      */
-    get animation() {
-        return this.#animation;
-    }
-
-    set animation(animation) {
-        this.#animation = animation;
+    get animations() {
+        return this.#animations;
     }
 
     /**
@@ -127,6 +125,20 @@ class Model {
 
     set groupCulled(bool) {
         this.#groupCulled = bool;
+    }
+
+    /**
+     * Whether this model should keep its natural ratio between its 3 dimensions,
+     * and instead scaled to be within the element's dimensions.
+     *
+     * @type {boolean}
+     */
+    get maintainNaturalProportions() {
+        return this.#maintainNaturalProportions;
+    }
+
+    set maintainNaturalProportions(bool) {
+        this.#maintainNaturalProportions = bool;
     }
 }
 
