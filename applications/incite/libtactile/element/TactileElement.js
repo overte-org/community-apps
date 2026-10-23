@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const AnimationHandler = require("../handler/AnimationHandler.js");
 const Logger = require("../Logger.js");
 const Signal = require("../../libincite/Signal.js");
 
@@ -31,7 +32,7 @@ const Signal = require("../../libincite/Signal.js");
  * @property {number} id - The unique id of this element
  * @property {number} depth - the depth of this element with the document tree
  * @property {number} documentId - The ID of the document this element is attached to.
- * @property {string} currentAnimation - The key of the model animation to apply to this element's model. The default animation will be "idle"; this property can be set to an empty string of `""` to set no animation.
+ * @property {string} currentAnimation - The key of the model animation to apply to this element's model. The default animation will be "idle"; this property can be set to `"none"` to set no animation. NOTE: Due to a limitation in the Overte scripting API it is not currently possible to clear an existing animation, only replace it with another valid animation file.
  * @property {Array<TactileElement>} elements - The list of child elements within this element
  * @property {number} mindWidth - the minimum width this element should be
  * @property {number} minHeight - the minimum heigh this element should be
@@ -56,9 +57,9 @@ const Signal = require("../../libincite/Signal.js");
  */
 class TactileElement {
 
+    #animationHandler
     #cache
     #color
-    #currentAnimation
     #elements
     #minWidth
     #minHeight
@@ -98,7 +99,11 @@ class TactileElement {
         this.offsetZ = options.offsetZ ?? 0;
 
         this.#model = options.model;
-        this.#currentAnimation = options.currentAnimation;
+
+        // set up an AnimationHandler.
+        this.#animationHandler = new AnimationHandler(this, this._onAnimationChanged);
+        if (options.currentAnimation) this.currentAnimation = options.currentAnimation;
+
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
@@ -176,7 +181,10 @@ class TactileElement {
     }
 
     get currentAnimation() {
-        return this.#currentAnimation == "" || this.#currentAnimation ? this.#currentAnimation : "idle";
+        const currentAnimation = this.#animationHandler?.currentAnimation;
+        return currentAnimation
+                ? currentAnimation
+                : "idle";
     }
 
     set currentAnimation(animation) {
@@ -187,7 +195,25 @@ class TactileElement {
             Logger.warn(`Element ${element.id} has the currentAnimation value set to ${animation} but no such animation yet exists on the model.`);
         }
 
-        this.#currentAnimation = animation;
+        this.#animationHandler.setAnimation(animation);
+    }
+
+    /**
+     * Set an animation to play on this element's model.
+     *
+     * An animationKey value of `"none"` will not set an animation.
+     * NOTE: It is not currently possible to clear an existing animation to return the model to its original state. See https://github.com/overte-org/overte/issues/2418 for more details.
+     *
+     * @param {string} animationKey - The name of the animation on the model
+     * @param {number} delay - The delay in milliseconds before the animation will play; default is 0.
+     */
+    setAnimation(animationKey, delay = 0) {
+        if (!this.#animationHandler) {
+            Logger.warn(`Cannot set animation ${animationKey} for element ${this.id} as it does not support animations.`);
+            return;
+        }
+
+        this.#animationHandler.setAnimation(animationKey, delay);
     }
 
     get color() {
@@ -585,6 +611,43 @@ class TactileElement {
         }
 
         this.valid = true;
+    }
+
+    /**
+     * Receive notice from the AnimationHandler that the current animation
+     * has changed.
+     *
+     * @param {string} newAnimation
+     */
+    _onAnimationChanged(newAnimation) {
+        // TODO render the animation change.
+        const animation = this.model?.animations[newAnimation];
+
+        if (newAnimation != "" && !animation) {
+            Logger.warn(`Could not switch to new animation "${newAnimation}" as it does not exist on the current model; ${animation}`);
+            return;
+        }
+
+        // Inform renderer it needs to change the animation
+        if (this.valid) this.valid = true; // Marking it as valid, even if already valid, will trigger a render.
+    }
+
+    /**
+     * Connect a callback to a signal
+     *
+     * @param {string} signalName
+     * @param {function} callback
+     *
+     * @returns {TactileElement} - This TactileElement instance
+     */
+    connect(signalName, callback) {
+        const signal = this[signalName];
+        if (!signal || !signal instanceof Signal) {
+            throw new Error(`Could not connect callback to signal ${signalName}, no such signal exists on ${this.constructor.name}`);
+        }
+        signal.connect(callback);
+
+        return this;
     }
 
     // Signals

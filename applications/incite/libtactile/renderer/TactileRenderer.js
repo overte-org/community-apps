@@ -364,12 +364,17 @@ class TactileRenderer extends BaseRenderer {
                     properties.compoundShapeURL = model.compoundShapeUrl;
                     properties.animation = model.animation;
                     properties.groupCulled = model.groupCulled;
-                    if (element.currentAnimation != "") {
-                        const animation = model.animations[element.currentAnimation] ;
-                            if (animation) {
-                                properties.animation = animation.toAnimationProperties();
-                            }
-                    }
+
+                    const currentAnimation = element.currentAnimation;
+                    // Animation "none" is reserved for *no animation*
+                    // NOTE: This currently does not work as it is not possible to remove animations from a Model entity, only replace the current animation with a valid new animation file. See https://github.com/overte-org/overte/issues/2418
+                    const animation = model.animations && element.currentAnimation != "none"
+                            ? model.animations[currentAnimation]
+                            : undefined;
+                    properties.animation = animation
+                                           ? animation.toAnimationProperties()
+                                           : {};
+
                 } else {
                     properties.type = "Box";
                     properties.color = element.color;
