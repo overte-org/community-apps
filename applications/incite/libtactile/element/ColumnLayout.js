@@ -66,7 +66,7 @@ class ColumnLayout extends Layout {
         }
     }
 
-    layout(availableWidth, availableHeight, x, y) {
+    _layout(availableWidth, availableHeight, x, y) {
         Logger.debug(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const maxWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));

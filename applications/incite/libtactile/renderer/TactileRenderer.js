@@ -445,6 +445,48 @@ class TactileRenderer extends BaseRenderer {
         return true;
     }
 
+    refineText(element, entityId) {
+        if (!(element instanceof TactileElements.TextElement)) return true;
+
+        // Check if entity has finished loading, else reschedule refine task.
+        if (!Entities.isLoaded(entityId)) {
+            Logger.debug(`Element ${element.id}'s entity ${entityId} is not yet ready, so cannot read text data. Will try again next render pass.`);
+            return false;
+        }
+
+        // Just in case the textSize is actually unexpectedly larger (or smaller)
+        // We'll just check if the entity has been around for long enough
+        // to expect it to have become fully ready, and if it has exceeded
+        // this arbritrary age we'll just give up on it.
+        const properties = Entities.getEntityProperties(entityId, ["age"]);
+        const ageInSeconds = properties.age;
+        if (ageInSeconds > 10) return true; // The entity doesn't need resizing because we gave it a good size initially
+
+        const textSize = Entities.textSize(entityId, element.text);
+        // Check integrity of textSize data before proceeding
+        if (textSize.width === 0 || textSize.height === 0
+            || textSize.height <= element.lineHeight*0.999 // smaller than 1 line
+            || textSize.height >= element.maxHeight
+            || textSize.height >= element.cache.availableHeight
+            || textSize.height == null
+            || Number.isNaN(textSize.height)) {
+            // Text size returns unexpected values during entity
+            // creation. When entity sizes are too large, too small
+            // or invalid we ignore them.
+            // See https://github.com/overte-org/overte/issues/1897.
+
+            return false; // Retry until textSize is valid!
+        }
+
+        // cache textSize
+        element.cache.textSize = textSize;
+
+        // Invalidate element to trigger relayout and render
+        element.valid = false;
+
+        return true;
+    }
+
     /**
      * Run a second-pass to refine the render of an element.
      *
@@ -458,6 +500,7 @@ class TactileRenderer extends BaseRenderer {
         let retry;
 
         if (!this.refineModel(element, entityId) && !retry) retry = true;
+        if (!this.refineText(element, entityId) && !retry) retry = true;
 
         if (retry) {
             // queue another refine render task for this element
@@ -467,13 +510,6 @@ class TactileRenderer extends BaseRenderer {
                                                 element.document,
                                                 RenderTask.REFINE));
         }
-
-        // TODO: Refine TextElement
-        // if (element instanceof TextElement) {
-        //     this.addRenderTask(new RenderTask(element,
-        //                                       document,
-        //                                       RenderTask.REFINE));
-        // }
     }
 
     /**

@@ -595,6 +595,34 @@ class TactileElement {
      */
     layout(availableWidth, availableHeight, offsetX, offsetY) {
 
+        this.cache.availableWidth = availableWidth;
+        this.cache.availableHeight = availableHeight;
+        this.cache.offsetX = offsetX;
+        this.cache.offsetY = offsetY;
+
+        return this._layout(availableWidth, availableHeight, offsetX, offsetY);
+    }
+
+    /**
+     * Internal element layout logic
+     *
+     * By the end of this method the following values will be in the cache:
+     * * x
+     * * y
+     * * absoluteX
+     * * absoluteY
+     * * width
+     * * height
+     *
+     * @private
+     *
+     * @param {number} availableWidth
+     * @param {number} availableHeight
+     * @param {number} offsetX
+     * @param {number} offsetY
+     */
+    _layout(availableWidth, availableHeight, offsetX, offsetY) {
+
         const finalWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const finalHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
 
