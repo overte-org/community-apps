@@ -108,6 +108,8 @@ class TactileElement {
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
 
+        this.ignoreRay = options.ignoreRay ?? false;
+
         this.resetCache();
         this.parent = null;
 

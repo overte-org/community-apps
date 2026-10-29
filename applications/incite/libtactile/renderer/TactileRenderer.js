@@ -251,7 +251,8 @@ class TactileRenderer extends BaseRenderer {
                 grab: {
                     grabbable: false,
                     equipable: false,
-                }
+                },
+                ignorePickIntersection: element.ignoreRay,
             },
             Grid: {
                 type: "Grid",
