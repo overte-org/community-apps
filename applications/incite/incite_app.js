@@ -178,7 +178,6 @@ function moveGraph() {
 
 function deleteGraph() {
     if (incite.InciteStore.graphManager.graphs.length > 0) {
-        incite.InciteStore.graphManager.graphs.shift();
         incite.InciteStore.graphManager.deleteGraph(0); // TODO: Support more than one graph
         Logger.log("Deleted graph");
     } else {

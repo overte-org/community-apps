@@ -7,12 +7,14 @@
 const Logger = require("./Logger.js");
 const incite = require("./libincite/incite.js");
 const tactile = require("./libtactile/tactile.js");
+const ContextMenu = require("contextMenu");
 
 /**
  * A Rez'd instance of an Incite Graph.
  */
 class GraphRez {
     #document
+    #callbacks
     #connectionElementMap
     #elementConnectionMap
     #elementNodeMap
@@ -42,15 +44,32 @@ class GraphRez {
 
         this.modeData = {};
 
+        this.#callbacks = {
+            nodeAddedEvent: this.onNodeAdded.bind(this),
+            nodeRemovedEvent: this.onNodeRemoved.bind(this),
+            connectionAddedEvent: this.onConnectionAdded.bind(this),
+            connectionRemovedEvent: this.onConnectionRemoved.bind(this),
+            graphDeletedEvent: this.onGraphDeleted.bind(this),
+        };
         this.subscribe();
     }
 
     subscribe() {
-        this.graph.nodeAddedEvent.connect(this.onNodeAdded.bind(this));
-        this.graph.nodeRemovedEvent.connect(this.onNodeRemoved.bind(this));
-        this.graph.connectionAddedEvent.connect(this.onConnectionAdded.bind(this));
-        this.graph.connectionRemovedEvent.connect(this.onConnectionRemoved.bind(this));
-        incite.InciteStore.graphManager.graphDeletedEvent.connect(this.onGraphDeleted.bind(this));
+        Logger.debug("graphRez subscribe");
+        this.graph.nodeAddedEvent.connect(this.#callbacks.nodeAddedEvent);
+        this.graph.nodeRemovedEvent.connect(this.#callbacks.nodeRemovedEvent);
+        this.graph.connectionAddedEvent.connect(this.#callbacks.connectionAddedEvent);
+        this.graph.connectionRemovedEvent.connect(this.#callbacks.connectionRemovedEvent);
+        incite.InciteStore.graphManager.graphDeletedEvent.connect(this.#callbacks.graphDeletedEvent);
+    }
+
+    unsubscribe() {
+        Logger.debug("graphRez unsubscribe");
+        this.graph.nodeAddedEvent.disconnect(this.#callbacks.nodeAddeEvent);
+        this.graph.nodeRemovedEvent.disconnect(this.#callbacks.nodeRemovedEvent);
+        this.graph.connectionAddedEvent.disconnect(this.#callbacks.connectionAddedEvent);
+        this.graph.connectionRemovedEvent.disconnect(this.#callbacks.connectionRemovedEvent);
+        incite.InciteStore.graphManager.graphDeletedEvent.disconnect(this.#callbacks.graphDeletedEvent);
     }
 
     setNodeInputportElementToMap(nodeId, portId, elementId) {
@@ -477,10 +496,13 @@ class GraphRez {
     }
 
     /**
-     * Remove all entities from the world
+     * Remove all entities from the world and cease functioning
      */
     cleanup() {
         this.document.cleanup();
+
+        // unsubscribe
+        this.unsubscribe();
     }
 
     // Signals
