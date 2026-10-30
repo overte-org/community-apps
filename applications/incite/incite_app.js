@@ -68,6 +68,7 @@ const baseUrl = "http://localhost:8079"
 // Woo proper app stuff!
 
 function updateContextMenu() {
+    Logger.debug("updateContextMenu");
     ContextMenu.unregisterActionSet("incite.menu_nodes");
     ContextMenu.unregisterActionSet("incite.menu");
     ContextMenu.unregisterActionSet("incite");
@@ -258,6 +259,15 @@ if (isOverte) {
     }
 
     updateContextMenu();
+
+    // Graph signals
+    const graphManager = incite.InciteStore.graphManager;
+    graphManager.graphDeletedEvent.connect(() => {
+        Script.setTimeout(updateContextMenu, 1);
+    })
+    graphManager.graphAddedEvent.connect(() => {
+        Script.setTimeout(updateContextMenu, 1)
+    })
 
     Script.scriptEnding.connect(() => {
         Menu.removeMenuItem(DEVELOPER_SUBMENU, MENU_DEBUG_NAME);

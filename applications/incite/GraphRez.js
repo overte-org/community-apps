@@ -264,7 +264,7 @@ class GraphRez {
         nodeElement.addElement(portsContainer);
 
 
-        this.document.root.addElement(nodeElement); // TODO Build an element for the type of node
+        this.rootGraphElement.addElement(nodeElement); // TODO Build an element for the type of node
         // Store elementId by the nodeId;
         this.#nodeElementMap.set(nodeId, nodeElement.id);
         this.#elementNodeMap.set(nodeElement.id, nodeId);
@@ -371,7 +371,7 @@ class GraphRez {
     onNodeRemoved(graphId, nodeId) {
         Logger.debug("onNodeRemoved", graphId, nodeId);
         const elementId = this.#nodeElementMap.get(nodeId);
-        this.document.root.removeElement(elementId);
+        this.rootGraphElement.removeElement(elementId);
         this.#nodeElementMap.delete(nodeId);
         this.#elementNodeMap.delete(elementId);
     }
@@ -428,24 +428,74 @@ class GraphRez {
             renderContext: "local"
         });
 
-        const layout = new tactile.element.FloatingLayout({
+        const container = new tactile.element.GridLayout({
+            spacing: 0.02,
+            flowDirection: 'row',
+            columns: 2,
+        })
+            .addElement(new tactile.element.TactileElement({ // invisible spacer
+                render: false,
+                preferredHeight: 0,
+                preferredWidth: 0,
+            }))
+            .addElement(new tactile.element.TextElement({ // Title bar
+                text: "Incite",
+                maxHeight: 0.13,
+                lineHeight: 0.12,
+                alpha: 0,
+                ignoreRay: true,
+            }))
+            .addElement(new tactile.element.ColumnLayout({ // Buttons
+                spacing: 0.03,
+                preferredHeight: 0,
+                preferredWidth: 0,
+            })
+                .addElement(new tactile.element.ButtonElement({})
+                    .addElement(new tactile.element.TextElement({
+                        text: "Execute graph",
+                        preferredHeight: 0,
+                        preferredWidth: 0,
+                        alpha: 0,
+                        ignoreRay: true,
+                    }))
+                    .connect("elementPressed", () => {
+                        this.graph.execute();
+                    }))
+                .addElement(new tactile.element.TactileElement({ // invisible spacer
+                    render: false,
+                    preferredWidth: 0,
+                }))
+                .addElement(new tactile.element.ButtonElement({})
+                    .addElement(new tactile.element.TextElement({
+                        text: "Delete graph",
+                        preferredHeight: 0,
+                        preferredWidth: 0,
+                        alpha: 0,
+                        ignoreRay: true,
+                    }))
+                    .connect("elementPressed", (documentId, elementId) => {
+                        Logger.debug(`Element ${elementId} pressed; Delete Graph`);
+                        incite.InciteStore.graphManager.deleteGraph(0);
+                    }))
+            );
+
+        this.rootGraphElement = new tactile.element.FloatingLayout({
             rows: 4,
             flowDirection: 'column',
             spacing: 0.1,
             margins: { top: 0.1, right: 0.1, bottom: 0.1, left: 0.1 },
         });
-
-        const grid = new tactile.element.GridElement({
-            preferredWidth: Infinity, preferredHeight: Infinity,
-        });
-        const elements = [layout,grid];
+        const grid = new tactile.element.GridElement({});
+        container.addElement(grid);
+        grid.addElement(this.rootGraphElement);
+        const elements = [container];
 
         // for each node in graph:
         for(const node of this.graph.nodes) {
             // create Element for node
             const element = new tactile.element.TactileElement({ minWidth: 0.5 });
             // attach to layout
-            layout.addElement(element);
+            this.rootGraphElement.addElement(element);
         }
 
         return tactile.tactileStore.documentManager.newDocument({

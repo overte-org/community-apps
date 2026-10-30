@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const TactileStore = require("../TactileStore.js");
 const AnimationHandler = require("../handler/AnimationHandler.js");
 const Logger = require("../Logger.js");
 const Signal = require("../../libincite/Signal.js");
@@ -107,6 +108,7 @@ class TactileElement {
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
+        this.render = options.render ?? true;
 
         this.ignoreRay = options.ignoreRay ?? false;
 
@@ -132,8 +134,7 @@ class TactileElement {
     }
 
     get document() {
-        const tactileStore = require("../TactileStore.js");
-        return tactileStore.documentManager.getDocument(this.documentId);
+        return TactileStore.documentManager.getDocument(this.documentId);
     }
 
     get absoluteZ() {

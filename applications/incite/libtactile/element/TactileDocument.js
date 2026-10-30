@@ -148,6 +148,7 @@ class TactileDocument extends TactileElement {
      * Called when an element of this tree has become valid
      */
     _onElementValidated(element) {
+        if (!element.render) return;
         // Inform renderer of the newly valid element,
         // so they might choose to render it again at some
         // point in the future.
