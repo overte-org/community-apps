@@ -402,6 +402,10 @@ class TactileRenderer extends BaseRenderer {
         this.refineElement(element);
     }
 
+    isElementRendered(element) {
+        return (!!this.entityMap.get(element.id));
+    }
+
     refineModel(element, entityId) {
         if (!(element.model && element.model.modelUrl && element.model.maintainNaturalProportions)) return true;
         // Check if model has finished loading, else reschedule refine task.

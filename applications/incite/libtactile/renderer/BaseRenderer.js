@@ -36,6 +36,8 @@ class BaseRenderer {
             this.addRenderTask(new RenderTask(element,
                                             document));
         } else {
+            // confirm element has been rendered before deleting the render
+            if (!this.isElementRendered(element)) return;
             // Element is marked to not render, so we should remove it.
             this.addRenderTask(new RenderTask(element,
                                               document,
@@ -120,6 +122,16 @@ class BaseRenderer {
                 this.renderElement(element);
             }
         }
+    }
+
+    /**
+     * Has the element been rendered?
+     *
+     * @param {TactileElement} element
+     * @abstract
+     */
+    isElementRendered(element) {
+        throw new Error("isElementRendered method must be implemented by a sub-class");
     }
 
     /**
