@@ -139,7 +139,7 @@ class GraphRez {
             render: false,
             preferredWidth: 0, preferredHeight: 0,
             zDepth: 0.12,
-
+            unlit: true,
         });
         nodeElement.addElement(nodeHighlight)
         nodeLayout.connect('elementHoverStarted', () => {
@@ -361,6 +361,10 @@ class GraphRez {
                 // Return port visuals to normal
 
                 break;
+            case "DeleteNodes":
+                // Hide button highlight when mode is inactive
+                this.highlightDeleteButton.render = false;
+                break;
             default:
                 if (this.interactionMode) this.interactionMode = null;
                 break;
@@ -395,6 +399,10 @@ class GraphRez {
 
                 // Setup loops to keep one end of polyline touching avatar's pointer location on graph
 
+                break;
+            case "DeleteNodes":
+                // Show button highlight when mode is active
+                this.highlightDeleteButton.render = true;
                 break;
             default:
 
@@ -462,6 +470,16 @@ class GraphRez {
             renderContext: "local"
         });
 
+        this.highlightDeleteButton = new tactile.element.TactileElement({
+            alpha: 0.4,
+            color: "red",
+            ignoreRay: true,
+            render: this.interactionMode == 'DeleteNodes',
+            preferredWidth: 0, preferredHeight: 0,
+            zDepth: 0.01,
+            unlit: true,
+        });
+
         const container = new tactile.element.GridLayout({
             spacing: 0.02,
             flowDirection: 'row',
@@ -507,7 +525,7 @@ class GraphRez {
                         // Enter/Exit node deletion mode
                         const newMode = this.interactionMode == 'DeleteNodes'? 'None' : 'DeleteNodes';
                         this.startInteractionMode(newMode);
-                    }))
+                    }).addElement(this.highlightDeleteButton))
                 .addElement(new tactile.element.TactileElement({ // invisible spacer
                     render: false,
                     preferredWidth: 0,
