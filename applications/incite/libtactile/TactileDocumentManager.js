@@ -5,7 +5,6 @@
 //
 
 const Logger = require("./Logger.js");
-const TactileDocument = require("./element/TactileDocument.js");
 
 class TactileDocumentManager {
 
@@ -15,6 +14,8 @@ class TactileDocumentManager {
     #nextId
     #availableIds
 
+    #TactileDocumentClass
+
     constructor() {
         this.#documents = [];
         this.#documentMap = new Map();
@@ -23,12 +24,30 @@ class TactileDocumentManager {
         this.#availableIds = [];
     }
 
+    get #TactileDocument() {
+        if (!this.#TactileDocumentClass) {
+            this.#TactileDocumentClass = require("./element/TactileDocument.js");
+        }
+
+        return this.#TactileDocumentClass;
+    }
+
+    /**
+     * Retreive a document by its id
+     *
+     * @param {number} documentId
+     */
     getDocument(documentId) {
         return this.#documentMap.get(documentId);
     }
 
+    /**
+     * Add a document
+     *
+     * @param {TactileDocument} document
+     */
     addDocument(document) {
-        if (!(document instanceof TactileDocument)) {
+        if (!(document instanceof this.#TactileDocument)) {
             Logger.error("Cannot add document; it is not a document.");
             return;
         };
@@ -38,8 +57,14 @@ class TactileDocumentManager {
         this.#documentMap.set(id, document);
     }
 
+    /**
+     * Create a new document already registered with this manager
+     *
+     * @param {Object} options
+     * @returns {TactileDocument}
+     */
     newDocument(options = {}) {
-        const document = new TactileDocument(options);
+        const document = new this.#TactileDocument(options);
         this.addDocument(document);
         return document;
     }

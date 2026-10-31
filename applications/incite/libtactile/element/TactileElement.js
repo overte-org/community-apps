@@ -4,6 +4,7 @@
 //  Copyright 2026 Overte e.V.
 //
 
+const TactileStore = require("../TactileStore.js");
 const AnimationHandler = require("../handler/AnimationHandler.js");
 const Logger = require("../Logger.js");
 const Signal = require("../../libincite/Signal.js");
@@ -30,10 +31,12 @@ const Signal = require("../../libincite/Signal.js");
  * The basic TactileElement
  *
  * @property {number} id - The unique id of this element
+ * @property {boolean} ignoreRay - Whether this element should ignore interactions; when true interactions will be allowed to fall to elements and possibly non-tactile objects behind this element.
  * @property {number} depth - the depth of this element with the document tree
  * @property {number} documentId - The ID of the document this element is attached to.
  * @property {string} currentAnimation - The key of the model animation to apply to this element's model. The default animation will be "idle"; this property can be set to `"none"` to set no animation. NOTE: Due to a limitation in the Overte scripting API it is not currently possible to clear an existing animation, only replace it with another valid animation file.
  * @property {Array<TactileElement>} elements - The list of child elements within this element
+ * @property {boolean} inheritPointerCallbacks - Whether this elenet should inherit callbacks from the parent element pointer signals. Inheritance is chainable; if the parent also has this property set, this element will also inherit callbacks from the grandparent.
  * @property {number} mindWidth - the minimum width this element should be
  * @property {number} minHeight - the minimum heigh this element should be
  * @property {number} maxWidth - the maxium width this element can be
@@ -66,6 +69,7 @@ class TactileElement {
     #model
     #preferredWidth
     #preferredHeight
+    #render
     #valid
 
     constructor(options = {}) {
@@ -107,6 +111,11 @@ class TactileElement {
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
+        this.#render = options.render ?? true;
+
+        this.ignoreRay = options.ignoreRay ?? false;
+        this.inheritPointerCallbacks = options.inheritPointerCallbacks ?? false;
+        this._setupEventInheritance();
 
         this.resetCache();
         this.parent = null;
@@ -130,8 +139,7 @@ class TactileElement {
     }
 
     get document() {
-        const tactileStore = require("../TactileStore.js");
-        return tactileStore.documentManager.getDocument(this.documentId);
+        return TactileStore.documentManager.getDocument(this.documentId);
     }
 
     get absoluteZ() {
@@ -235,9 +243,23 @@ class TactileElement {
         this.#cache = cache;
     }
 
+    get render() {
+        return this.#render;
+    }
+
+    set render(bool) {
+        if (this.#render != bool) {
+            this.#render = bool;
+
+            this.valid = false;
+        }
+    }
+
     /**
      * When this element is valid it's data is in tip-top shape,
      * when this value is false it is in need of a measure and a layout.
+     *
+     * @type {boolean}
      */
     get valid() {
         return this.#valid;
@@ -254,23 +276,38 @@ class TactileElement {
         return typeof this.cache?.x !== 'undefined'
     }
 
-    // No hidden elements here!
+    /**
+     * Only elements which are visible when rendered
+     *
+     * @type {Array<TactileElement>}
+     */
     get visibleElements() {
         return this.elements.filter(element => element.visible);
     }
 
-    // elements with valid geometry
+    /**
+     * elements with valid geometry
+     *
+     * @type {Array<TactileElement>}
+     */
     get validElements() {
         return this.elements.filter(element => element.valid);
     }
 
-    // elements with valid geometry
+    /**
+     * elements which have been assigned coordinates
+     *
+     * @type {Array<TactileElement>}
+     */
     get placedElements() {
         return this.elements.filter(element => element.isPlaced);
     };
 
     /**
      * Propogate element validation notification up through the tree
+     *
+     * @param {TactileElement} element
+     * @param {boolean} valid
      */
     _propogateValidation(element, valid) {
         if (valid) {
@@ -286,6 +323,8 @@ class TactileElement {
 
     /**
      * Propogate attachment notification up through the tree
+     *
+     * @param {TactileElement} element
      */
     _propogateAttachment(element) {
         // An element has been added below/within this element,
@@ -308,6 +347,8 @@ class TactileElement {
 
     /**
      * Propogate removal notification up through the tree
+     *
+     * @param {TactileElement} element
      */
     _propogateRemoval(element) {
         Logger.debug("_propogateRemoval");
@@ -332,27 +373,37 @@ class TactileElement {
 
     /**
      * Called whenever either this or any child element below this one is added to the tree
+     *
+     * @param {TactileElement} element
      */
     _onElementAttachedToTree(element) {};
 
     /**
      * Called whenever either this or any child element below this one is removed from the tree
+     *
+     * @param {TactileElement} element
      */
     _onElementRemovedFromTree(element) {};
 
     /**
      * Called whenever either this or any child element below this one become invalid
+     *
+     * @param {TactileElement} element
      */
     _onElementInvalidated(element) {};
 
     /**
      * Called whenever either this or any child element below this one become valid
+     *
+     * @param {TactileElement} element
      */
     _onElementValidated(element) {};
 
     /**
      * Called whenever this element's position within the tree changes.
      * This can be when it is attached to a new parent, or any parent element above it is added to a new tree or moves position within the same tree.
+     *
+     * @param {TactileElement} parent
      */
     _onParentChanged(parent) {
         this.parent = parent;
@@ -480,7 +531,7 @@ class TactileElement {
     /**
      * Remove a child element of this element
      *
-     * @param {number} elmentId
+     * @param {number} elementId
      */
     removeElement(elementId) {
         Logger.debug("removeElement", elementId);
@@ -497,6 +548,8 @@ class TactileElement {
 
     /**
      * Remove every child element from this element
+     *
+     * @returns {TactileElement} This element
      */
     removeAllElements() {
         const clearedElements = this.#elements;
@@ -593,6 +646,34 @@ class TactileElement {
      */
     layout(availableWidth, availableHeight, offsetX, offsetY) {
 
+        this.cache.availableWidth = availableWidth;
+        this.cache.availableHeight = availableHeight;
+        this.cache.offsetX = offsetX;
+        this.cache.offsetY = offsetY;
+
+        return this._layout(availableWidth, availableHeight, offsetX, offsetY);
+    }
+
+    /**
+     * Internal element layout logic
+     *
+     * By the end of this method the following values will be in the cache:
+     * * x
+     * * y
+     * * absoluteX
+     * * absoluteY
+     * * width
+     * * height
+     *
+     * @private
+     *
+     * @param {number} availableWidth
+     * @param {number} availableHeight
+     * @param {number} offsetX
+     * @param {number} offsetY
+     */
+    _layout(availableWidth, availableHeight, offsetX, offsetY) {
+
         const finalWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));
         const finalHeight = Math.max(this.minHeight, Math.min(availableHeight, this.maxHeight));
 
@@ -652,34 +733,74 @@ class TactileElement {
 
     // Signals
 
+    _setupEventInheritance() {
+        this.elementPressed.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementPressed', documentId, elementId);
+        })
+        this.elementHoverStarted.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementHoverStarted', documentId, elementId);
+        })
+        this.elementHoverStopped.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementHoverStopped', documentId, elementId);
+        })
+        this.elementReleased.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementReleased', documentId, elementId);
+        })
+        this.elementScroll.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementScroll', documentId, elementId);
+        })
+    }
+
+    _handleInheritanceEvent(signalName, documentId, elementId) {
+        if (!this.inheritPointerCallbacks || !this.parent) return;
+        const signal = this.parent[signalName];
+
+        if (signal) signal.emit(documentId, elementId);
+    }
+
+    // Pointer Events; callbacks added to these are inherited by
+    // this element's children, unless the child element has `inheritPointerCallbacks` set to false.
+
     /**
      * Triggered when a mouse button is clicked while the mouse cursor is on this element, or a controller trigger is fully pressed while its laser is on this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementPressed = new Signal("ElementPressed");
 
     /**
      * Triggered when the mouse cursor or controller laser starts hovering on this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementHoverStarted = new Signal("ElementHoverStarted");
 
     /**
      * Triggered when the mouse cursor or controller laser stops hovering over this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementHoverStopped = new Signal("ElementHoverStopped");
 
     /**
      * Triggered when a mouse button is released after clicking on this element or the controller trigger is partly or fully released after pressing on this element, even if the mouse pointer or controller laser has moved off the element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementReleased = new Signal("ElementReleased");
 
     /**
      * Triggered when the mouse cursor or controller laser scrolls over this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementScroll = new Signal("ElementScroll");
 
 //     hoverOverEntity
 //
 //     mouseMoveOnEntity
+
+    // End of Pointer Events
 
 
 

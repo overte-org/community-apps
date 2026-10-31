@@ -67,8 +67,9 @@ class InciteRezzer {
      * Remove a graph to end its rez.
      */
     removeGraphRez(graphRezId) {
-        Logger.debug("removeGraphRez", graphRezId);
+        Logger.debug("removeGraphRez id:", graphRezId);
         const graphRez = this.#graphRezMap.get(graphRezId);
+        Logger.debug("removeGraphRez typeof graphRez:", typeof graphRez);
         this.#graphRez.delete(graphRez);
         this.#graphRezMap.delete(graphRezId);
 

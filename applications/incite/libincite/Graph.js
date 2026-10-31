@@ -268,11 +268,12 @@ class Graph {
      * @param {number}
      */
     deleteNode(nodeId) {
-        const node = this.#nodes.get(nodeId);
+        const node = this.#nodes[nodeId];
         this.#nodes.delete(node);
         this.#nodesById.delete(nodeId);
         this.#nonPureNodesOrdering = this.#nonPureNodesOrdering.filter(e => e !== nodeId);
         this.#availableIds.push(nodeId);
+        this.deleteConnectionsOfNode(nodeId);
         this.nodeRemovedEvent.emit(this.id, nodeId); // TODO: Only emit if successfully removed
         this.updateData();
         this.graphUpdatedEvent.emit(this.id, new Set([nodeId]));
@@ -354,6 +355,19 @@ class Graph {
         this.connectionRemovedEvent.emit(this.id, connectionId);
 
         this.#valid = this.validateGraph();
+    }
+
+    /**
+     * Delete all connections associated with the specified node
+     *
+     * @param {number} nodeId - The id of the node to delete connections from
+     */
+    deleteConnectionsOfNode(nodeId) {
+        Logger.debug("graph.deleteConnectionsOfNode", nodeId);
+        const connections = this.getConnections(nodeId);
+        const queue = connections.inputs.map((connection) => connection.id)
+                .concat(connections.outputs.map((connection) => connection.id));
+        queue.forEach(connectionId => this.deleteConnection(connectionId));
     }
 
     /**
@@ -508,7 +522,7 @@ class Graph {
         if (!inPort) message.push("From node "+connection.in.node+", port "+connection.in.port+" does not exist.");
         if (!outPort) message.push("To node:port "+connection.out.node+":"+connection.out.port+" does not exist.");
         if (bothPortsDefined) message.push("inPort", inPort, "outPort:", outPort);
-        if (!bothPortTypesCorrect) message.push("One or more port type is incorrect; inPort:", inPort.type, "outPort:", outPort.type);
+        if (!bothPortTypesCorrect) message.push("One or more port type is incorrect; inPort:", inPort?.type, "outPort:", outPort?.type);
         message.push(JSON.stringify(connection));
         Logger.warn(... message);
         return false;
@@ -747,19 +761,17 @@ class Graph {
     /**
      * Returns any connections involving the specified node
      *
-     * @param {GraphNode} graphNode
+     * @param {number} graphId
      * @returns {Array<Graph~Connection>} - input and output connections
      */
-    getConnections(graphNode) {
-        //Logger.debug(graphNode);
+    getConnections(graphId) {
+        Logger.debug("graph.getConnections", graphId);
         const inputs = [];
         const output = [];
         this.connections.forEach(item => {
-            //Logger.debug(item);
-            //Logger.debug("in:", item.in, ", out:", item.out);
-            if (item.out.node === graphNode.id) {
+            if (item.out.node === graphId) {
                 inputs.push(item);
-            } else if (item.in.node === graphNode.id) {
+            } else if (item.in.node === graphId) {
                 output.push(item);
             }
         });
@@ -768,7 +780,7 @@ class Graph {
             // inputs: node.connections.filter(item => item.out === node.id),
             // outputs: node.connections.filter(item => item.in === node.id)
             inputs: inputs,
-            output: output
+            outputs: output
         }
     }
 

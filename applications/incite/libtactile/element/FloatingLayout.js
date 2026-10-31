@@ -186,7 +186,7 @@ class FloatingLayout extends Layout {
         }
     }
 
-    layout(availableWidth, availableHeight, x, y) {
+    _layout(availableWidth, availableHeight, x, y) {
         Logger.debug(`availableWidth: ${availableWidth}, availableHeight: ${availableHeight}, x: ${x}, y: ${y}`)
 
         const finalWidth = Math.max(this.minWidth, Math.min(availableWidth, this.maxWidth));

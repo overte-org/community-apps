@@ -7,12 +7,14 @@
 const Logger = require("./Logger.js");
 const incite = require("./libincite/incite.js");
 const tactile = require("./libtactile/tactile.js");
+const ContextMenu = require("contextMenu");
 
 /**
  * A Rez'd instance of an Incite Graph.
  */
 class GraphRez {
     #document
+    #callbacks
     #connectionElementMap
     #elementConnectionMap
     #elementNodeMap
@@ -42,15 +44,32 @@ class GraphRez {
 
         this.modeData = {};
 
+        this.#callbacks = {
+            nodeAddedEvent: this.onNodeAdded.bind(this),
+            nodeRemovedEvent: this.onNodeRemoved.bind(this),
+            connectionAddedEvent: this.onConnectionAdded.bind(this),
+            connectionRemovedEvent: this.onConnectionRemoved.bind(this),
+            graphDeletedEvent: this.onGraphDeleted.bind(this),
+        };
         this.subscribe();
     }
 
     subscribe() {
-        this.graph.nodeAddedEvent.connect(this.onNodeAdded.bind(this));
-        this.graph.nodeRemovedEvent.connect(this.onNodeRemoved.bind(this));
-        this.graph.connectionAddedEvent.connect(this.onConnectionAdded.bind(this));
-        this.graph.connectionRemovedEvent.connect(this.onConnectionRemoved.bind(this));
-        incite.InciteStore.graphManager.graphDeletedEvent.connect(this.onGraphDeleted.bind(this));
+        Logger.debug("graphRez subscribe");
+        this.graph.nodeAddedEvent.connect(this.#callbacks.nodeAddedEvent);
+        this.graph.nodeRemovedEvent.connect(this.#callbacks.nodeRemovedEvent);
+        this.graph.connectionAddedEvent.connect(this.#callbacks.connectionAddedEvent);
+        this.graph.connectionRemovedEvent.connect(this.#callbacks.connectionRemovedEvent);
+        incite.InciteStore.graphManager.graphDeletedEvent.connect(this.#callbacks.graphDeletedEvent);
+    }
+
+    unsubscribe() {
+        Logger.debug("graphRez unsubscribe");
+        this.graph.nodeAddedEvent.disconnect(this.#callbacks.nodeAddeEvent);
+        this.graph.nodeRemovedEvent.disconnect(this.#callbacks.nodeRemovedEvent);
+        this.graph.connectionAddedEvent.disconnect(this.#callbacks.connectionAddedEvent);
+        this.graph.connectionRemovedEvent.disconnect(this.#callbacks.connectionRemovedEvent);
+        incite.InciteStore.graphManager.graphDeletedEvent.disconnect(this.#callbacks.graphDeletedEvent);
     }
 
     setNodeInputportElementToMap(nodeId, portId, elementId) {
@@ -97,7 +116,12 @@ class GraphRez {
     onNodeAdded(graphId, nodeId) {
         const onCompleteCommands = []; // We need to run some commands later, once all elements have been added to the document
         const node = this.graph.getNode(nodeId);
-        const nodeElement = new tactile.element.ColumnLayout({
+        const nodeElement = new tactile.element.TactileElement({
+            preferredWidth: 0, preferredHeight: 0,
+            alpha: 0,
+            zDepth: 0,
+        });
+        const nodeLayout = new tactile.element.ColumnLayout({
             preferredWidth: 0.5, preferredHeight: 0.5,
             minWidth: 0.5, minHeight: 0.5,
             maxWidth: 1, maxHeight: 1,
@@ -107,13 +131,39 @@ class GraphRez {
             alpha: 1,
             zDepth: 0.1,
         });
-        nodeElement.addElement(new tactile.element.TextElement({
+        nodeElement.addElement(nodeLayout);
+        const nodeHighlight = new tactile.element.TactileElement({
+            alpha: 0.4,
+            color: "red",
+            ignoreRay: true,
+            render: false,
+            preferredWidth: 0, preferredHeight: 0,
+            zDepth: 0.12,
+            unlit: true,
+        });
+        nodeElement.addElement(nodeHighlight)
+        nodeLayout.connect('elementHoverStarted', () => {
+            if (this.interactionMode != 'DeleteNodes') return;
+            // Start highlighting node
+            nodeHighlight.render = true;
+        }).connect('elementHoverStopped', () => {
+            //if (this.interactionMode != 'DeleteNodes') return;
+            // Stop highlighting node
+            nodeHighlight.render = false;
+
+        }).connect('elementPressed', (documentId, elementId) => {
+            if (this.interactionMode != 'DeleteNodes') return;
+
+            // Delete node
+            this.#graph.deleteNode(nodeId);
+        }).addElement(new tactile.element.TextElement({
             text: node.type,
             color: { red: 255, green: 144, blue: 0 },
             textColor: { red: 0, green: 0, blue: 0 },
             lineHeight: 0.12,
             preferredWidth: 0.3, preferredHeight: 0.2,
             unlit: true,
+            inheritPointerCallbacks: true,
         }));
 
         // Ports row
@@ -122,6 +172,7 @@ class GraphRez {
             preferredWidth: 0.3, preferredHeight: 0.1,
             alpha: 0,
             zDepth: 0,
+            inheritPointerCallbacks: true,
 
         });
 
@@ -134,6 +185,7 @@ class GraphRez {
             zDepth: 0.01,
             margins: { top: 0.01, right: 0.01, bottom: 0.01, left: 0.01 },
             spacing: 0.01,
+            inheritPointerCallbacks: true,
 
         });
         node.inputs.forEach((port, index) => {
@@ -179,7 +231,7 @@ class GraphRez {
                 // Do we have an existing connection? We shall disconnect it.
                 } else {
                     Logger.debug("We are not currently connecting ports.");
-                    const connections = this.#graph.getConnections(node);
+                    const connections = this.#graph.getConnections(node.id);
                     connections?.inputs.forEach((connection, connectionIndex) => {
                         Logger.debug("Could we delete this connection?", connection.id, JSON.stringify(connection))
                         if (connection.out.port === port.id) {
@@ -207,6 +259,7 @@ class GraphRez {
             zDepth: 0.01,
             margins: { top: 0.01, right: 0.01, bottom: 0.01, left: 0.01 },
             spacing: 0.1,
+            inheritPointerCallbacks: true,
         });
         node.outputs.forEach((port, index) => {
             const outputElement = new tactile.element.TactileElement({
@@ -242,10 +295,10 @@ class GraphRez {
         });
         portsContainer.addElement(outputPorts);
 
-        nodeElement.addElement(portsContainer);
+        nodeLayout.addElement(portsContainer);
 
 
-        this.document.root.addElement(nodeElement); // TODO Build an element for the type of node
+        this.rootGraphElement.addElement(nodeElement); // TODO Build an element for the type of node
         // Store elementId by the nodeId;
         this.#nodeElementMap.set(nodeId, nodeElement.id);
         this.#elementNodeMap.set(nodeElement.id, nodeId);
@@ -308,6 +361,10 @@ class GraphRez {
                 // Return port visuals to normal
 
                 break;
+            case "DeleteNodes":
+                // Hide button highlight when mode is inactive
+                this.highlightDeleteButton.render = false;
+                break;
             default:
                 if (this.interactionMode) this.interactionMode = null;
                 break;
@@ -343,6 +400,10 @@ class GraphRez {
                 // Setup loops to keep one end of polyline touching avatar's pointer location on graph
 
                 break;
+            case "DeleteNodes":
+                // Show button highlight when mode is active
+                this.highlightDeleteButton.render = true;
+                break;
             default:
 
                 break;
@@ -352,7 +413,7 @@ class GraphRez {
     onNodeRemoved(graphId, nodeId) {
         Logger.debug("onNodeRemoved", graphId, nodeId);
         const elementId = this.#nodeElementMap.get(nodeId);
-        this.document.root.removeElement(elementId);
+        this.rootGraphElement.removeElement(elementId);
         this.#nodeElementMap.delete(nodeId);
         this.#elementNodeMap.delete(elementId);
     }
@@ -409,24 +470,97 @@ class GraphRez {
             renderContext: "local"
         });
 
-        const layout = new tactile.element.FloatingLayout({
+        this.highlightDeleteButton = new tactile.element.TactileElement({
+            alpha: 0.4,
+            color: "red",
+            ignoreRay: true,
+            render: this.interactionMode == 'DeleteNodes',
+            preferredWidth: 0, preferredHeight: 0,
+            zDepth: 0.01,
+            unlit: true,
+        });
+
+        const container = new tactile.element.GridLayout({
+            spacing: 0.02,
+            flowDirection: 'row',
+            columns: 2,
+        })
+            .addElement(new tactile.element.TactileElement({ // invisible spacer
+                render: false,
+                preferredHeight: 0,
+                preferredWidth: 0,
+            }))
+            .addElement(new tactile.element.TextElement({ // Title bar
+                text: "Incite",
+                maxHeight: 0.13,
+                lineHeight: 0.12,
+                alpha: 0,
+                ignoreRay: true,
+            }))
+            .addElement(new tactile.element.ColumnLayout({ // Buttons
+                spacing: 0.03,
+                preferredHeight: 0,
+                preferredWidth: 0,
+            })
+                .addElement(new tactile.element.ButtonElement({})
+                    .addElement(new tactile.element.TextElement({
+                        text: "Execute graph",
+                        preferredHeight: 0,
+                        preferredWidth: 0,
+                        alpha: 0,
+                        ignoreRay: true,
+                    }))
+                    .connect("elementPressed", () => {
+                        this.graph.execute();
+                    }))
+                .addElement(new tactile.element.ButtonElement({})
+                    .addElement(new tactile.element.TextElement({
+                        text: "Delete node",
+                        preferredHeight: 0,
+                        preferredWidth: 0,
+                        alpha: 0,
+                        ignoreRay: true,
+                    }))
+                    .connect("elementPressed", () => {
+                        // Enter/Exit node deletion mode
+                        const newMode = this.interactionMode == 'DeleteNodes'? 'None' : 'DeleteNodes';
+                        this.startInteractionMode(newMode);
+                    }).addElement(this.highlightDeleteButton))
+                .addElement(new tactile.element.TactileElement({ // invisible spacer
+                    render: false,
+                    preferredWidth: 0,
+                }))
+                .addElement(new tactile.element.ButtonElement({})
+                    .addElement(new tactile.element.TextElement({
+                        text: "Delete graph",
+                        preferredHeight: 0,
+                        preferredWidth: 0,
+                        alpha: 0,
+                        ignoreRay: true,
+                    }))
+                    .connect("elementPressed", (documentId, elementId) => {
+                        Logger.debug(`Element ${elementId} pressed; Delete Graph`);
+                        incite.InciteStore.graphManager.deleteGraph(0);
+                    }))
+            );
+
+        this.rootGraphElement = new tactile.element.FloatingLayout({
             rows: 4,
             flowDirection: 'column',
             spacing: 0.1,
             margins: { top: 0.1, right: 0.1, bottom: 0.1, left: 0.1 },
         });
-
-        const grid = new tactile.element.GridElement({
-            preferredWidth: Infinity, preferredHeight: Infinity,
-        });
-        const elements = [layout,grid];
+        const grid = new tactile.element.GridElement({});
+        container.addElement(grid);
+        grid.addElement(this.rootGraphElement);
+        const elements = [container];
 
         // for each node in graph:
         for(const node of this.graph.nodes) {
             // create Element for node
             const element = new tactile.element.TactileElement({ minWidth: 0.5 });
             // attach to layout
-            layout.addElement(element);
+            this.rootGraphElement.addElement(element);
         }
 
         return tactile.tactileStore.documentManager.newDocument({
@@ -477,10 +611,13 @@ class GraphRez {
     }
 
     /**
-     * Remove all entities from the world
+     * Remove all entities from the world and cease functioning
      */
     cleanup() {
         this.document.cleanup();
+
+        // unsubscribe
+        this.unsubscribe();
     }
 
     // Signals

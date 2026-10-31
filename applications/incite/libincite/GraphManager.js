@@ -37,7 +37,7 @@ class GraphManager {
     /**
      * Add a graph
      *
-     * @param {Graph} node - Instance of a Graph
+     * @param {Graph} graph - Instance of a Graph
      * @returns {number} new graph id
      */
     addGraph(graph) {
@@ -62,19 +62,21 @@ class GraphManager {
     }
 
     /**
-     * Delete a node from this graph by its id
+     * Delete a graph by its id
      *
      * @param {number} graphId
      */
     deleteGraph(graphId) {
         Logger.debug("GraphManager 1 Deleted graph");
         const graph = this.#graphsById.get(graphId);
+        Logger.debug(`GraphManager graph ${graph?.id}`);
 
         Logger.debug("GraphManager 2 Deleted graph");
         for (const node of graph.nodes) {
             graph.nodeRemovedEvent.emit(node.id);
         }
         this.graphDeletedEvent.emit(graphId);
+        Logger.debug("deleteGraph post-deleted event");
         this.#graphs.delete(graph);
         this.#graphsById.delete(graphId);
         this.#availableIds.push(graphId);

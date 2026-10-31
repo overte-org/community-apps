@@ -19,7 +19,7 @@ class NodeRegistry {
      */
     constructor(loadDefaultNodes = true) {
         this.#nodes = new Map();
-        this.loadDefaultNodes();
+        if (loadDefaultNodes) this.loadDefaultNodes();
     }
 
     /**
@@ -46,7 +46,7 @@ class NodeRegistry {
     /**
      * Get a copy of all available nodes
      *
-     * @returns {Map}
+     * @returns {Map<string, Node>}
      */
     get nodes() {
         return new Map(this.#nodes);

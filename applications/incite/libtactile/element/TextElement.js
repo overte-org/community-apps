@@ -28,6 +28,11 @@ class TextElement extends TactileElement {
         return 'TextElement';
     }
 
+    /**
+     * The text displayed on this element
+     *
+     * @type {string}
+     */
     get text() {
         return this.#text;
     }
@@ -35,6 +40,26 @@ class TextElement extends TactileElement {
     set text(newText) {
         this.#text = newText;
         this.valid = false;
+    }
+
+    measure() {
+        const superSize = super.measure(); // The size of the child elements
+
+        // The textSize is up to the renderer and will be defined and cached once
+        // this element has been rendered for the first time.
+        const textSize = this.cache.textSize
+                ? this.cache.textSize
+                : {width:0,height:0}
+
+        return {
+            width: superSize.width > textSize.width
+                    ? superSize.width
+                    : textSize.width,
+            height: superSize.height > textSize.height
+                    ? superSize.height
+                    : textSize.height
+        }
+
     }
 
 

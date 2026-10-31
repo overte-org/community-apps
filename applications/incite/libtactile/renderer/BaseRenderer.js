@@ -31,9 +31,18 @@ class BaseRenderer {
     onElementValidated(document, element) {
         // TODO: Confirm it is an element
 
-        // Store the element and document tree in renderTask
-        this.addRenderTask(new RenderTask(element,
-                                          document));
+        if (element.render) {
+            // Store the element and document tree in renderTask
+            this.addRenderTask(new RenderTask(element,
+                                            document));
+        } else {
+            // confirm element has been rendered before deleting the render
+            if (!this.isElementRendered(element)) return;
+            // Element is marked to not render, so we should remove it.
+            this.addRenderTask(new RenderTask(element,
+                                              document,
+                                              RenderTask.DELETE));
+        }
     }
 
     /**
@@ -113,6 +122,16 @@ class BaseRenderer {
                 this.renderElement(element);
             }
         }
+    }
+
+    /**
+     * Has the element been rendered?
+     *
+     * @param {TactileElement} element
+     * @abstract
+     */
+    isElementRendered(element) {
+        throw new Error("isElementRendered method must be implemented by a sub-class");
     }
 
     /**

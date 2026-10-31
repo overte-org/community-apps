@@ -13,7 +13,7 @@ class GridElement extends TactileElement {
 
     constructor(options = {}) {
         super(options);
-        this.zDepth = options.zDepth ?? 0.01
+        this.zDepth = options.zDepth ?? 0.001
         this.followCamera = options.followCamera ?? false;
         this.majorGridEvery = options.majorGridEvery ?? 5;
         this.minorGridEvery = options.minorGridEvery ?? 1;

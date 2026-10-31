@@ -63,7 +63,7 @@ class AnimationHandler {
         } else {
             Script.setTimeout(() => {
                 this.#animationChange(animationKey);
-                console.log("Delayed animation started:", animationKey);
+                Logger.debug("Delayed animation started:", animationKey);
             }, delay);
         }
     }

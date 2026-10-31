@@ -52,10 +52,21 @@ class TactileDocument extends TactileElement {
 
     }
 
+    /**
+     * Get an element in this document by its ID
+     *
+     * @param {number} elementId
+     * @returns {TactileElement|undefined}
+     */
     getElement(elementId) {
         return this._elementMap.get(elementId);
     }
 
+    /**
+     * This TactileDocument's document ID
+     *
+     * @type {number}
+     */
     get documentId() {
         return this.#documentId;
     }
@@ -90,6 +101,8 @@ class TactileDocument extends TactileElement {
 
     /**
      * Called when an element is added as a child of this tree
+     *
+     * @param {TactileElement} element
      */
     _onElementAttachedToTree(element) {
         // This can be called during super construction, which means we don't get a chance to create these variables
@@ -105,6 +118,8 @@ class TactileDocument extends TactileElement {
 
     /**
      * Called when an element is removed as a child of this tree
+     *
+     * @param {TactileElement} element
      */
     _onElementRemovedFromTree(element) {
         Logger.debug("_onElementRemovedFromTree", element.id)
@@ -146,6 +161,8 @@ class TactileDocument extends TactileElement {
 
     /**
      * Called when an element of this tree has become valid
+     *
+     * @param {TactileElement} element
      */
     _onElementValidated(element) {
         // Inform renderer of the newly valid element,
@@ -162,6 +179,8 @@ class TactileDocument extends TactileElement {
 
     /**
      * Add a new renderer responsible for rendering this TactileDocument
+     *
+     * @param {BaseRenderer} renderer
      */
     attachRenderer(renderer) {
         this.renderers.push(renderer);
@@ -170,6 +189,8 @@ class TactileDocument extends TactileElement {
     /**
      * Remove a renderer from this TactileDocument,
      * so it will no longer be repsonsible for rendering.
+     *
+     * @param {BaseRenderer} renderer
      */
     detachRenderer(renderer) {
         this.renderers = this.renderers.filter(r => r != renderer);
