@@ -31,9 +31,16 @@ class BaseRenderer {
     onElementValidated(document, element) {
         // TODO: Confirm it is an element
 
-        // Store the element and document tree in renderTask
-        this.addRenderTask(new RenderTask(element,
-                                          document));
+        if (element.render) {
+            // Store the element and document tree in renderTask
+            this.addRenderTask(new RenderTask(element,
+                                            document));
+        } else {
+            // Element is marked to not render, so we should remove it.
+            this.addRenderTask(new RenderTask(element,
+                                              document,
+                                              RenderTask.DELETE));
+        }
     }
 
     /**

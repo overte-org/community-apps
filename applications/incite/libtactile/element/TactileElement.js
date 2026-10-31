@@ -31,10 +31,12 @@ const Signal = require("../../libincite/Signal.js");
  * The basic TactileElement
  *
  * @property {number} id - The unique id of this element
+ * @property {boolean} ignoreRay - Whether this element should ignore interactions; when true interactions will be allowed to fall to elements and possibly non-tactile objects behind this element.
  * @property {number} depth - the depth of this element with the document tree
  * @property {number} documentId - The ID of the document this element is attached to.
  * @property {string} currentAnimation - The key of the model animation to apply to this element's model. The default animation will be "idle"; this property can be set to `"none"` to set no animation. NOTE: Due to a limitation in the Overte scripting API it is not currently possible to clear an existing animation, only replace it with another valid animation file.
  * @property {Array<TactileElement>} elements - The list of child elements within this element
+ * @property {boolean} inheritPointerCallbacks - Whether this elenet should inherit callbacks from the parent element pointer signals. Inheritance is chainable; if the parent also has this property set, this element will also inherit callbacks from the grandparent.
  * @property {number} mindWidth - the minimum width this element should be
  * @property {number} minHeight - the minimum heigh this element should be
  * @property {number} maxWidth - the maxium width this element can be
@@ -67,6 +69,7 @@ class TactileElement {
     #model
     #preferredWidth
     #preferredHeight
+    #render
     #valid
 
     constructor(options = {}) {
@@ -108,9 +111,11 @@ class TactileElement {
         this.#color = options.color ?? { red: 255, green: 255, blue: 255 }
         this.alpha = options.alpha ?? 1;
         this.unlit = options.unlit ?? false;
-        this.render = options.render ?? true;
+        this.#render = options.render ?? true;
 
         this.ignoreRay = options.ignoreRay ?? false;
+        this.inheritPointerCallbacks = options.inheritPointerCallbacks ?? false;
+        this._setupEventInheritance();
 
         this.resetCache();
         this.parent = null;
@@ -236,6 +241,18 @@ class TactileElement {
     set cache(cache) {
         Logger.debug("Setting cache");
         this.#cache = cache;
+    }
+
+    get render() {
+        return this.#render;
+    }
+
+    set render(bool) {
+        if (this.#render != bool) {
+            this.#render = bool;
+
+            this.valid = false;
+        }
     }
 
     /**
@@ -683,34 +700,74 @@ class TactileElement {
 
     // Signals
 
+    _setupEventInheritance() {
+        this.elementPressed.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementPressed', documentId, elementId);
+        })
+        this.elementHoverStarted.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementHoverStarted', documentId, elementId);
+        })
+        this.elementHoverStopped.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementHoverStopped', documentId, elementId);
+        })
+        this.elementReleased.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementReleased', documentId, elementId);
+        })
+        this.elementScroll.connect((documentId, elementId) => {
+            this._handleInheritanceEvent('elementScroll', documentId, elementId);
+        })
+    }
+
+    _handleInheritanceEvent(signalName, documentId, elementId) {
+        if (!this.inheritPointerCallbacks || !this.parent) return;
+        const signal = this.parent[signalName];
+
+        if (signal) signal.emit(documentId, elementId);
+    }
+
+    // Pointer Events; callbacks added to these are inherited by
+    // this element's children, unless the child element has `inheritPointerCallbacks` set to false.
+
     /**
      * Triggered when a mouse button is clicked while the mouse cursor is on this element, or a controller trigger is fully pressed while its laser is on this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementPressed = new Signal("ElementPressed");
 
     /**
      * Triggered when the mouse cursor or controller laser starts hovering on this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementHoverStarted = new Signal("ElementHoverStarted");
 
     /**
      * Triggered when the mouse cursor or controller laser stops hovering over this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementHoverStopped = new Signal("ElementHoverStopped");
 
     /**
      * Triggered when a mouse button is released after clicking on this element or the controller trigger is partly or fully released after pressing on this element, even if the mouse pointer or controller laser has moved off the element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementReleased = new Signal("ElementReleased");
 
     /**
      * Triggered when the mouse cursor or controller laser scrolls over this element.
+     *
+     * @type Signal<(documentId: number, elementId: number) => void>
      */
     elementScroll = new Signal("ElementScroll");
 
 //     hoverOverEntity
 //
 //     mouseMoveOnEntity
+
+    // End of Pointer Events
 
 
 

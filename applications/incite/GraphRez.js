@@ -116,7 +116,12 @@ class GraphRez {
     onNodeAdded(graphId, nodeId) {
         const onCompleteCommands = []; // We need to run some commands later, once all elements have been added to the document
         const node = this.graph.getNode(nodeId);
-        const nodeElement = new tactile.element.ColumnLayout({
+        const nodeElement = new tactile.element.TactileElement({
+            preferredWidth: 0, preferredHeight: 0,
+            alpha: 0,
+            zDepth: 0,
+        });
+        const nodeLayout = new tactile.element.ColumnLayout({
             preferredWidth: 0.5, preferredHeight: 0.5,
             minWidth: 0.5, minHeight: 0.5,
             maxWidth: 1, maxHeight: 1,
@@ -126,13 +131,39 @@ class GraphRez {
             alpha: 1,
             zDepth: 0.1,
         });
-        nodeElement.addElement(new tactile.element.TextElement({
+        nodeElement.addElement(nodeLayout);
+        const nodeHighlight = new tactile.element.TactileElement({
+            alpha: 0.4,
+            color: "red",
+            ignoreRay: true,
+            render: false,
+            preferredWidth: 0, preferredHeight: 0,
+            zDepth: 0.12,
+
+        });
+        nodeElement.addElement(nodeHighlight)
+        nodeLayout.connect('elementHoverStarted', () => {
+            if (this.interactionMode != 'DeleteNodes') return;
+            // Start highlighting node
+            nodeHighlight.render = true;
+        }).connect('elementHoverStopped', () => {
+            //if (this.interactionMode != 'DeleteNodes') return;
+            // Stop highlighting node
+            nodeHighlight.render = false;
+
+        }).connect('elementPressed', (documentId, elementId) => {
+            if (this.interactionMode != 'DeleteNodes') return;
+
+            // Delete node
+            this.#graph.deleteNode(nodeId);
+        }).addElement(new tactile.element.TextElement({
             text: node.type,
             color: { red: 255, green: 144, blue: 0 },
             textColor: { red: 0, green: 0, blue: 0 },
             lineHeight: 0.12,
             preferredWidth: 0.3, preferredHeight: 0.2,
             unlit: true,
+            inheritPointerCallbacks: true,
         }));
 
         // Ports row
@@ -141,6 +172,7 @@ class GraphRez {
             preferredWidth: 0.3, preferredHeight: 0.1,
             alpha: 0,
             zDepth: 0,
+            inheritPointerCallbacks: true,
 
         });
 
@@ -153,6 +185,7 @@ class GraphRez {
             zDepth: 0.01,
             margins: { top: 0.01, right: 0.01, bottom: 0.01, left: 0.01 },
             spacing: 0.01,
+            inheritPointerCallbacks: true,
 
         });
         node.inputs.forEach((port, index) => {
@@ -198,7 +231,7 @@ class GraphRez {
                 // Do we have an existing connection? We shall disconnect it.
                 } else {
                     Logger.debug("We are not currently connecting ports.");
-                    const connections = this.#graph.getConnections(node);
+                    const connections = this.#graph.getConnections(node.id);
                     connections?.inputs.forEach((connection, connectionIndex) => {
                         Logger.debug("Could we delete this connection?", connection.id, JSON.stringify(connection))
                         if (connection.out.port === port.id) {
@@ -226,6 +259,7 @@ class GraphRez {
             zDepth: 0.01,
             margins: { top: 0.01, right: 0.01, bottom: 0.01, left: 0.01 },
             spacing: 0.1,
+            inheritPointerCallbacks: true,
         });
         node.outputs.forEach((port, index) => {
             const outputElement = new tactile.element.TactileElement({
@@ -261,7 +295,7 @@ class GraphRez {
         });
         portsContainer.addElement(outputPorts);
 
-        nodeElement.addElement(portsContainer);
+        nodeLayout.addElement(portsContainer);
 
 
         this.rootGraphElement.addElement(nodeElement); // TODO Build an element for the type of node
@@ -460,6 +494,19 @@ class GraphRez {
                     }))
                     .connect("elementPressed", () => {
                         this.graph.execute();
+                    }))
+                .addElement(new tactile.element.ButtonElement({})
+                    .addElement(new tactile.element.TextElement({
+                        text: "Delete node",
+                        preferredHeight: 0,
+                        preferredWidth: 0,
+                        alpha: 0,
+                        ignoreRay: true,
+                    }))
+                    .connect("elementPressed", () => {
+                        // Enter/Exit node deletion mode
+                        const newMode = this.interactionMode == 'DeleteNodes'? 'None' : 'DeleteNodes';
+                        this.startInteractionMode(newMode);
                     }))
                 .addElement(new tactile.element.TactileElement({ // invisible spacer
                     render: false,
