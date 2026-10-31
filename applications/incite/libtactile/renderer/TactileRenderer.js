@@ -79,6 +79,12 @@ class TactileRenderer extends BaseRenderer {
         Entities.scrollOnEntity.connect(this.onScrollOnEntity.bind(this));
     }
 
+    /**
+     * Retreive the element associated with a particular entity
+     *
+     * @param {number} entityId
+     * @returns {TactileElement}
+     */
     getElementFromEntityId(entityId) {
         const documentElementIds = this.entityToDocumentAndElementIds.get(entityId);
         if (!documentElementIds) return;
@@ -146,6 +152,13 @@ class TactileRenderer extends BaseRenderer {
         return this.rootEntityId == undefined ? this.position : this.rootEntityPosition; // TODO: What if the root element somehow has a non-origin x/y?
     }
 
+    /**
+     * Record an element with associated entity
+     *
+     * @param {TactileElement} layoutElement
+     * @param {number} entityId
+     * @returns {TactileRenderer} This renderer
+     */
     addElement(layoutElement, entityId) {
         this.entities.push(entityId);
         this.entityMap.set(layoutElement.id, entityId);
@@ -153,6 +166,12 @@ class TactileRenderer extends BaseRenderer {
         return this;
     }
 
+    /**
+     * Remove infromation about an element
+     *
+     * @param {TactileElement|number} layoutElementOrId
+     * @returns {TactileRenderer} This renderer
+     */
     removeElement(layoutElementOrId) {
         const id = layoutElementOrId instanceof LayoutElement.id ?? layoutElementOrId; // TODO What??
         const entityId = this.entityMap.get(id);
@@ -218,7 +237,9 @@ class TactileRenderer extends BaseRenderer {
 
     /**
      * Creates entityProperties for rendering the given element
-     * @param {Object} element
+     *
+     * @param {TactileElement} element
+     * @returns {Object} entityProperties
      */
     entityProperties(element) {
         Logger.debug(element.id, "entityProperties - start");
@@ -391,6 +412,9 @@ class TactileRenderer extends BaseRenderer {
 
     /**
      * Updates the entity which the given element is rendered to
+     *
+     * @param {TactileElement} element
+     * @param {boolean} isRoot
      */
     updateEntity(element, isRoot) {
         const entityProperties = this.entityProperties(element);
@@ -518,6 +542,8 @@ class TactileRenderer extends BaseRenderer {
 
     /**
      * Renders the given element's current state into the world
+     *
+     * @param {TactileElement} element
      */
     renderElement(element) {
         const entityId = this.entityMap.get(element.id);
@@ -568,6 +594,8 @@ class TactileRenderer extends BaseRenderer {
 
     /**
      * Renders the absence of the given element into the world
+     *
+     * @param {TactileElement} element
      */
     destroyElement(element) {
         // First destroy its children

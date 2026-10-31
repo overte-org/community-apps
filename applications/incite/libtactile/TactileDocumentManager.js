@@ -32,10 +32,20 @@ class TactileDocumentManager {
         return this.#TactileDocumentClass;
     }
 
+    /**
+     * Retreive a document by its id
+     *
+     * @param {number} documentId
+     */
     getDocument(documentId) {
         return this.#documentMap.get(documentId);
     }
 
+    /**
+     * Add a document
+     *
+     * @param {TactileDocument} document
+     */
     addDocument(document) {
         if (!(document instanceof this.#TactileDocument)) {
             Logger.error("Cannot add document; it is not a document.");
@@ -47,6 +57,12 @@ class TactileDocumentManager {
         this.#documentMap.set(id, document);
     }
 
+    /**
+     * Create a new document already registered with this manager
+     *
+     * @param {Object} options
+     * @returns {TactileDocument}
+     */
     newDocument(options = {}) {
         const document = new this.#TactileDocument(options);
         this.addDocument(document);

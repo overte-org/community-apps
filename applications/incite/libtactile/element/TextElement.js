@@ -28,6 +28,11 @@ class TextElement extends TactileElement {
         return 'TextElement';
     }
 
+    /**
+     * The text displayed on this element
+     *
+     * @type {string}
+     */
     get text() {
         return this.#text;
     }

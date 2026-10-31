@@ -258,6 +258,8 @@ class TactileElement {
     /**
      * When this element is valid it's data is in tip-top shape,
      * when this value is false it is in need of a measure and a layout.
+     *
+     * @type {boolean}
      */
     get valid() {
         return this.#valid;
@@ -274,23 +276,38 @@ class TactileElement {
         return typeof this.cache?.x !== 'undefined'
     }
 
-    // No hidden elements here!
+    /**
+     * Only elements which are visible when rendered
+     *
+     * @type {Array<TactileElement>}
+     */
     get visibleElements() {
         return this.elements.filter(element => element.visible);
     }
 
-    // elements with valid geometry
+    /**
+     * elements with valid geometry
+     *
+     * @type {Array<TactileElement>}
+     */
     get validElements() {
         return this.elements.filter(element => element.valid);
     }
 
-    // elements with valid geometry
+    /**
+     * elements which have been assigned coordinates
+     *
+     * @type {Array<TactileElement>}
+     */
     get placedElements() {
         return this.elements.filter(element => element.isPlaced);
     };
 
     /**
      * Propogate element validation notification up through the tree
+     *
+     * @param {TactileElement} element
+     * @param {boolean} valid
      */
     _propogateValidation(element, valid) {
         if (valid) {
@@ -306,6 +323,8 @@ class TactileElement {
 
     /**
      * Propogate attachment notification up through the tree
+     *
+     * @param {TactileElement} element
      */
     _propogateAttachment(element) {
         // An element has been added below/within this element,
@@ -328,6 +347,8 @@ class TactileElement {
 
     /**
      * Propogate removal notification up through the tree
+     *
+     * @param {TactileElement} element
      */
     _propogateRemoval(element) {
         Logger.debug("_propogateRemoval");
@@ -352,27 +373,37 @@ class TactileElement {
 
     /**
      * Called whenever either this or any child element below this one is added to the tree
+     *
+     * @param {TactileElement} element
      */
     _onElementAttachedToTree(element) {};
 
     /**
      * Called whenever either this or any child element below this one is removed from the tree
+     *
+     * @param {TactileElement} element
      */
     _onElementRemovedFromTree(element) {};
 
     /**
      * Called whenever either this or any child element below this one become invalid
+     *
+     * @param {TactileElement} element
      */
     _onElementInvalidated(element) {};
 
     /**
      * Called whenever either this or any child element below this one become valid
+     *
+     * @param {TactileElement} element
      */
     _onElementValidated(element) {};
 
     /**
      * Called whenever this element's position within the tree changes.
      * This can be when it is attached to a new parent, or any parent element above it is added to a new tree or moves position within the same tree.
+     *
+     * @param {TactileElement} parent
      */
     _onParentChanged(parent) {
         this.parent = parent;
@@ -500,7 +531,7 @@ class TactileElement {
     /**
      * Remove a child element of this element
      *
-     * @param {number} elmentId
+     * @param {number} elementId
      */
     removeElement(elementId) {
         Logger.debug("removeElement", elementId);
@@ -517,6 +548,8 @@ class TactileElement {
 
     /**
      * Remove every child element from this element
+     *
+     * @returns {TactileElement} This element
      */
     removeAllElements() {
         const clearedElements = this.#elements;
